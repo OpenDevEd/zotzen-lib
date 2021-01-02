@@ -1,9 +1,13 @@
 
-const fs = require('fs');
+'use strict'
 
-async function create(args) {
-  const data = fs.readFileSync('data.json', "utf8");
-  // console.log(data)
-  let result = JSON.parse(data)
-  return result
+module.exports.create = create;
+
+//var fs = require('fs');
+var create_data = require('./data.json');
+
+function create (args){
+    
+    return create_data;
+
 }
