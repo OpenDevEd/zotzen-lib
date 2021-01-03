@@ -5,6 +5,13 @@ module.exports.push = zotzenPush;
 module.exports.create = zotzenCreate;
 module.exports.link = zotzenLink;
 
+// PRODUCTION: Load library
+//const zotero = require("zotero-api-lib");
+//const zenodo = require("zenodo-api-lib");
+// TESTING: Load locally for testing
+// const zotero = require("../zotero-api-lib/index"); ///??
+const zenodo = require("../zenodo-cli-ts/build/functions")
+
 //var fs = require('fs');
 function dummycreate(args) {
     var create_data = require('./data.json');
@@ -38,8 +45,14 @@ function verbose(args, msg, data) {
 
 async function zotzenCreate(args) {
     verbose(args, "zotzenCreate", args)
-    const result = dummycreate(args)
-    debug(args, "zotzenCreate: result", result)
+    let result = dummycreate(args)
+    let record = {}
+    try {
+        zenodo.create(args)
+    } catch (e) {
+        console.log(e)
+    }
+    debug(args, "zotzenCreate: result", record)
     return result
     // let zoteroArgs = args
     // // remove some args/add some args
