@@ -31,11 +31,11 @@
     "pathlib": "^0.1.2",
     "pprint": "0.0.1",
     "re": "^0.1.4",
+    "request": "^2.34",
     "request-promise-native": "^1.0.9",
     "requests": "^0.3.0",
     "sys": "0.0.1",
-    "zenodo-lib": "^1.0.2",
-    "request": "^2.34"
+    "zenodo-lib": "^1.0.2"
   },
   "files": [
     "build/*"
