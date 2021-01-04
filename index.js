@@ -48,7 +48,7 @@ async function zotzenCreate(args) {
     let result = dummycreate(args)
     let record = {}
     try {
-        zenodo.create(args)
+        record = zenodo.create(args)
     } catch (e) {
         console.log(e)
     }
