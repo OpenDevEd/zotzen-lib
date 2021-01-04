@@ -1,10 +1,16 @@
 {
   "name": "zotzen-lib",
-  "version": "1.0.5",
+  "version": "1.0.10",
   "description": "This package facilitates data exchange between Zotero and Zenodo, using the respective APIs.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "echo \"prepare\"",
+    "version:old": "git add -A src",
+    "postversion": "git push && git push --tags",
+    "publish:patch": "npm version patch; npm publish; git push --tags",
+    "publish:minor": "npm version minor; npm publish; git push --tags",
+    "publish:major": "npm version major; npm publish; git push --tags"
   },
   "repository": {
     "type": "git",
@@ -18,6 +24,19 @@
   },
   "homepage": "https://github.com/OpenDevEd/zotzen-lib#readme",
   "dependencies": {
-    "fs": "0.0.1-security"
-  }
+    "fs": "0.0.1-security",
+    "json": "^10.0.0",
+    "opn": "^6.0.0",
+    "os": "^0.1.1",
+    "pathlib": "^0.1.2",
+    "pprint": "0.0.1",
+    "re": "^0.1.4",
+    "request-promise-native": "^1.0.9",
+    "requests": "^0.3.0",
+    "sys": "0.0.1",
+    "zenodo-lib": "^1.0.2"
+  },
+  "files": [
+    "build/*"
+  ]
 }

@@ -7,10 +7,10 @@ module.exports.link = zotzenLink;
 
 // PRODUCTION: Load library
 //const zotero = require("zotero-api-lib");
-//const zenodo = require("zenodo-api-lib");
+const zenodo = require("zenodo-lib");
 // TESTING: Load locally for testing
 // const zotero = require("../zotero-api-lib/index"); ///??
-const zenodo = require("../zenodo-cli-ts/build/functions")
+// const zenodo = require("../zenodo-cli/build/functions")
 
 //var fs = require('fs');
 function dummycreate(args) {
