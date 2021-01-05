@@ -39,6 +39,7 @@
     "zotero-lib": "^1.0.4"
   },
   "files": [
-    "build/*"
+    "build/*",
+    "data.json"
   ]
 }
