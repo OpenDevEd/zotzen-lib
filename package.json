@@ -35,8 +35,8 @@
     "request-promise-native": "^1.0.9",
     "requests": "^0.3.0",
     "sys": "0.0.1",
-    "zenodo-lib": "^1.0.7",
-    "zotero-lib": "^1.0.3"
+    "zenodo-lib": "^1.0.8",
+    "zotero-lib": "^1.0.4"
   },
   "files": [
     "build/*"
