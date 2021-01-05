@@ -44,10 +44,11 @@ function verbose(args, msg, data) {
 }
 
 async function zotzenCreate(args) {
-    verbose(args, "zotzenCreate", args)
+    verbose(args, "zotzenlib.zotzenCreate", args)
     let result = dummycreate(args)
     let record = {}
     try {
+        console.log("zenodo.create")
         record = zenodo.create(args)
     } catch (e) {
         console.log(e)
