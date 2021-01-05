@@ -1,6 +1,6 @@
 {
   "name": "zotzen-lib",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "This package facilitates data exchange between Zotero and Zenodo, using the respective APIs.",
   "main": "index.js",
   "scripts": {
