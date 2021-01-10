@@ -51,9 +51,10 @@ async function zotzenCreate(args) {
         console.log("zenodo.create")
         record = await zenodo.create(args)
     } catch (e) {
-        console.log(e)
+      debug(args, "zotzenCreate: error=", e)
+      console.log(e)
     }
-    debug(args, "zotzenCreate: result", record)
+    debug(args, "zotzenCreate: result:", record)
     return result
     // let zoteroArgs = args
     // // remove some args/add some args
