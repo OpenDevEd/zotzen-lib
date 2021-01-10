@@ -48,8 +48,9 @@ async function zotzenCreate(args) {
     let result = dummycreate(args)
     let record = {}
     try {
-        console.log("zenodo.create")
-        record = await zenodo.create(args)
+      console.log("zotzen-lib: calls zenodo.create")
+      record = await zenodo.create(args)
+      console.log("zotzen-lib: zenodo.create returns")
     } catch (e) {
       debug(args, "zotzenCreate: error=", e)
       console.log(e)
@@ -60,7 +61,7 @@ async function zotzenCreate(args) {
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
-    const zoteroRecord = zoteroCreate(args.title, args.group, args.json);
+    const zoteroRecord = await zoteroCreate(args.title, args.group, args.json);
     const zoteroSelectLink = zoteroRecord.successful[0].links.self.href.replace(
         zoteroApiPrefix,
         zoteroSelectPrefix
