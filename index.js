@@ -1,6 +1,3 @@
-
-'use strict'
-
 module.exports.push = zotzenPush;
 module.exports.create = zotzenCreate;
 module.exports.link = zotzenLink;
