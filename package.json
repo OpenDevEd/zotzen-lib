@@ -37,7 +37,7 @@
     "sys": "0.0.1",
     "axios": "^0.21.1",
     "zenodo-lib": "^1.0.11",
-    "zotero-lib": "^1.0.4"
+    "zotero-lib": "^1.0.5"
   },
   "files": [
     "build/*",
