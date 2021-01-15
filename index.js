@@ -62,7 +62,7 @@ async function zotzenCreate(args) {
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
-    const doistr = "" // 'DOI: '+zenodoRecord["prereserve_doi"]["doi"]
+    const doistr = 'DOI: '+zenodoRecord["metadata"]["prereserve_doi"]["doi"]
     const report = {
         "itemType": "report",
         "title": args.title,
@@ -103,6 +103,7 @@ async function zotzenCreate(args) {
         }
     }
     return record
+    // Now update the zenodo record with the ZoteroId.
     const zoteroSelectLink = zoteroRecord.successful[0].links.self.href.replace(
         zoteroApiPrefix,
         zoteroSelectPrefix
