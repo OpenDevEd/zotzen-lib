@@ -5,6 +5,10 @@ module.exports.link = zotzenLink;
 // PRODUCTION: Load library
 //const zotero = require("zotero-api-lib");
 const zenodo = require("zenodo-lib");
+const Zotero = require("zotero-lib");
+
+var zotero = new Zotero({})
+
 // TESTING: Load locally for testing
 // const zotero = require("../zotero-api-lib/index"); ///??
 // const zenodo = require("../zenodo-cli/build/functions")
@@ -42,23 +46,63 @@ function verbose(args, msg, data) {
 
 async function zotzenCreate(args) {
     verbose(args, "zotzenlib.zotzenCreate", args)
-    let result = dummycreate(args)
-    let record = {}
+    // let result = dummycreate(args)
+    let zenodoRecord = {}
     try {
-      console.log("zotzen-lib: calls zenodo.create")
-      record = await zenodo.create(args)
-      console.log("zotzen-lib: zenodo.create returns")
+        console.log("zotzen-lib: calls zenodo.create")
+        zenodoRecord = await zenodo.create(args)
+        console.log("zotzen-lib: zenodo.create returns")
     } catch (e) {
-      debug(args, "zotzenCreate: error=", e)
-      console.log(e)
+        debug(args, "zotzenCreate: error=", e)
+        console.log(e)
     }
-    debug(args, "zotzenCreate: result:", record)
-    return result
+    debug(args, "zotzenCreate: result:", zenodoRecord)
+    // return result
     // let zoteroArgs = args
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
-    const zoteroRecord = await zoteroCreate(args.title, args.group, args.json);
+    const doistr = "" // 'DOI: '+zenodoRecord["prereserve_doi"]["doi"]
+    const report = {
+        "itemType": "report",
+        "title": args.title,
+        "creators": [],
+        "abstractNote": "",
+        "reportNumber": "",
+        "reportType": "",
+        "seriesTitle": "",
+        "place": "",
+        "institution": "",
+        "date": "",
+        "pages": "",
+        "language": "",
+        "shortTitle": "",
+        "url": "",
+        "accessDate": "",
+        "archive": "",
+        "archiveLocation": "",
+        "libraryCatalog": "",
+        "callNumber": "",
+        "rights": "",
+        "extra": doistr,
+        "tags": [],
+        "collections": []
+    }
+    const zarg = {
+        item: report
+    }
+    debug(args, "zoteroCreate: call", null)
+    const zoteroRecord = await zotero.create_item(zarg);
+    debug(args, "zotzenCreate: result:", zoteroRecord)
+    const record = {
+        zotero: {
+            data: zoteroRecord
+        },
+        zenodo: {
+            data: zenodoRecord
+        }
+    }
+    return record
     const zoteroSelectLink = zoteroRecord.successful[0].links.self.href.replace(
         zoteroApiPrefix,
         zoteroSelectPrefix
@@ -68,7 +112,7 @@ async function zotzenCreate(args) {
     // // Utilise the zotero id as alternative id for the Zenodo record
     // zenodoArgs["zoteroSelectLink"] = zoteroSelectLink
     // const zenodoRecord = zenodoAPI(zenodoArgs)
-    const zenodoRecord = zenodoCreate(
+    const zenodoRecord2 = zenodoCreate(
         zoteroRecord.successful[0].data.title,
         zoteroRecord.successful[0].data.creators,
         zoteroSelectLink
