@@ -7,9 +7,10 @@ async function run() {
     reportNumber: "100",
     reportType: "Some report type",
     date: "2021-01-01",
-    url: "https://example.comxs",
-    tags: [],
-    collections: [],
+    url: "not working yet",
+    kerko_url: "https://docs.edtechhub.org/lib/",
+    tags: ["ZotZen"],
+    collections: ["IY4IS3FU"],
     team: "",
     group_id: 2259720
   })

@@ -6,7 +6,6 @@ module.exports.link = zotzenLink;
 //const zotero = require("zotero-api-lib");
 const zenodo = require("zenodo-lib");
 const Zotero = require("zotero-lib");
-
 var zotero = new Zotero({})
 
 // TESTING: Load locally for testing
@@ -44,6 +43,9 @@ function verbose(args, msg, data) {
     }
 }
 
+/*
+TOP-LEVEL FUNCTION 
+*/
 async function zotzenCreate(args) {
     const zenodoLibCreate_Args = {
         title: "string",
@@ -59,7 +61,8 @@ async function zotzenCreate(args) {
         tags: ["Zotero only"],
         collections: ["Zotero only"],
         team: "neither",
-        group_id: 2259720
+        group_id: 2259720,
+        json: "Zenodo template file"
     }
     verbose(args, "zotzenlib.zotzenCreate", args)
     // let result = dummycreate(args)
@@ -78,16 +81,23 @@ async function zotzenCreate(args) {
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
-    const doistr = 'DOI: ' + zenodoRecord["metadata"]["prereserve_doi"]["doi"]
+    const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
+    const doistr = 'DOI: ' + DOI
     Object.keys(zenodoLibCreate_Args).forEach(mykey => {
         if (!args[mykey]) {
-            if (mykey == "tags" || mykey == "tags") {
+            if (mykey == "collections") { // mykey == "tags" || 
                 args[mykey] = []
             } else {
                 args[mykey] = ""
             }
         }
     })
+    let tagsarr = []
+    if (args.tags) {
+        args.tags.forEach(mytag => {
+            tagsarr.push({ tag: mytag })
+        })
+    }
     const report = {
         "itemType": "report",
         "title": args.title,
@@ -110,7 +120,7 @@ async function zotzenCreate(args) {
         "callNumber": "",
         "rights": "",
         "extra": doistr,
-        "tags": args.tags,
+        "tags": tagsarr,
         "collections": args.collections
     }
     let zarg = {
@@ -123,37 +133,35 @@ async function zotzenCreate(args) {
     const zoteroRecord = await zotero.create_item(zarg);
     debug(args, "zotzenCreate: result:", zoteroRecord)
     // Now update the zenodo record with the ZoteroId.
-    const zoteroSelectLink = `zotero://select/groups/${args.group_id}/items/${zoteroRecord.key}`
+    // TODO, this  will fail if args.group_id not given explicitly
+    const zoteroGroup = args.group_id
+    // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
+    const zoteroSelectLink = `zotero://select/groups/${zoteroGroup}/items/${zoteroRecord.key}`
     args.zotero_link = zoteroSelectLink
     args.id = zenodoRecord.id
-    console.log(JSON.stringify(args))
+    //console.log(JSON.stringify(args, null, 2))
     const zenodoRecord2 = await zenodo.update(args)
+    //console.log(JSON.stringify(zenodoRecord2, null, 2))
+    const kerko_url = args.kerko_url ? args.kerko_url+zoteroRecord.key : ""
     const record = {
+        status: 0,
+        message: "success",
+        data: {
+            zenodoRecordID: zenodoRecord.id,
+            zoteroItemKey: zoteroRecord.key,
+            zoteroGroup: zoteroGroup,
+            zoteroSelectLink: zoteroSelectLink,
+            DOI: DOI,
+            kerko_url: kerko_url 
+        },
         zotero: {
             data: zoteroRecord
         },
         zenodo: {
-            data: zenodoRecord2
+            data: zenodoRecord2.metadata
         }
     }
-    /*
-        console.log('Item successfully created: ');
-        console.log(
-            `Zotero ID: ${zoteroRecord.successful[0].library.id}:${zoteroRecord.successful[0].key}`
-        );
-        console.log(`Zotero link: ${zoteroRecord.successful[0].links.self.href}`);
-        console.log(`Zotero select link: ${zoteroSelectLink}`);
-        console.log(
-            `Zenodo RecordId: ${parseFromZenodoResponse(zenodoRecord, 'RecordId')}`
-        );
-        console.log(`Zenodo DOI: ${doi}`);
-        console.log(`Zenodo deposit link: ${zenodoDepositUrl}`);
-    */
-    // This should not be needed, as --show/--open etc has been passed through via the APIs.
-    if (args.open) {
-        opn(zoteroSelectLink);
-        opn(zenodoDepositUrl);
-    }
+    console.log('Zotero/Zenodo records successfully created.');
     return record
 }
 
