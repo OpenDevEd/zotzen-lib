@@ -2,10 +2,10 @@
 const zotzenlib = require('../src/zotzen-lib')
 // To run independently
 // const zotzenlib = require('zotzen-lib')
-async function run() {
+async function main() {
   const result = await zotzenlib.create({
     title: "zotzenlib.create",
-    authors: "not working yet",
+    authors: ["not working yet","should be an array"],
     description: "Description/abstract",
     reportNumber: "100",
     reportType: "Some report type",
@@ -19,4 +19,4 @@ async function run() {
   })
   console.log("zotzen result=" + JSON.stringify(result, null, 2))
 }
-run();
+main();

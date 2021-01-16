@@ -1,6 +1,6 @@
 module.exports.sync = zotzenSync;
 module.exports.create = zotzenCreate;
-module.exports.link = zotzenLink;
+module.exports.link = zotzenLinkCheck;
 
 //const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
@@ -82,6 +82,9 @@ async function zotzenCreate(args) {
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
+    if (!zenodoRecord || !zenodoRecord["metadata"] || !zenodoRecord["metadata"]["prereserve_doi"]) {
+        console.log("ERROR in ZenodoRecord creation.")
+    }
     const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
     const doistr = 'DOI: ' + DOI
     Object.keys(zenodoLibCreate_Args).forEach(mykey => {
@@ -166,13 +169,14 @@ async function zotzenCreate(args) {
     return record
 }
 
+/*
 async function zotzenLink(args) {
     verbose(args, "zotzenLink", args)
     const result = dummycreate(args)
     debug(args, "zotzenLink: result", result)
     return result
 
-}
+}*/
 
 /*
 Top Level function
@@ -191,14 +195,47 @@ async function zotzenSync(args) {
     return output
 }
 
-async function zotzenSyncOne(args) {
-    verbose(args, "zotzenSync", args)
-    //debug(qargs, "zotzenPush: result", result)
-    // return result
-    // let zoteroArgs = args
-    // // remove some args/add some args
-    // zoteroArgs["func"] = "create"
-    // const zoteroRecord = zoteroAPI(zoteroArgs);
+function message(stat = 0, msg = "None", data = null) {
+    return {
+        "status": stat,
+        "message": msg,
+        "data": data
+    }
+}
+
+async function zotzenLinkCheck(args) {
+    /*
+    input
+    args = { key: "", id: ""}
+
+    Possible outcomes:
+    zotero.key exists (error if not)
+    if (zotero.extra.zenodo exists) {
+        if (zenodo.id is provided)
+            if (zenodo.id exists) {
+                -> items are linked and are teh same or not.
+                -> if they are not, then we can relink.
+            } else {
+                error
+            }
+        } else {
+            -> we can generate
+        }
+    } else {
+        if (zenodo.id provided) {       
+            if (zenodo.id exists) {
+                -> we can link.
+            }
+        } else {
+            -> we can generate
+        }
+    }
+    */
+    if (!args.key) {
+        console.log("ERROR zotzenLink")
+        return message(1, "You must provide 'key' (for a zotero item)", args)
+    }
+    // There's a key, so we can get the item.    
     debug(args, "zoteroItem: call", args)
     const zoteroItem = await zotero.item(args);
     debug(args, "zotzenCreate: result:", zoteroItem)
@@ -210,14 +247,38 @@ async function zotzenSyncOne(args) {
     if (zenodoIDstr) {
         zenodoID = zenodoIDstr[1]
     } else {
-        console.log("zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi ")
-        return null
+        // So the item doesn't have a DOI - let's see whether we should get one.
+        if (args.getdoi) {
+            // TODO - get a DOI
+            // async getDOI(zoteroItem)
+            // or async getDOI(args)
+            return message(1, "Not implemented. Data attached. ",
+            {
+                "zoteroItem": "updated zoteroItem",
+                "zenodoItem": "new zenodo item"
+            })
+        } else {
+            console.log("zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi ")
+            return message(1, "zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi. Data attached. ",
+                {
+                    "zoteroItem": zoteroItem
+                })
+        }
         // unlinked... link first
     }
     // args.id = zenodo.
-    console.log("Looking for " + zenodoID)
     let zenodoRecord = {}
-    args.id = zenodoID
+    if (args.id) {
+        if (args.id !== zenodoID) {
+            console.log("args.id !== zenodoID, ${args.id} !== ${zenodoID}")
+            return null
+        } else {
+            console.log("Zotero/Zenodo IDs are matching - now checking reverse link.")
+        }
+    } else {
+        console.log("Indentified zenodoID=" + zenodoID)
+        args.id = zenodoID
+    }
     try {
         console.log("zotzen-lib: calls zenodo.getRecord")
         zenodoRecord = await zenodo.getrecord(args)
@@ -225,6 +286,7 @@ async function zotzenSyncOne(args) {
     } catch (e) {
         debug(args, "zotzenCreate: error=", e)
         console.log(e)
+        return null
     }
     debug(args, "zotzenCreate: result:", zenodoRecord)
     //console.log(JSON.stringify(zenodoRecord[0].metadata["related_identifiers"],null,2))
@@ -233,10 +295,14 @@ async function zotzenSyncOne(args) {
         const ri = zenodoRecord[0]["metadata"]["related_identifiers"]
         // We should iterate through these TODO
         zotlink = ri[0].identifier
+    } else {
+        console.log("The Zenodo item is not linked to a Zoteroitem")
+        // ask prompt or check rags and proceed to link TODO
+        return null
     }
     if (!zotlink) {
         console.log("The zenodo record does not link back to the zotero item - use 'link'")
-        process.exit(1)
+        return null
     }
     const arr = zotlink.split("/")
     if (zoteroItem.key == arr[arr.length - 1]) {
@@ -246,6 +312,34 @@ async function zotzenSyncOne(args) {
         console.log("The zenodo record does not link back to the right zotero item - use 'link' to fix")
         process.exit(1)
     }
+    return 0
+}
+
+function linkZotZen(zoteroKey, zenodoDoi, group, zoteroLink = null) {
+    if (args.debug) {
+        console.log('DEBUG: linkZotZen');
+    }
+    runCommandWithJsonFileInput(
+        `${group ? '--group-id ' + group : ''} update-item --key ${zoteroKey}`,
+        {
+            extra: `DOI: ${zenodoDoi}`,
+        }
+    );
+
+    if (zoteroLink) {
+        runCommand(`update ${zenodoDoi} --zotero-link ${zoteroLink}`, false);
+    }
+}
+
+async function zotzenSyncOne(args) {
+    verbose(args, "zotzenSync", args)
+    //debug(qargs, "zotzenPush: result", result)
+    // return result
+    // let zoteroArgs = args
+    // // remove some args/add some args
+    // zoteroArgs["func"] = "create"
+    // const zoteroRecord = zoteroAPI(zoteroArgs);
+    const zz = zotzenLinkCheck(args)
     // Records are correctly linked - we can now proceed to sync/push
     // const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
     // const doistr = 'DOI: ' + DOI
@@ -269,7 +363,7 @@ async function zotzenSyncOne(args) {
     }
     if (args.attachments) {
         // push attachments. TODO: We should remove existing draft attachments in the Zenodo record
-        const children = zotero.children( groupId , "get /items/${itemKey}/children")
+        const children = zotero.children(groupId, "get /items/${itemKey}/children")
         let attachments = children.filter(
             (c) => c.data.itemType === 'attachment' &&
                 c.data.linkMode === 'imported_file'
@@ -397,21 +491,7 @@ function zenodoCreate(title, creators, zoteroSelectLink, template) {
         zenodoTemplate.creators = creators;
     return runCommandWithJsonFileInput('create --show', zenodoTemplate, false);
 }
-function linkZotZen(zoteroKey, zenodoDoi, group, zoteroLink = null) {
-    if (args.debug) {
-        console.log('DEBUG: linkZotZen');
-    }
-    runCommandWithJsonFileInput(
-        `${group ? '--group-id ' + group : ''} update-item --key ${zoteroKey}`,
-        {
-            extra: `DOI: ${zenodoDoi}`,
-        }
-    );
 
-    if (zoteroLink) {
-        runCommand(`update ${zenodoDoi} --zotero-link ${zoteroLink}`, false);
-    }
-}
 function zoteroGet(groupId, userId, itemKey) {
     if (args.debug) {
         console.log('DEBUG: zoteroGet');
