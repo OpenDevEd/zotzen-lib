@@ -84,6 +84,7 @@ async function zotzenCreate(args) {
     // const zoteroRecord = zoteroAPI(zoteroArgs);
     if (!zenodoRecord || !zenodoRecord["metadata"] || !zenodoRecord["metadata"]["prereserve_doi"]) {
         console.log("ERROR in ZenodoRecord creation.")
+        process.exit(1)
     }
     const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
     const doistr = 'DOI: ' + DOI
