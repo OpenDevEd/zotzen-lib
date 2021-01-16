@@ -1,4 +1,7 @@
-const zotzenlib = require('../index')
+// To run wihtin the repo:
+const zotzenlib = require('../src/zotzen-lib')
+// To run independently
+// const zotzenlib = require('zotzen-lib')
 async function run() {
   const result = await zotzenlib.create({
     title: "zotzenlib.create",

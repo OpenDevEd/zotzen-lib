@@ -6,14 +6,29 @@ const { ArgumentParser } = require('argparse');
 const zotzenlib = require("./zotzen-lib");
 // const zotzenlib = require("zotzen-lib");
 
-const { 
+const {
   zotzenInit,
- } = require("./zotzen-cli-helper");
-
+} = require("./zotzen-cli-helper");
 
 function getArguments() {
   const parser = new ArgumentParser({ "description": "Zotzen command line utility. Move data and files from Zotero to Zenodo." });
 
+  /*
+  // General options
+
+  -h, --help            show this help message and exit
+  --zoteroconfig ZOTEROCONFIG
+                        Config file with API key. By default config.json then ~/.config/zotero-cli/zotero-cli.toml are used if no config is provided.
+  --zenodoconfig ZENODOCONFIG
+                        Config file with API key. By default config.json then ~/.config/zenodo-cli/config.json are used if no config is provided.
+  --verbose             Run in verbose mode
+  --debug               Enable debug logging
+  --show                Show the Zotero and Zenodo item information
+  --open                Open the Zotero and Zenodo link after creation (both on web).
+  --oapp                Open the Zotero link (app) and the Zenodo link after creation (web).
+  --dump                Show json for list and for depositions after executing the command.
+
+  */
   parser.add_argument(
     "--zoteroconfig", {
     "action": "store",
@@ -38,7 +53,6 @@ function getArguments() {
     "default": false,
     help: 'Enable debug logging',
   });
-
   parser.add_argument(
     '--show', {
     action: 'store_true',
@@ -62,7 +76,14 @@ function getArguments() {
     "help": "Show json for list and for depositions after executing the command.",
     "default": false
   });
+  parser.add_argument(
+    "--dryrun", {
+    "action": "store_true",
+    "help": "Show what command would be run.",
+    "default": false
+  });
 
+  /* help */
   const subparsers = parser.add_subparsers({ "help": "sub-command help" });
 
   const parser_init = subparsers.add_parser(
@@ -71,6 +92,7 @@ function getArguments() {
   });
   parser_init.set_defaults({ "func": zotzenInit });
 
+  /* Create */
   const parser_create = subparsers.add_parser(
     "create", {
     "help": "Create a new pair of Zotero/Zenodo entries. Note: If you already have a Zotero item, use 'link' instead. If you have a Zenodo item already, but not Zotero item, make a zotero item in the Zotero application and also use 'link'."
@@ -127,7 +149,7 @@ function getArguments() {
     "help": "Zotero link of the zotero record to be linked. Overrides data provided via --json."
   }); */
 
-
+  /* link */
   const parser_link = subparsers.add_parser(
     "link", {
     "help": "Link Zotero item with a Zenodo item, or generate a missing item."
@@ -139,8 +161,9 @@ function getArguments() {
     "help": "Link Zotero item with a Zenodo item, or generate a missing item. Provide one/no Zotero item and provide one/no Zenodo item. Items should be of the format zotero://... and a Zenodo DOI or https://zenodo.org/... url."
   });
 
+  /* push */
   const parser_push = subparsers.add_parser(
-    "push", {
+    "sync", {
     "help": "Move/synchronise Zotero data to Zenodo."
   });
   parser_push.set_defaults({ "func": zotzenlib.push });
@@ -150,12 +173,12 @@ function getArguments() {
     "help": "Move/synchronise Zotero data to Zenodo. Provide one or more Zotero ids."
   });
   parser_push.add_argument(
-    '--sync', {
+    '--metadata', {
     action: 'store_true',
-    help: 'Sync metadata from zotero to zenodo.'
+    help: 'Push metadata from zotero to zenodo.'
   });
   parser_push.add_argument(
-    '--push', {
+    '--attachments', {
     action: 'store_true',
     help: 'Push Zotero attachments to Zenodo.'
   });
@@ -174,27 +197,30 @@ function getArguments() {
 
 // -------------------------- main ---------------------------------------
 
-async function run() {
+async function main() {
 
+  console.log('main: arguments');
   const args = getArguments();
-
-    console.log('TRY');
-    if (args.func) {
-      console.log("Action: "+args.func.name)
-      await args.func(args).then(res=>{
-      
-        console.log("Result: "+JSON.stringify(res, null, 2))
-          console.log("Done.")
-      
-    }).catch(e=>{
-      console.log(e);
-    })
-     
-      
-    };
-} 
+  console.log('main: api calls');
+  if (args.func) {
+    console.log("Action: " + args.func.name)
+    if (args.dryrun) {
+      const fnname = args.func.name
+     // delete args[func]
+      const myargs = JSON.stringify(args,null,2)
+      console.log(`${fnname}(${myargs})`)
+    } else {
+      await args.func(args).then(res => {
+        console.log("Result: " + JSON.stringify(res, null, 2))
+        console.log("Done.")
+      }).catch(e => {
+        console.log(e);
+      })
+    }
+  };
+}
 console.log("Start")
-run();
+main();
 console.log("End.")
 //process.exit(0)
 
