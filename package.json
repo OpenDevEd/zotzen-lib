@@ -2,10 +2,12 @@
   "name": "zotzen-lib",
   "version": "1.0.33",
   "description": "This package facilitates data exchange between Zotero and Zenodo, using the respective APIs.",
-  "main": "index.js",
+  "main": "src/zotzen-lib.js",
+  "bin": "src/zotzen-cli.js",
   "scripts": {
     "test_zoterocreate": "node tests/test_zoterocreate.js",
     "test_create": "node tests/test_create.js",
+    "cli": "node src/zotzen-cli.js",
     "prepare": "echo \"prepare\"",
     "version:old": "git add -A src",
     "postversion": "git push && git push --tags",
@@ -25,6 +27,8 @@
   },
   "homepage": "https://github.com/OpenDevEd/zotzen-lib#readme",
   "dependencies": {
+    "zenodo-lib": "^1.0.18",
+    "zotero-lib": "^1.0.8",
     "axios": "^0.21.1",
     "fs": "0.0.1-security",
     "json": "^10.0.0",
@@ -37,8 +41,8 @@
     "request-promise-native": "^1.0.9",
     "requests": "^0.3.0",
     "sys": "0.0.1",
-    "zenodo-lib": "^1.0.18",
-    "zotero-lib": "^1.0.8"
+    "argparse": "^2.0.1",
+    "prompt": "^1.0.0"
   },
   "files": [
     "build/*",

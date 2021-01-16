@@ -2,7 +2,7 @@ const zotzenlib = require('../index')
 async function run() {
   const result = await zotzenlib.create({
     title: "zotzenlib.create",
-    authors: "",
+    authors: "not working yet",
     description: "Description/abstract",
     reportNumber: "100",
     reportType: "Some report type",
