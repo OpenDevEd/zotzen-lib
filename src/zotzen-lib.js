@@ -1,7 +1,8 @@
-module.exports.push = zotzenPush;
+module.exports.sync = zotzenSync;
 module.exports.create = zotzenCreate;
 module.exports.link = zotzenLink;
 
+//const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
 //const zotero = require("zotero-api-lib");
 const zenodo = require("zenodo-lib");
@@ -142,7 +143,7 @@ async function zotzenCreate(args) {
     //console.log(JSON.stringify(args, null, 2))
     const zenodoRecord2 = await zenodo.update(args)
     //console.log(JSON.stringify(zenodoRecord2, null, 2))
-    const kerko_url = args.kerko_url ? args.kerko_url+zoteroRecord.key : ""
+    const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
     const record = {
         status: 0,
         message: "success",
@@ -152,7 +153,7 @@ async function zotzenCreate(args) {
             zoteroGroup: zoteroGroup,
             zoteroSelectLink: zoteroSelectLink,
             DOI: DOI,
-            kerko_url: kerko_url 
+            kerko_url: kerko_url
         },
         zotero: {
             data: zoteroRecord
@@ -173,22 +174,106 @@ async function zotzenLink(args) {
 
 }
 
-async function zotzenPush(args) {
-    verbose(args, "zotzenPush", args)
-    const result = dummycreate(args)
-    debug(args, "zotzenPush: result", result)
-    return result
-    if (!syncErrors(doi, zenodoRawItem, zoteroSelectLink)) {
-        const children = JSON.parse(
-            runCommand(
-                `${groupId ? '--group-id ' + groupId : ''} get /items/${itemKey}/children`,
-                true
-            )
-        );
+/*
+Top Level function
+*/
+async function zotzenSync(args) {
+    if (!args.id) return null
+    const ids = args.id
+    delete args["id"]
+    let output = []
+    for (id of ids) {
+        let myargs = args
+        myargs.key = id
+        const rec = await zotzenSyncOne(myargs)
+        output.push(rec)
+    }
+    return output
+}
+
+async function zotzenSyncOne(args) {
+    verbose(args, "zotzenSync", args)
+    //debug(qargs, "zotzenPush: result", result)
+    // return result
+    // let zoteroArgs = args
+    // // remove some args/add some args
+    // zoteroArgs["func"] = "create"
+    // const zoteroRecord = zoteroAPI(zoteroArgs);
+    debug(args, "zoteroItem: call", args)
+    const zoteroItem = await zotero.item(args);
+    debug(args, "zotzenCreate: result:", zoteroItem)
+    // zoteroRecord.extras -> DOI -> zenodo
+    // return zoteroRecord
+    // "extra": "DOI: 10.5072/zenodo.716876",
+    const zenodoIDstr = zoteroItem.extra.match(/zenodo\.(\d+)/)
+    let zenodoID = 0;
+    if (zenodoIDstr) {
+        zenodoID = zenodoIDstr[1]
+    } else {
+        console.log("zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi ")
+        return null
+        // unlinked... link first
+    }
+    // args.id = zenodo.
+    console.log("Looking for " + zenodoID)
+    let zenodoRecord = {}
+    args.id = zenodoID
+    try {
+        console.log("zotzen-lib: calls zenodo.getRecord")
+        zenodoRecord = await zenodo.getrecord(args)
+        console.log("zotzen-lib: zenodo.getRecord returns")
+    } catch (e) {
+        debug(args, "zotzenCreate: error=", e)
+        console.log(e)
+    }
+    debug(args, "zotzenCreate: result:", zenodoRecord)
+    //console.log(JSON.stringify(zenodoRecord[0].metadata["related_identifiers"],null,2))
+    let zotlink = null
+    if (zenodoRecord[0].metadata["related_identifiers"]) {
+        const ri = zenodoRecord[0]["metadata"]["related_identifiers"]
+        // We should iterate through these TODO
+        zotlink = ri[0].identifier
+    }
+    if (!zotlink) {
+        console.log("The zenodo record does not link back to the zotero item - use 'link'")
+        process.exit(1)
+    }
+    const arr = zotlink.split("/")
+    if (zoteroItem.key == arr[arr.length - 1]) {
+        console.log("Records are linked.")
+    } else {
+        console.log(`Problem: ${zoteroItem.key} vs. ${zotlink}`)
+        console.log("The zenodo record does not link back to the right zotero item - use 'link' to fix")
+        process.exit(1)
+    }
+    // Records are correctly linked - we can now proceed to sync/push
+    // const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
+    // const doistr = 'DOI: ' + DOI
+    /* --- */
+    // if (!syncErrors(doi, zenodoRawItem, zoteroSelectLink)) {
+    if (args.metadata) {
+        // Sync metadata
+        let updateDoc = {
+            title: zoteroItem.title,
+            description: zoteroItem.abstractNote,
+            creators: zoteroItem.creators.map((c) => {
+                return {
+                    name: `${c.name ? c.name : c.lastName + ', ' + c.firstName}`,
+                };
+            }),
+        };
+        if (zoteroItem.date) {
+            updateDoc.publication_date = zoteroItem.date;
+        }
+        zenodo.update(updateDoc)
+    }
+    if (args.attachments) {
+        // push attachments. TODO: We should remove existing draft attachments in the Zenodo record
+        const children = zotero.children( groupId , "get /items/${itemKey}/children")
         let attachments = children.filter(
             (c) => c.data.itemType === 'attachment' &&
                 c.data.linkMode === 'imported_file'
-        );
+        )
         const attachmentType = args.type.toLowerCase();
         if (attachmentType !== 'all') {
             attachments = attachments.filter((a) => a.data.filename.endsWith(attachmentType)
@@ -208,8 +293,9 @@ async function zotzenPush(args) {
                 );
             });
         }
+        // }
+        // return dummycreate(args) */
     }
-    return dummycreate(args)
 }
 /*
 // TODO
@@ -439,6 +525,7 @@ function linked(zenodoItem, zoteroLink) {
     );
 }
 
+// This function is obsolete:
 async function zotzenGet(args) {
     if (args.debug) {
         console.log('DEBUG: zotzenGet');

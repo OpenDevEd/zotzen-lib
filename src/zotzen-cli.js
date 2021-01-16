@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
 const { ArgumentParser } = require('argparse');
-
-// PRODUCTION: Load library
 const zotzenlib = require("./zotzen-lib");
-// const zotzenlib = require("zotzen-lib");
 
 const {
   zotzenInit,
@@ -161,12 +158,12 @@ function getArguments() {
     "help": "Link Zotero item with a Zenodo item, or generate a missing item. Provide one/no Zotero item and provide one/no Zenodo item. Items should be of the format zotero://... and a Zenodo DOI or https://zenodo.org/... url."
   });
 
-  /* push */
+  /* sync */
   const parser_push = subparsers.add_parser(
     "sync", {
     "help": "Move/synchronise Zotero data to Zenodo."
   });
-  parser_push.set_defaults({ "func": zotzenlib.push });
+  parser_push.set_defaults({ "func": zotzenlib.sync });
   parser_push.add_argument(
     "id", {
     "nargs": "*",
@@ -211,7 +208,7 @@ async function main() {
       console.log(`${fnname}(${myargs})`)
     } else {
       await args.func(args).then(res => {
-        console.log("Result: " + JSON.stringify(res, null, 2))
+        console.log("zotzen-cli result = " + JSON.stringify(res, null, 2))
         console.log("Done.")
       }).catch(e => {
         console.log(e);
