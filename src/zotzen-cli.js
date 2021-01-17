@@ -7,6 +7,8 @@ const {
   zotzenInit,
 } = require("./zotzen-cli-helper");
 
+const version = process.env.npm_package_version
+
 function getArguments() {
   const parser = new ArgumentParser({ "description": "Zotzen command line utility. Move data and files from Zotero to Zenodo." });
 
@@ -216,7 +218,7 @@ async function main() {
     }
   };
 }
-console.log("Start")
+console.log("Start: "+version)
 main();
 console.log("End.")
 //process.exit(0)
