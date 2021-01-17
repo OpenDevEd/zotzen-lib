@@ -3,9 +3,14 @@ const zotzenlib = require('../src/zotzen-lib')
 // To run independently
 // const zotzenlib = require('zotzen-lib')
 async function main() {
-  
-  
-  const resultX = [
+  // Retrieve collections
+  var zotero = new Zotero({ verbose: true, "group-id": 2259720 })
+  let collections = await zotero.collections({
+      key: "HP6NALR4",
+      terse: true
+  })
+  /*  
+  [
     {
       "key": "KDAFJBYM",
       "name": "C"
@@ -19,8 +24,8 @@ async function main() {
       "name": "A"
     }
   ]
-  
-
+  */
+ 
   const result = await zotzenlib.create({
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
