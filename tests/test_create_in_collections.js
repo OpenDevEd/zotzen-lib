@@ -3,7 +3,31 @@ const zotzenlib = require('../src/zotzen-lib')
 // To run independently
 // const zotzenlib = require('zotzen-lib')
 async function main() {
-  // For how to retrieve collections, see example test_create_in_collections.js
+  // Retrieve collections
+  const Zotero = require('zotero-lib')
+  var zotero = new Zotero({ verbose: true, "group-id": 2259720 })
+  let collections = await zotero.collections({
+      key: "HP6NALR4",
+      terse: true
+  })
+  /*
+  // The above returns the following structure: 
+  let collections = [
+    {
+      "key": "5MDH7SKC",
+      "name": "A"
+    },
+    {
+      "key": "EEV72PK2",
+      "name": "B"
+    },
+    {
+      "key": "KDAFJBYM",
+      "name": "C"
+    }
+  ]
+  */
+  collections = collections.map(item => item.key)
   const result = await zotzenlib.create({
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
@@ -15,7 +39,8 @@ async function main() {
     reportType: "Some report type - from form",  
     date: "2021-01-01",                          // NOTE: This has to be a valid date, otherwise Zenodo.create fails
     googledoc: "https://url_to_google_doc-from_form",
-    collections: ["IY4IS3FU"],  // Will need to be adapted in deployment
+    collections: collections, // We're adding the item to all three collections, but could also do e.g. 
+    // collections: [ collections[0] ],
     team: "some team - will be added to note. Take this form form field for 'team'.",
     note: "Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.",
     // Leave as defaults (for now)
