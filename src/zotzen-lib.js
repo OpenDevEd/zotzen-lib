@@ -52,15 +52,18 @@ async function zotzenCreate(args) {
         title: "string",
         date: "date string",
         description: "string",
-        authordata: "file with authordata",
-        authors: "first last; first last; first last",
+        authors: ["First Second Last; affiliation", "First2 Last2; affiliation2"],
         communities: "file to communities",
         zotero_link: "string (zotero://...)",
         reportNumber: "Zotero only",
         reportType: "Zotero only",
-        url: "Zotero only",
-        tags: ["Zotero only"],
-        collections: ["Zotero only"],
+        institution: "EdTech Hub",
+        language: "en",
+        rights: "Creative Commons Attribution 4.0",
+        googledoc: "url to google doc - not working yet",
+        kerko_url: "https://docs.edtechhub.org/lib/",
+        tags: ["AddedByZotZen"],
+        collections: ["IY4IS3FU"],
         team: "neither",
         group_id: 2259720,
         json: "Zenodo template file"
@@ -90,7 +93,7 @@ async function zotzenCreate(args) {
     const doistr = 'DOI: ' + DOI
     Object.keys(zenodoLibCreate_Args).forEach(mykey => {
         if (!args[mykey]) {
-            if (mykey == "collections") { // mykey == "tags" || 
+            if (mykey == "collections") { // mykey == "tags" || authors
                 args[mykey] = []
             } else {
                 args[mykey] = ""
@@ -103,19 +106,36 @@ async function zotzenCreate(args) {
             tagsarr.push({ tag: mytag })
         })
     }
+    let authorsarr = []
+    if (args.authors) {
+        args.authors.forEach(myauth => {
+            myauth = myauth.replace(/\;.*$/, "")
+            const firstlast = myauth.split(/ +/)
+            //console.log("XXX "+firstlast.slice(0, 1).join(" "))
+            //console.log("XXX "+firstlast.slice(0, firstlast.length - 1).join(" "))
+            const first = firstlast.length > 1 ? firstlast.slice(0, firstlast.length - 1).join(" ") : ""
+            const last = firstlast[firstlast.length - 1]
+            authorsarr.push({
+                "creatorType": "author",
+                "firstName": first,
+                "lastName": last
+            })
+        })
+    }
+    const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
     const report = {
         "itemType": "report",
         "title": args.title,
-        "creators": [],
+        "creators": authorsarr,
         "abstractNote": args.description,
         "reportNumber": args.reportNumber,
         "reportType": args.reportType,
         "seriesTitle": "",
         "place": "",
-        "institution": "",
+        "institution": args.institution,
         "date": args.date,
         "pages": "",
-        "language": "",
+        "language": args.language,
         "shortTitle": "",
         "url": "",
         "accessDate": "",
@@ -123,31 +143,49 @@ async function zotzenCreate(args) {
         "archiveLocation": "",
         "libraryCatalog": "",
         "callNumber": "",
-        "rights": "",
-        "extra": doistr,
+        "rights": args.rights,
+        "extra": extrastr,
         "tags": tagsarr,
         "collections": args.collections
     }
+    // We need to get the full response
     let zarg = {
-        item: report
+        item: report,
+        fullresponse: true
     }
     if (args.group_id) {
         zarg.group_id = args.group_id
     }
     debug(args, "zoteroCreate: call", null)
-    const zoteroRecord = await zotero.create_item(zarg);
-    debug(args, "zotzenCreate: result:", zoteroRecord)
+    const zoteroResult = await zotero.create_item(zarg)
+    const zoteroRecord = zotero.pruneData(zoteroResult)
+    debug(args, "zotzenCreate: result:", zoteroResult)
+    const zoteroRecordVersion = zoteroResult.successful["0"].version
+    const zoteroRecordGType = zoteroResult.successful["0"].library.type
+    const zoteroRecordGroup = zoteroResult.successful["0"].library.id
     // Now update the zenodo record with the ZoteroId.
-    // TODO, this  will fail if args.group_id not given explicitly
-    const zoteroGroup = args.group_id
+    // const zoteroGroup = args.group_id
     // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
-    const zoteroSelectLink = `zotero://select/groups/${zoteroGroup}/items/${zoteroRecord.key}`
+    if (zoteroRecordGType != "group") {
+        return this.message(1, "ERROR: group-type=user not implemented")
+    }
+    const zoteroSelectLink = `zotero://select/groups/${zoteroRecordGroup}/items/${zoteroRecord.key}`
     args.zotero_link = zoteroSelectLink
     args.id = zenodoRecord.id
     //console.log(JSON.stringify(args, null, 2))
+    args.description += `<p>Available from <a href="https://docs.edtechhub.org/lib/${zoteroRecord.key}">https://docs.edtechhub.org/lib/${zoteroRecord.key}</a></p>`
     const zenodoRecord2 = await zenodo.update(args)
     //console.log(JSON.stringify(zenodoRecord2, null, 2))
     const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
+    let newRecord = zoteroRecord
+    if (kerko_url != "") {
+        const zoteroUpdate = {
+            key: zoteroRecord.key,
+            version: zoteroRecordVersion,
+            update: { url: kerko_url }
+        }
+        newRecord = await zotero.update_item(zoteroUpdate)
+    }
     const record = {
         status: 0,
         message: "success",
@@ -160,7 +198,7 @@ async function zotzenCreate(args) {
             kerko_url: kerko_url
         },
         zotero: {
-            data: zoteroRecord
+            data: newRecord
         },
         zenodo: {
             data: zenodoRecord2.metadata
@@ -254,10 +292,10 @@ async function zotzenLinkCheck(args) {
             // async getDOI(zoteroItem)
             // or async getDOI(args)
             return message(1, "Not implemented. Data attached. ",
-            {
-                "zoteroItem": "updated zoteroItem",
-                "zenodoItem": "new zenodo item"
-            })
+                {
+                    "zoteroItem": "updated zoteroItem",
+                    "zenodoItem": "new zenodo item"
+                })
         } else {
             console.log("zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi ")
             return message(1, "zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi. Data attached. ",
