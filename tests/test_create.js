@@ -25,7 +25,7 @@ async function main() {
     }
   ]
   */
-  collections= collections.map(item => )
+  collections= collections.map(item => item.key)
   const result = await zotzenlib.create({
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
@@ -37,7 +37,8 @@ async function main() {
     reportType: "Some report type - from form",  
     date: "2021-01-01",                          // NOTE: This has to be a valid date, otherwise Zenodo.create fails
     googledoc: "https://url_to_google_doc-from_form",
-    collections: ["IY4IS3FU"],  // Will need to be adapted in deployment
+    // collections: ["IY4IS3FU"],  // Will need to be adapted in deployment
+    collections: collections, // We're adding the item to all three collections.
     team: "some team - will be added to note. Take this form form field for 'team'.",
     note: "Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.",
     // Leave as defaults (for now)
