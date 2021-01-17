@@ -100,12 +100,7 @@ async function zotzenCreate(args) {
             }
         }
     })
-    let tagsarr = []
-    if (args.tags) {
-        args.tags.forEach(mytag => {
-            tagsarr.push({ tag: mytag })
-        })
-    }
+    let tagsarr = zotero.objectifyTags(args.tags)
     let authorsarr = []
     if (args.authors) {
         args.authors.forEach(myauth => {
@@ -122,7 +117,8 @@ async function zotzenCreate(args) {
             })
         })
     }
-    const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
+    //const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
+    const extrastr = doistr
     const report = {
         "itemType": "report",
         "title": args.title,
@@ -169,22 +165,46 @@ async function zotzenCreate(args) {
     if (zoteroRecordGType != "group") {
         return this.message(1, "ERROR: group-type=user not implemented")
     }
+    let zenodoRecord2
+    let newZoteroRecord
     const zoteroSelectLink = `zotero://select/groups/${zoteroRecordGroup}/items/${zoteroRecord.key}`
-    args.zotero_link = zoteroSelectLink
-    args.id = zenodoRecord.id
-    //console.log(JSON.stringify(args, null, 2))
-    args.description += `<p>Available from <a href="https://docs.edtechhub.org/lib/${zoteroRecord.key}">https://docs.edtechhub.org/lib/${zoteroRecord.key}</a></p>`
-    const zenodoRecord2 = await zenodo.update(args)
-    //console.log(JSON.stringify(zenodoRecord2, null, 2))
     const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
-    let newRecord = zoteroRecord
-    if (kerko_url != "") {
-        const zoteroUpdate = {
-            key: zoteroRecord.key,
-            version: zoteroRecordVersion,
-            update: { url: kerko_url }
+    promiseall: {
+        // The creation of the first Zotero/Zenodo record needs to be sequences.
+        // However, the items below could be done through a 'Promise all' as they can run in parallel.
+        args.zotero_link = zoteroSelectLink
+        args.id = zenodoRecord.id
+        //console.log(JSON.stringify(args, null, 2))
+        args.description += `<p>Available from <a href="https://docs.edtechhub.org/lib/${zoteroRecord.key}">https://docs.edtechhub.org/lib/${zoteroRecord.key}</a></p>`
+        zenodoRecord2 = await zenodo.update(args)
+        //console.log(JSON.stringify(zenodoRecord2, null, 2))
+        newZoteroRecord = zoteroRecord
+        if (kerko_url != "") {
+            console.log("updating...")
+            const zoteroUpdate = {
+                key: zoteroRecord.key,
+                version: zoteroRecordVersion,
+                update: { url: kerko_url },
+                fullresponse: false
+            }
+            const status = await zotero.update_item(zoteroUpdate)
+            // update_item doesn't return the item, but only a status - we should check the status at this point.
+            newZoteroRecord = await zotero.item({ key: zoteroRecord.key, fullresponse: false })
+            // Attach link to kerko
+            await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "🔄View item Evidence Library - click to open", tags: ["_r:kerko","_r:zotzen"] })
         }
-        newRecord = await zotero.update_item(zoteroUpdate)
+        if (args.googledoc) {
+            // Attach link to google doc, if there is one:
+            await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "🔄View Google Doc and download alternative formats", tags: ["_r:googleDoc","_r:zotzen"] })
+        }
+        // Attach link to Zenodo
+        await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + zenodoRecord.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit","_r:zotzen"] })
+        // Attach link to DOI
+        await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + DOI, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi","_r:zotzen"] })
+        const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : ""
+        const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : ""
+        const content = `${team} ${note}`
+        await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm","_r:zotzen"] })        
     }
     const record = {
         status: 0,
@@ -192,13 +212,13 @@ async function zotzenCreate(args) {
         data: {
             zenodoRecordID: zenodoRecord.id,
             zoteroItemKey: zoteroRecord.key,
-            zoteroGroup: zoteroGroup,
+            zoteroGroup: zoteroRecordGroup,
             zoteroSelectLink: zoteroSelectLink,
             DOI: DOI,
             kerko_url: kerko_url
         },
         zotero: {
-            data: newRecord
+            data: newZoteroRecord
         },
         zenodo: {
             data: zenodoRecord2.metadata
