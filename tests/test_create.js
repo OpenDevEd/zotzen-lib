@@ -25,7 +25,7 @@ async function main() {
     }
   ]
   */
- 
+  collections= collections.map(item => )
   const result = await zotzenlib.create({
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
