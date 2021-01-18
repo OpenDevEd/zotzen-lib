@@ -1,6 +1,29 @@
 module.exports.sync = zotzenSync;
 module.exports.create = zotzenCreate;
 module.exports.link = zotzenLinkCheck;
+module.exports.zenodoCreate = zenodoCreate;
+module.exports.zoteroCreate = zoteroCreate;
+
+const zenodoLibCreate_Args = {
+    title: "string",
+    date: "date string",
+    description: "string",
+    authors: ["First Second Last; affiliation", "First2 Last2; affiliation2"],
+    communities: "file to communities",
+    zotero_link: "string (zotero://...)",
+    reportNumber: "Zotero only",
+    reportType: "Zotero only",
+    institution: "EdTech Hub",
+    language: "en",
+    rights: "Creative Commons Attribution 4.0",
+    googledoc: "url to google doc - not working yet",
+    kerko_url: "https://docs.edtechhub.org/lib/",
+    tags: ["AddedByZotZen"],
+    collections: ["IY4IS3FU"],
+    team: "neither",
+    group_id: 2259720,
+    json: "Zenodo template file"
+}
 
 //const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
@@ -74,8 +97,8 @@ async function zenodoCreate(args) {
     // [zenodoRecord, DOI] = zenodoCreate(args)
 }
 
-async function zoteroCreate(args, zenodoLibCreate_Args) {
-    const doistr = args.doi ? 'DOI: ' + args.doi : ""
+async function zoteroCreate(args) {
+    // complement the set of args provided according to zenodoLibCreate_Args
     Object.keys(zenodoLibCreate_Args).forEach(mykey => {
         if (!args[mykey]) {
             if (mykey == "collections") { // mykey == "tags" || authors
@@ -85,6 +108,7 @@ async function zoteroCreate(args, zenodoLibCreate_Args) {
             }
         }
     })
+    const doistr = args.doi ? 'DOI: ' + args.doi : ""
     let tagsarr = zotero.objectifyTags(args.tags)
     let authorsarr = []
     if (args.authors) {
@@ -145,6 +169,7 @@ async function zoteroCreate(args, zenodoLibCreate_Args) {
     const zoteroRecordGType = zoteroResult.successful["0"].library.type
     const zoteroRecordGroup = zoteroResult.successful["0"].library.id
 
+    // The following two don't make sense - either ID or DOI should be ok! Need to get one from the other.
     if (args.id) {
         // Zotero item - attach links ... to Zenodo
         await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
@@ -165,26 +190,6 @@ async function zoteroCreate(args, zenodoLibCreate_Args) {
 TOP-LEVEL FUNCTION 
 */
 async function zotzenCreate(args) {
-    const zenodoLibCreate_Args = {
-        title: "string",
-        date: "date string",
-        description: "string",
-        authors: ["First Second Last; affiliation", "First2 Last2; affiliation2"],
-        communities: "file to communities",
-        zotero_link: "string (zotero://...)",
-        reportNumber: "Zotero only",
-        reportType: "Zotero only",
-        institution: "EdTech Hub",
-        language: "en",
-        rights: "Creative Commons Attribution 4.0",
-        googledoc: "url to google doc - not working yet",
-        kerko_url: "https://docs.edtechhub.org/lib/",
-        tags: ["AddedByZotZen"],
-        collections: ["IY4IS3FU"],
-        team: "neither",
-        group_id: 2259720,
-        json: "Zenodo template file"
-    }
     // TODO - we have to fix the communities for Zenodo.
     verbose(args, "zotzenlib.zotzenCreate", args)
     // let result = dummycreate(args)
@@ -196,7 +201,7 @@ async function zotzenCreate(args) {
         zoteroRecordGType,
         zoteroRecordGroup,
         zoteroRecordVersion
-    ] = await zoteroCreate(args, zenodoLibCreate_Args)
+    ] = await zoteroCreate(args)
     // const zoteroGroup = args.group_id
     // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
     // Actually - as we are about the attach this to the Zenodo item - it will not work for user libs in any case...
@@ -311,13 +316,17 @@ function message(stat = 0, msg = "None", data = null) {
 }
 
 function zenodoParseID(str) {
+    // What is str is an integer?
+    if (typeof (str) === "number") {
+        return str
+    }
     const zenodoIDstr = str.match(/(\d+)$/s)
     let zenodoIDref = null;
     if (zenodoIDstr) {
         zenodoIDref = zenodoIDstr[1]
         console.log(`Got Zenodo ID = ${zenodoIDref}`)
     }
-    return zenodoIDref
+    return parseInt(zenodoIDref)
 }
 
 function zoteroParseKey(str) {
@@ -348,17 +357,20 @@ function zoteroParseGroup(str) {
     }
     return zoteroGroup
 }
+
+// This function can be called recursively - it's not efficient...
 async function zotzenLinkCheck(args) {
     // This functions gets whatever items possible, which can then be checked.
-    console.log("Getting Zotero item if possible.")
+    // console.log("Getting Zotero item if possible.")
     //-- Get the Zotero item
     let zenodoIDFromZotero = null
     const zoteroKey = args.key ? zoteroParseKey(args.key) : null
     const zoteroGroup = args.group_id ? args.group_id : null
+    let zoteroItem = null
     if (zoteroKey) {
         // There's a key, so we can get the item.    
         debug(args, "zoteroItem: call", args)
-        const zoteroItem = await zotero.item(args);
+        zoteroItem = await zotero.item(args);
         debug(args, "zotzenCreate: result:", zoteroItem)
         // zoteroRecord.extras -> DOI -> zenodo
         // return zoteroRecord
@@ -373,9 +385,9 @@ async function zotzenLinkCheck(args) {
     let zoteroKeyFromZenodo = null
     let zoteroGroupFromZenodo = null
     const zenodoID = args.id ? zenodoParseID(args.id) : null
+    let zenodoRecord = null
     if (zenodoID) {
         //-- Get the zenodo record
-        let zenodoRecord = {}
         const zenodoID = args.id ? zenodoParseID(args.id) : null
         try {
             console.log("zotzen-lib: calls zenodo.getRecord")
@@ -403,7 +415,7 @@ async function zotzenLinkCheck(args) {
         //    console.log("The zenodo record does not link back to the zotero item - use 'link'")
         //}
     } else {
-        console.log("You did not provided an 'id' (for a zotero item)", args)
+        console.log("You did not provided an 'id' (for a zenodo item)", args)
     }
     // We now have all potential keys and links:
     const keySet = {
@@ -413,14 +425,18 @@ async function zotzenLinkCheck(args) {
         zenodoIDFromZotero: zenodoIDFromZotero,
         zoteroKeyFromZenodo: zoteroKeyFromZenodo,
         zoteroGroupFromZenodo: zoteroGroupFromZenodo,
-        DOI: "......../zenodo." + zenodoID
+        doi: "......../zenodo." + zenodoID,
     }
+    const data = {
+        zotero: zoteroItem,
+        zenodo: zenodoRecord
+    } // We'll have to pass the data as well - otherwise we have to look it up again below
     // TODO: Fix the DOI above - either take it from the actual DOI or the pre-reserved DOI.
-    const result = await checkZotZenLink(args, keySet)
+    const result = await checkZotZenLink(args, keySet, data)
     console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
     return result
 }
-async function checkZotZenLink(args, k) {
+async function checkZotZenLink(args, k, data) {
     if (k.zoteroKey) {
         // Zotero key provided
         if (k.zenodoID) {
@@ -441,7 +457,7 @@ async function checkZotZenLink(args, k) {
             } else if (k.zenodoIDFromZotero && !k.zoteroKeyFromZenodo) {
                 if (k.zenodoIDFromZotero === k.zenodoID) {
                     if (args.link) {
-                        return await linkZotZen(args, keySet)
+                        return await linkZotZen(args, k, data)
                     } else {
                         return message(1, "You provided both a Zotero Key and a Zenodo ID. The Zotero links to Zenodo, but Zenodo does not link back. You can link the items by providing the option 'link'", k)
                     }
@@ -452,7 +468,7 @@ async function checkZotZenLink(args, k) {
             } else if (!k.zenodoIDFromZotero && k.zoteroKeyFromZenodo) {
                 if (k.zoteroKeyFromZenodo === k.zoteroKey) {
                     if (args.link) {
-                        return await linkZotZen(args, keySet)
+                        return await linkZotZen(args, k, data)
                     } else {
                         return message(1, "You provided both a Zotero Key and a Zenodo ID. The Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will use the DOI from the Zenodo record as DOI for the Zotero item.", k)
                     }
@@ -463,7 +479,7 @@ async function checkZotZenLink(args, k) {
             } else {
                 // Neither are defined
                 if (args.link) {
-                    return await linkZotZen(args, keySet)
+                    return await linkZotZen(args, k, data)
                 } else {
                     return message(1, "You provided both a Zotero Key and a Zenodo ID. The records are not linked. You can link the items by providing the option 'link'. Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will use the DOI from the Zenodo record as DOI for the Zotero item.", k)
                 }
@@ -477,7 +493,7 @@ async function checkZotZenLink(args, k) {
                 return await zotzenLinkCheck(args)
             } else {
                 if (args.link) {
-                    return await linkZotZen(args, keySet)
+                    return await linkZotZen(args, k, data)
                 } else {
                     return message(1, "You provided both a Zotero Key but no Zenodo ID. You can generate a Zenodo by providing the option 'link'. Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will provided a DOI for the Zotero item.", k)
                 }
@@ -487,14 +503,17 @@ async function checkZotZenLink(args, k) {
         // We dont have Zotero
         if (k.zenodoID) {
             if (k.zoteroKeyFromZenodo) {
-                // However, we have a reference to a zenodo id.
-                console.log("Zenodo ID provided, and it links to Zotero key, but no Zotero key provided. Going to check this pair.")
+                // However, we have a reference to a zotero id.
+                console.log("Zenodo ID provided, and it links to Zotero key, but no Zotero key provided initially. Going to check this pair.")
                 args.key = k.zoteroKeyFromZenodo
                 args.group_id = k.zoteroGroupFromZenodo
                 return await zotzenLinkCheck(args)
             } else {
-                // return await linkZotZen(args, keySet)
-                return message(1, "You provided a Zenodo ID but no Zotero. At the moment it's not possible to generate a corresponding Zotero element, but this is planned. If the item has been published on Zenodo, please use e.g. the DOI to import to Zotero.", args)
+                if (args.link) {
+                    return await linkZotZen(args, k, data)
+                } else {
+                    return message(1, "You provided a Zenodo ID but no Zotero. At the moment it's not possible to generate a corresponding Zotero element, but this is planned. If the item has been published on Zenodo, please use e.g. the DOI to import to Zotero.", args)
+                }
             }
         } else {
             return message(1, "You provided neither a Zotero Key nor Zenodo ID - nothing to do. You can create pairs of records with 'create'", args)
@@ -502,7 +521,16 @@ async function checkZotZenLink(args, k) {
     }
 }
 
-async function linkZotZen(args, k) {
+async function update_doi_and_link(k) {
+    const status = await zotero.update_doi({ key: k.zoteroKey, group: k.zoteroGroup, doi: k.doi })
+    // Zotero item - attach links ... to Zenodo
+    await zotero.attachLinkToItem(k.zoteroKey, "https://zenodo.org/deposit/" + k.zenodoID, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+    // Zotero item - attach links ... to DOI
+    await zotero.attachLinkToItem(k.zoteroKey, "https://doi.org/" + k.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+    return status
+}
+
+async function linkZotZen(args, k, data) {
     // TODO: The keySet should have zoteroGroup as well, adn this shoudl be checked...
     /*const keySet = {
         zoteroKey: zoteroKey,
@@ -514,21 +542,17 @@ async function linkZotZen(args, k) {
         DOI: DOI
     }*/
     // We have verified existence of items and linking status above. This function just links.
-    let zenodoRecord
+    let data_out = {}
     if (k.zenodoID && k.zoteroKey) {
         if (k.zoteroKeyFromZenodo && k.zenodoIDFromZotero) {
             // Nothing to do - items are linked
             console.log("Items are linked.")
         } else {
+            // There's two items, but at least one of them is not linked to the other.
             if (!k.zoteroKeyFromZenodo) {
                 // TODO: Testing
                 console.log("Linking from Zenodo to Zotero (alters Zotero record)")
-                // TODO: Need to write zotero.update_doi
-                const status = await zotero.update_doi(k.zoteroKey, k.zoteroGroup, DOI)
-                // Zotero item - attach links ... to Zenodo
-                await zotero.attachLinkToItem(k.zoteroID, "https://zenodo.org/deposit/" + k.zenodoID, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
-                // Zotero item - attach links ... to DOI
-                await zotero.attachLinkToItem(k.zoteroKey, "https://doi.org/" + k.DOI, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+                const status = await update_doi_and_link(k)
             }
             if (!k.zenodoIDFromZotero) {
                 // TODO: Testing
@@ -539,20 +563,53 @@ async function linkZotZen(args, k) {
             }
         }
     } else if (k.zoteroKey) {
-        // Create a new zenodo record - that's the standard scenario.
-        console.log("Create a new zenodo record.")
+        // We don't have both keys, so let's see whcih one there is. Is there a zoteroKey?
+        // If yes, create a new zenodo record - that's the standard scenario.
+        console.log("Using the zotero item to create a new zenodo record.")
         // TODO: testing
         args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, "group")
-        [zenodoRecord, DOI] = zenodoCreate(args)
+        args.title = data.zotero.title
+        args.description = data.zotero.description
+        args.date = data.date
+        // authors are a problem
+        const [zenodoRecord, doi] = await zenodoCreate(args)
+        data_out["zenodo"] = zenodoRecord
+        k.doi = doi
+        await update_doi_and_link(k)
+        // TODO: To copy the data as comprehensively as possible, we should now run a sync.
+        // synchronise(args)
     } else if (k.zenodoID) {
-        // Create a new zotero record
+        // We don't have both keys and we don't have zotero key, so lets see whether we ahve a zenodo id
+        // If yes, create a new zotero record
         // TODO: complete
-        console.log("Create a new zotero record.")
-        process.exit(1)
+        console.log("Using Zenodo record to creating a new zotero record. Only title/desc/date/doi is copied.")
+        args.id = k.zenodoID // <-- this ensures linking.
+        // TODO - needs fixing
+        args.doi = `............../zenodo.${k.zenodoID}`
+        // authors .... <-- TODO - need to copy authors
+        // TODO - need to figure out why we have an array here: [0]
+        args.title = data.zenodo[0].title
+        args.date = data.zenodo[0].date
+        args.description = data.zenodo[0].description
+        const [zoteroRecord,
+            zoteroRecordGType,
+            zoteroRecordGroup,
+            zoteroRecordVersion
+        ] = await zoteroCreate(args)
+        data_out["zotero"] = {
+            data: zoteroRecord, metadata: [zoteroRecordGType,
+                zoteroRecordGroup,
+                zoteroRecordVersion]
+        }
     } else {
         return message(1, "linkZotZen: You have to provide a zenodo id or zotero key.")
     }
-    return 0
+    return {
+        args: args,
+        keySet: k,
+        data_in: data,
+        data_out: data_out
+    }
 }
 /*
 function linkZotZen(zoteroKey, zenodoDoi, group, zoteroLink = null) {
@@ -599,7 +656,7 @@ async function zotzenSyncOne(args) {
         if (zoteroItem.date) {
             updateDoc.publication_date = zoteroItem.date;
         }
-        zenodo.update(updateDoc)
+        await zenodo.update(updateDoc)
     }
     if (args.attachments) {
         // push attachments. TODO: We should remove existing draft attachments in the Zenodo record
@@ -631,13 +688,65 @@ async function zotzenSyncOne(args) {
         // return dummycreate(args) */
     }
 }
+
+// Copy attachment from Zotero to Zenodo
+async function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
+    if (args.debug) {
+        console.log('DEBUG: pushAttachment');
+    }
+    console.log(`Pushing from Zotero to Zenodo: ${fileName}`);
+    await zotero.attachment({
+        dummy: `${groupId ? '--group-id ' + groupId : ''} attachment --key ${key} --save "../${fileName}"`
+    });
+    // TODO: What is the above command fails?
+    // TODO: Also, I've inserted "..." in case the filename contains spaces. However, really the filename should be made shell-proof.
+    // In perl, you would say:
+    // All the command failures  need throw an exception which will be caught on the top-level / message printed.
+    const pushResult = await zenodo.upload({
+        dummy: `upload ${doi} "../${fileName}"`,
+        with: false
+    })
+    // Rather than looking at this, we should first check the status of the Zenodo item.
+    if (pushResult.status === 403) {
+        console.log(pushResult.message);
+        console.log('Creating new version.');
+        const newVersionResponse = runCommand(`newversion ${doi}`, false);
+        doi = doi.replace(
+            /zenodo.*/,
+            `zenodo.${parseFromZenodoResponse(newVersionResponse, 'latest_draft')
+                .split('/')
+                .slice(-1)[0]}`
+        );
+        linkZotZen(
+            itemKey,
+            doi,
+            groupId,
+            getZoteroSelectLinkV1(userId || groupId, itemKey, !!groupId)
+        );
+        await zenodo.upload({
+            dummy: `upload ${doi} "../${fileName}"`,
+            with: false
+        })
+    }
+    fs.unlinkSync(fileName);
+    // TODO: How does the user know this was successful?
+    console.log('Upload successfull.'); //This shoukd be good enough. User can always use --show or --open to see/open the record.
+    return doi;
+}
+function getZoteroSelectLinkV1(group_id, key, group = false) {
+    return `zotero://select/${group ? 'groups' : 'users'}/${group_id}/items/${key}`;
+}
+function getZoteroSelectLink(item_key, group_id, zoteroRecordGType = "group") { // add a switch for collections?
+    return `zotero://select/${zoteroRecordGType}/${group_id}/items/${item_key}`;
+}
 /*
 // TODO
 Replace runCommand with two functions:
 - zenodoAPI
 - zoteroAPI
- 
+
 */
+/*
 function runCommandWithJsonFileInput(command, json, zotero = true) {
     if (args.debug) {
         console.log('DEBUG: runCommandWithJsonFileInput');
@@ -649,7 +758,8 @@ function runCommandWithJsonFileInput(command, json, zotero = true) {
     const response = runCommand(`${command} tmp`, zotero);
     fs.unlinkSync(zotero ? zoteroTmpFile : zenodoTmpFile);
     return response;
-}
+}*/
+/*
 function runCommand(command, zotero = true) {
     if (args.debug) {
         console.log('DEBUG: runCommand; ' + command);
@@ -668,6 +778,8 @@ function runCommand(command, zotero = true) {
         throw new Error(`${zotero ? 'Zotero' : 'Zenodo'}: ${ex.output.toString()}`);
     }
 }
+*/
+/*
 // This function should be removed.
 function parseFromZenodoResponse(content, key) {
     if (args.debug) {
@@ -681,6 +793,7 @@ function parseFromZenodoResponse(content, key) {
         .join(':')
         .trim();
 }
+*/
 /*
 function zoteroCreate(args) {
     // This could call the zoteroAPI with a subset of args
@@ -732,7 +845,7 @@ function zenodoCreate(title, creators, zoteroSelectLink, template) {
         zenodoTemplate.creators = creators;
     return runCommandWithJsonFileInput('create --show', zenodoTemplate, false);
 }*/
-
+/*
 function zoteroGet(groupId, userId, itemKey) {
     if (args.debug) {
         console.log('DEBUG: zoteroGet');
@@ -743,7 +856,8 @@ function zoteroGet(groupId, userId, itemKey) {
             true
         )
     );
-}
+}*/
+/*
 function zenodoGet(doi) {
     if (args.debug) {
         console.log('DEBUG: zenodoGet');
@@ -766,13 +880,8 @@ function zenodoGetRaw(doi) {
     runCommand(`get ${doi}`, false);
     const fileName = doi.split('.').pop();
     return JSON.parse(fs.readFileSync(`zenodo-cli/${fileName}.json`).toString());
-}
-function getZoteroSelectLinkV1(group_id, key, group = false) {
-    return `zotero://select/${group ? 'groups' : 'users'}/${group_id}/items/${key}`;
-}
-function getZoteroSelectLink(item_key, group_id, zoteroRecordGType = "group") { // add a switch for collections?
-    return `zotero://select/${zoteroRecordGType}/${group_id}/items/${item_key}`;
-}
+}*/
+/*
 function syncErrors(doi, zenodoRawItem, zoteroSelectLink) {
     if (args.debug) {
         console.log('DEBUG: syncErrors');
@@ -796,45 +905,8 @@ function syncErrors(doi, zenodoRawItem, zoteroSelectLink) {
         error = true;
     }
     return error;
-}
-function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
-    if (args.debug) {
-        console.log('DEBUG: pushAttachment');
-    }
-    console.log(`Pushing from Zotero to Zenodo: ${fileName}`);
-    runCommand(
-        `${groupId ? '--group-id ' + groupId : ''} attachment --key ${key} --save "../${fileName}"`
-    );
-    // TODO: What is the above command fails?
-    // TODO: Also, I've inserted "..." in case the filename contains spaces. However, really the filename should be made shell-proof.
-    // In perl, you would say:
-    //                           use String::ShellQuote; $safefilename = shell_quote($filename);
-    // There's no built-in for escaping. We can only escape special characters. We can do that if needed.
-    // All the command failures will throw an exception which will be caught on the top-level and a message will be printed.
-    const pushResult = runCommand(`upload ${doi} "../${fileName}"`, false);
-    if (pushResult.status === 403) {
-        console.log(pushResult.message);
-        console.log('Creating new version.');
-        const newVersionResponse = runCommand(`newversion ${doi}`, false);
-        doi = doi.replace(
-            /zenodo.*/,
-            `zenodo.${parseFromZenodoResponse(newVersionResponse, 'latest_draft')
-                .split('/')
-                .slice(-1)[0]}`
-        );
-        linkZotZen(
-            itemKey,
-            doi,
-            groupId,
-            getZoteroSelectLinkV1(userId || groupId, itemKey, !!groupId)
-        );
-        runCommand(`upload ${doi} "../${fileName}"`, false);
-    }
-    fs.unlinkSync(fileName);
-    // TODO: How does the user know this was successful?
-    console.log('Upload successfull.'); //This shoukd be good enough. User can always use --show or --open to see/open the record.
-    return doi;
-}
+}*/
+/*
 function linked(zenodoItem, zoteroLink) {
     if (args.debug) {
         console.log('DEBUG: linked');
@@ -844,8 +916,8 @@ function linked(zenodoItem, zoteroLink) {
         zenodoItem.related_identifiers.length >= 1 &&
         zenodoItem.related_identifiers[0].identifier === zoteroLink
     );
-}
-
+}*/
+/*
 // This function is obsolete:
 async function zotzenGet(args) {
     if (args.debug) {
@@ -1037,8 +1109,8 @@ async function zotzenGet(args) {
     );
 }
 // This should not be needed as we're passing things through to the API.
-
-
+*/
+/*
 async function finalActions() {
     //-- final actions
     if (args.publish && doi) {
@@ -1084,3 +1156,4 @@ async function finalActions() {
         }
     }
 }
+*/

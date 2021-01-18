@@ -13,7 +13,7 @@ const {
 // Read package.json, and extract version.
 var pjson = require('../package.json')
 if (pjson.version)
-  console.log("version=" + pjson.version)
+  console.log("zotzen version=" + pjson.version)
 
 function getArguments() {
   const parser = new ArgumentParser({ "description": "Zotzen command line utility. Move data and files from Zotero to Zenodo." });
@@ -203,7 +203,6 @@ function getArguments() {
 // -------------------------- main ---------------------------------------
 
 async function main() {
-
   console.log('main: arguments');
   const args = getArguments();
   console.log('main: api calls');
@@ -224,7 +223,7 @@ async function main() {
     }
   };
 }
-console.log("Start: " + version)
+console.log("Start.")
 main();
 console.log("End.")
 //process.exit(0)
