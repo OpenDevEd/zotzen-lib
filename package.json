@@ -46,6 +46,7 @@
   },
   "files": [
     "build/*",
+    "src/*.js",
     "data.json"
   ]
 }

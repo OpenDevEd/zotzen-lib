@@ -397,7 +397,7 @@ async function zotzenLinkCheck(args) {
             zoteroGroupFromZenodo = zoteroParseGroup(zotlink)
         } else {
             console.log("The Zenodo item is not linked to a Zoteroitem")
-            // ask prompt or check rags and proceed to link TODO
+            // ask prompt or check tags and proceed to link TODO
         }
         //if (!zotlink) {
         //    console.log("The zenodo record does not link back to the zotero item - use 'link'")

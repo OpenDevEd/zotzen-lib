@@ -51,6 +51,5 @@ async function main() {
     tags: ["_r:AddedByZotZen"],
     description: "An output of the EdTech Hub, https://edtechhub.org",
   })
-  console.log("zotzen result=" + JSON.stringify(result, null, 2))
-}
+ }
 main();
