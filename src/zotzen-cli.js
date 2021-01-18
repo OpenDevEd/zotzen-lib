@@ -9,13 +9,11 @@ const {
 
 // https://stackoverflow.com/questions/9153571/is-there-a-way-to-get-version-from-package-json-in-nodejs-code
 // This only works when running package from directory.
-const version = process.env.npm_package_version
+// const version = process.env.npm_package_version
 // Read package.json, and extract version.
 var pjson = require('../package.json')
 if (pjson.version)
-  console.log("version(dev)=" + pjson.version)
-if (pjson._id)
-  console.log("version(installed)=" + pjson._id)
+  console.log("version=" + pjson.version)
 
 function getArguments() {
   const parser = new ArgumentParser({ "description": "Zotzen command line utility. Move data and files from Zotero to Zenodo." });
