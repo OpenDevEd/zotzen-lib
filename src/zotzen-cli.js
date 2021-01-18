@@ -13,9 +13,9 @@ const version = process.env.npm_package_version
 // Read package.json, and extract version.
 var pjson = require('../package.json')
 if (pjson.version)
-  console.log("V=" + pjson.version)
+  console.log("version(dev)=" + pjson.version)
 if (pjson._id)
-  console.log("VV=" + pjson._id)
+  console.log("version(installed)=" + pjson._id)
 
 function getArguments() {
   const parser = new ArgumentParser({ "description": "Zotzen command line utility. Move data and files from Zotero to Zenodo." });
