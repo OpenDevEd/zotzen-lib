@@ -7,14 +7,22 @@ const {
   zotzenInit,
 } = require("./zotzen-cli-helper");
 
+// https://stackoverflow.com/questions/9153571/is-there-a-way-to-get-version-from-package-json-in-nodejs-code
+// This only works when running package from directory.
 const version = process.env.npm_package_version
+// Read package.json, and extract version.
+var pjson = require('../package.json')
+if (pjson.version)
+  console.log("V=" + pjson.version)
+if (pjson._id)
+  console.log("VV=" + pjson._id)
 
 function getArguments() {
   const parser = new ArgumentParser({ "description": "Zotzen command line utility. Move data and files from Zotero to Zenodo." });
 
   /*
   // General options
-
+ 
   -h, --help            show this help message and exit
   --zoteroconfig ZOTEROCONFIG
                         Config file with API key. By default config.json then ~/.config/zotero-cli/zotero-cli.toml are used if no config is provided.
@@ -26,7 +34,7 @@ function getArguments() {
   --open                Open the Zotero and Zenodo link after creation (both on web).
   --oapp                Open the Zotero link (app) and the Zenodo link after creation (web).
   --dump                Show json for list and for depositions after executing the command.
-
+ 
   */
   parser.add_argument(
     "--zoteroconfig", {
@@ -205,8 +213,8 @@ async function main() {
     console.log("Action: " + args.func.name)
     if (args.dryrun) {
       const fnname = args.func.name
-     // delete args[func]
-      const myargs = JSON.stringify(args,null,2)
+      // delete args[func]
+      const myargs = JSON.stringify(args, null, 2)
       console.log(`${fnname}(${myargs})`)
     } else {
       await args.func(args).then(res => {
@@ -218,7 +226,7 @@ async function main() {
     }
   };
 }
-console.log("Start: "+version)
+console.log("Start: " + version)
 main();
 console.log("End.")
 //process.exit(0)

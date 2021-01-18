@@ -45,6 +45,7 @@
     "prompt": "^1.0.0"
   },
   "files": [
+    "package.json",
     "build/*",
     "src/*.js",
     "data.json"
