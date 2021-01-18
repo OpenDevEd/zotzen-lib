@@ -44,33 +44,13 @@ function verbose(args, msg, data) {
     }
 }
 
-/*
-TOP-LEVEL FUNCTION 
-*/
-async function zotzenCreate(args) {
-    const zenodoLibCreate_Args = {
-        title: "string",
-        date: "date string",
-        description: "string",
-        authors: ["First Second Last; affiliation", "First2 Last2; affiliation2"],
-        communities: "file to communities",
-        zotero_link: "string (zotero://...)",
-        reportNumber: "Zotero only",
-        reportType: "Zotero only",
-        institution: "EdTech Hub",
-        language: "en",
-        rights: "Creative Commons Attribution 4.0",
-        googledoc: "url to google doc - not working yet",
-        kerko_url: "https://docs.edtechhub.org/lib/",
-        tags: ["AddedByZotZen"],
-        collections: ["IY4IS3FU"],
-        team: "neither",
-        group_id: 2259720,
-        json: "Zenodo template file"
+//--
+async function zenodoCreate(args) {
+    // TODO: What if this is a user lib?
+    if (!args.zotero_link && args.key && args.group_id) {
+        console.log("Adding args.zotero_link from key/group_id provided")
+        args.zotero_link = getZoteroSelectLink(args.key, args.group_id, "group")
     }
-    verbose(args, "zotzenlib.zotzenCreate", args)
-    // let result = dummycreate(args)
-    let zenodoRecord = {}
     try {
         console.log("zotzen-lib: calls zenodo.create")
         zenodoRecord = await zenodo.create(args)
@@ -90,7 +70,12 @@ async function zotzenCreate(args) {
         process.exit(1)
     }
     const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
-    const doistr = 'DOI: ' + DOI
+    return [zenodoRecord, DOI]
+    // [zenodoRecord, DOI] = zenodoCreate(args)
+}
+
+async function zoteroCreate(args, zenodoLibCreate_Args) {
+    const doistr = args.doi ? 'DOI: ' + args.doi : ""
     Object.keys(zenodoLibCreate_Args).forEach(mykey => {
         if (!args[mykey]) {
             if (mykey == "collections") { // mykey == "tags" || authors
@@ -106,8 +91,8 @@ async function zotzenCreate(args) {
         args.authors.forEach(myauth => {
             myauth = myauth.replace(/\;.*$/, "")
             const firstlast = myauth.split(/ +/)
-            //console.log("XXX "+firstlast.slice(0, 1).join(" "))
-            //console.log("XXX "+firstlast.slice(0, firstlast.length - 1).join(" "))
+            //console.log("X-- "+firstlast.slice(0, 1).join(" "))
+            //console.log("X-- "+firstlast.slice(0, firstlast.length - 1).join(" "))
             const first = firstlast.length > 1 ? firstlast.slice(0, firstlast.length - 1).join(" ") : ""
             const last = firstlast[firstlast.length - 1]
             authorsarr.push({
@@ -117,7 +102,7 @@ async function zotzenCreate(args) {
             })
         })
     }
-    //const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
+    //const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr    
     const extrastr = doistr
     const report = {
         "itemType": "report",
@@ -159,25 +144,99 @@ async function zotzenCreate(args) {
     const zoteroRecordVersion = zoteroResult.successful["0"].version
     const zoteroRecordGType = zoteroResult.successful["0"].library.type
     const zoteroRecordGroup = zoteroResult.successful["0"].library.id
-    // Now update the zenodo record with the ZoteroId.
+
+    if (args.id) {
+        // Zotero item - attach links ... to Zenodo
+        await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+    }
+    if (args.doi) {
+        // Zotero item - attach links ... to DOI
+        await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+    }
+
+    return [zoteroRecord,
+        zoteroRecordGType,
+        zoteroRecordGroup,
+        zoteroRecordVersion
+    ]
+}
+
+/*
+TOP-LEVEL FUNCTION 
+*/
+async function zotzenCreate(args) {
+    const zenodoLibCreate_Args = {
+        title: "string",
+        date: "date string",
+        description: "string",
+        authors: ["First Second Last; affiliation", "First2 Last2; affiliation2"],
+        communities: "file to communities",
+        zotero_link: "string (zotero://...)",
+        reportNumber: "Zotero only",
+        reportType: "Zotero only",
+        institution: "EdTech Hub",
+        language: "en",
+        rights: "Creative Commons Attribution 4.0",
+        googledoc: "url to google doc - not working yet",
+        kerko_url: "https://docs.edtechhub.org/lib/",
+        tags: ["AddedByZotZen"],
+        collections: ["IY4IS3FU"],
+        team: "neither",
+        group_id: 2259720,
+        json: "Zenodo template file"
+    }
+    // TODO - we have to fix the communities for Zenodo.
+    verbose(args, "zotzenlib.zotzenCreate", args)
+    // let result = dummycreate(args)
+    // Create zenodo record
+    const [zenodoRecord, DOI] = await zenodoCreate(args)
+    args.id = zenodoRecord.id
+    args.doi = DOI
+    const [zoteroRecord,
+        zoteroRecordGType,
+        zoteroRecordGroup,
+        zoteroRecordVersion
+    ] = await zoteroCreate(args, zenodoLibCreate_Args)
     // const zoteroGroup = args.group_id
     // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
+    // Actually - as we are about the attach this to the Zenodo item - it will not work for user libs in any case...
     if (zoteroRecordGType != "group") {
+        console.log("The zotero record is in a user library.")
         return this.message(1, "ERROR: group-type=user not implemented")
     }
+    // console.log(`key=${zoteroRecord.key}`)
+    // process.exit(1)
+    // Now update the zenodo record with the ZoteroId.
     let zenodoRecord2
     let newZoteroRecord
-    const zoteroSelectLink = `zotero://select/groups/${zoteroRecordGroup}/items/${zoteroRecord.key}`
+    const zoteroSelectLink = getZoteroSelectLink(zoteroRecord.key, zoteroRecordGroup, "group")
     const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
     promiseall: {
         // The creation of the first Zotero/Zenodo record needs to be sequences.
         // However, the items below could be done through a 'Promise all' as they can run in parallel.
+
+        // Attach idenfier to zenodo record.
         args.zotero_link = zoteroSelectLink
         args.id = zenodoRecord.id
-        //console.log(JSON.stringify(args, null, 2))
-        args.description += `<p>Available from <a href="https://docs.edtechhub.org/lib/${zoteroRecord.key}">https://docs.edtechhub.org/lib/${zoteroRecord.key}</a></p>`
+        if (args.kerko_url) {
+            args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${args.kerko_url + DOI}</a></p>` // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+        }
         zenodoRecord2 = await zenodo.update(args)
         //console.log(JSON.stringify(zenodoRecord2, null, 2))
+
+        // Zotero item - attach links ... to Google Doc
+        if (args.googledoc) {
+            // Attach link to google doc, if there is one:
+            await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "🔄View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] })
+        }
+
+        // Zotero item - attach note
+        const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : ""
+        const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : ""
+        const content = `${team} ${note}`
+        await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm", "_r:zotzen"] })
+
+        // Attach kerko url to Zotero record (as url)
         newZoteroRecord = zoteroRecord
         if (kerko_url != "") {
             console.log("updating...")
@@ -191,20 +250,9 @@ async function zotzenCreate(args) {
             // update_item doesn't return the item, but only a status - we should check the status at this point.
             newZoteroRecord = await zotero.item({ key: zoteroRecord.key, fullresponse: false })
             // Attach link to kerko
-            await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "🔄View item Evidence Library - click to open", tags: ["_r:kerko","_r:zotzen"] })
+            await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "🔄View item Evidence Library - click to open", tags: ["_r:kerko", "_r:zotzen"] })
         }
-        if (args.googledoc) {
-            // Attach link to google doc, if there is one:
-            await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "🔄View Google Doc and download alternative formats", tags: ["_r:googleDoc","_r:zotzen"] })
-        }
-        // Attach link to Zenodo
-        await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + zenodoRecord.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit","_r:zotzen"] })
-        // Attach link to DOI
-        await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + DOI, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi","_r:zotzen"] })
-        const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : ""
-        const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : ""
-        const content = `${team} ${note}`
-        await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm","_r:zotzen"] })        
+
     }
     const record = {
         status: 0,
@@ -262,118 +310,251 @@ function message(stat = 0, msg = "None", data = null) {
     }
 }
 
-async function zotzenLinkCheck(args) {
-    /*
-    input
-    args = { key: "", id: ""}
-
-    Possible outcomes:
-    zotero.key exists (error if not)
-    if (zotero.extra.zenodo exists) {
-        if (zenodo.id is provided)
-            if (zenodo.id exists) {
-                -> items are linked and are teh same or not.
-                -> if they are not, then we can relink.
-            } else {
-                error
-            }
-        } else {
-            -> we can generate
-        }
-    } else {
-        if (zenodo.id provided) {       
-            if (zenodo.id exists) {
-                -> we can link.
-            }
-        } else {
-            -> we can generate
-        }
-    }
-    */
-    if (!args.key) {
-        console.log("ERROR zotzenLink")
-        return message(1, "You must provide 'key' (for a zotero item)", args)
-    }
-    // There's a key, so we can get the item.    
-    debug(args, "zoteroItem: call", args)
-    const zoteroItem = await zotero.item(args);
-    debug(args, "zotzenCreate: result:", zoteroItem)
-    // zoteroRecord.extras -> DOI -> zenodo
-    // return zoteroRecord
-    // "extra": "DOI: 10.5072/zenodo.716876",
-    const zenodoIDstr = zoteroItem.extra.match(/zenodo\.(\d+)/)
-    let zenodoID = 0;
+function zenodoParseID(str) {
+    const zenodoIDstr = str.match(/(\d+)$/s)
+    let zenodoIDref = null;
     if (zenodoIDstr) {
-        zenodoID = zenodoIDstr[1]
-    } else {
-        // So the item doesn't have a DOI - let's see whether we should get one.
-        if (args.getdoi) {
-            // TODO - get a DOI
-            // async getDOI(zoteroItem)
-            // or async getDOI(args)
-            return message(1, "Not implemented. Data attached. ",
-                {
-                    "zoteroItem": "updated zoteroItem",
-                    "zenodoItem": "new zenodo item"
-                })
-        } else {
-            console.log("zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi ")
-            return message(1, "zotzen-lib: Zotero Item is lnot linked to Zenodo record. Use 'link' with getdoi. Data attached. ",
-                {
-                    "zoteroItem": zoteroItem
-                })
-        }
-        // unlinked... link first
+        zenodoIDref = zenodoIDstr[1]
+        console.log(`Got Zenodo ID = ${zenodoIDref}`)
     }
-    // args.id = zenodo.
-    let zenodoRecord = {}
-    if (args.id) {
-        if (args.id !== zenodoID) {
-            console.log("args.id !== zenodoID, ${args.id} !== ${zenodoID}")
+    return zenodoIDref
+}
+
+function zoteroParseKey(str) {
+    //const arr = zotlink.split("/")
+    //arr[arr.length - 1]        
+    const a = str.match(/([\d\w]+)\/?$/s)
+    let zoteroKey = null;
+    if (a) {
+        zoteroKey = a[1]
+        console.log(`Got Zotero Key = ${zoteroKey}`)
+    }
+    return zoteroKey
+}
+function zoteroParseGroup(str) {
+    //const arr = zotlink.split("/")
+    //arr[arr.length - 1]        
+    let zoteroGroup = null
+    const a = str.match(/\/(\d+)\//s)
+    if (a) {
+        zoteroGroup = a[1]
+        console.log(`Got Zotero Group (/) = ${zoteroGroup}`)
+    } else {
+        const a = str.match(/^(\d+)\:/s)
+        if (a) {
+            zoteroGroup = a[1]
+            console.log(`Got Zotero Group (:) = ${zoteroGroup}`)
+        }
+    }
+    return zoteroGroup
+}
+async function zotzenLinkCheck(args) {
+    // This functions gets whatever items possible, which can then be checked.
+    console.log("Getting Zotero item if possible.")
+    //-- Get the Zotero item
+    let zenodoIDFromZotero = null
+    const zoteroKey = args.key ? zoteroParseKey(args.key) : null
+    const zoteroGroup = args.group_id ? args.group_id : null
+    if (zoteroKey) {
+        // There's a key, so we can get the item.    
+        debug(args, "zoteroItem: call", args)
+        const zoteroItem = await zotero.item(args);
+        debug(args, "zotzenCreate: result:", zoteroItem)
+        // zoteroRecord.extras -> DOI -> zenodo
+        // return zoteroRecord
+        // "extra": "DOI: 10.5072/zenodo.716876",
+        // TODO - this will not work for Zotero recordTypes other the 'record'
+        zenodoIDFromZotero = zenodoParseID(zoteroItem.extra)
+    } else {
+        console.log("You did not provided a 'key' (for a zotero item)", args)
+    }
+    //-- Zenodo
+    console.log("Getting Zenodo record if possible.")
+    let zoteroKeyFromZenodo = null
+    let zoteroGroupFromZenodo = null
+    const zenodoID = args.id ? zenodoParseID(args.id) : null
+    if (zenodoID) {
+        //-- Get the zenodo record
+        let zenodoRecord = {}
+        const zenodoID = args.id ? zenodoParseID(args.id) : null
+        try {
+            console.log("zotzen-lib: calls zenodo.getRecord")
+            zenodoRecord = await zenodo.getrecord(args)
+            console.log("zotzen-lib: zenodo.getRecord returns")
+        } catch (e) {
+            debug(args, "zotzenCreate: error=", e)
+            console.log(e)
             return null
+        }
+        debug(args, "zotzenCreate: result:", zenodoRecord)
+        //console.log(JSON.stringify(zenodoRecord[0].metadata["related_identifiers"],null,2))
+        let zotlink = null
+        if (zenodoRecord[0].metadata["related_identifiers"]) {
+            const ri = zenodoRecord[0]["metadata"]["related_identifiers"]
+            // We should iterate through these TODO
+            zotlink = ri[0].identifier
+            zoteroKeyFromZenodo = zoteroParseKey(zotlink)
+            zoteroGroupFromZenodo = zoteroParseGroup(zotlink)
         } else {
-            console.log("Zotero/Zenodo IDs are matching - now checking reverse link.")
+            console.log("The Zenodo item is not linked to a Zoteroitem")
+            // ask prompt or check rags and proceed to link TODO
+        }
+        //if (!zotlink) {
+        //    console.log("The zenodo record does not link back to the zotero item - use 'link'")
+        //}
+    } else {
+        console.log("You did not provided an 'id' (for a zotero item)", args)
+    }
+    // We now have all potential keys and links:
+    const keySet = {
+        zoteroKey: zoteroKey,
+        zenodoID: zenodoID,
+        zoteroGroup: zoteroGroup,
+        zenodoIDFromZotero: zenodoIDFromZotero,
+        zoteroKeyFromZenodo: zoteroKeyFromZenodo,
+        zoteroGroupFromZenodo: zoteroGroupFromZenodo,
+        DOI: "......../zenodo." + zenodoID
+    }
+    // TODO: Fix the DOI above - either take it from the actual DOI or the pre-reserved DOI.
+    const result = await checkZotZenLink(args, keySet)
+    console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+    return result
+}
+async function checkZotZenLink(args, k) {
+    if (k.zoteroKey) {
+        // Zotero key provided
+        if (k.zenodoID) {
+            // zenodo id provided
+            if (k.zenodoIDFromZotero && k.zoteroKeyFromZenodo) {
+                // the zenodo record links to zotero
+                if (k.zenodoIDFromZotero === k.zenodoID && k.zoteroKeyFromZenodo === k.zoteroKey) { // TODO: && zoteroGroup === zoteroGroupFromZenodo (we need to check groups as well, just to be sure)
+                    // Great!
+                    return message(0, "You provided both a Zotero Key and a Zenodo ID - and they are linked.", k)
+                } else if (k.zenodoIDFromZotero === k.zenodoID && k.zoteroKeyFromZenodo != k.zoteroKey) {
+                    return message(1, "You provided both a Zotero Key and a Zenodo ID - but they are partially linked to different items. Please fix this by editing the records directly.", k)
+                } else if (k.zenodoIDFromZotero != k.zenodoID && k.zoteroKeyFromZenodo === k.zoteroKey) {
+                    return message(1, "You provided both a Zotero Key and a Zenodo ID - but they are partially linked to different items. Please fix this by editing the records directly.", k)
+                } else {
+                    // Linked to different items.
+                    return message(1, "You provided both a Zotero Key and a Zenodo ID - but they are both linked to different items. Please fix this by editing the records directly.", k)
+                }
+            } else if (k.zenodoIDFromZotero && !k.zoteroKeyFromZenodo) {
+                if (k.zenodoIDFromZotero === k.zenodoID) {
+                    if (args.link) {
+                        return await linkZotZen(args, keySet)
+                    } else {
+                        return message(1, "You provided both a Zotero Key and a Zenodo ID. The Zotero links to Zenodo, but Zenodo does not link back. You can link the items by providing the option 'link'", k)
+                    }
+                } else {
+                    // Linked to different items.
+                    return message(1, "You provided both a Zotero Key and a Zenodo ID. The Zotero links to a different Zenodo item. Please fix this manually.", k)
+                }
+            } else if (!k.zenodoIDFromZotero && k.zoteroKeyFromZenodo) {
+                if (k.zoteroKeyFromZenodo === k.zoteroKey) {
+                    if (args.link) {
+                        return await linkZotZen(args, keySet)
+                    } else {
+                        return message(1, "You provided both a Zotero Key and a Zenodo ID. The Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will use the DOI from the Zenodo record as DOI for the Zotero item.", k)
+                    }
+                } else {
+                    // Linked to different items.
+                    return message(1, "You provided both a Zotero Key and a Zenodo ID. The Zenodo links to a different Zotero item. Please fix this manually.", k)
+                }
+            } else {
+                // Neither are defined
+                if (args.link) {
+                    return await linkZotZen(args, keySet)
+                } else {
+                    return message(1, "You provided both a Zotero Key and a Zenodo ID. The records are not linked. You can link the items by providing the option 'link'. Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will use the DOI from the Zenodo record as DOI for the Zotero item.", k)
+                }
+            }
+        } else {
+            // We have Zotero, but no Zenodo
+            if (k.zenodoIDFromZotero) {
+                // However, we have a reference to a zenodo id.
+                console.log("Zotero key provided, and it links to Zenodo ID, but no Zenodo ID provided. Going to check this pair.")
+                args.id = k.zenodoIDFromZotero
+                return await zotzenLinkCheck(args)
+            } else {
+                if (args.link) {
+                    return await linkZotZen(args, keySet)
+                } else {
+                    return message(1, "You provided both a Zotero Key but no Zenodo ID. You can generate a Zenodo by providing the option 'link'. Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will provided a DOI for the Zotero item.", k)
+                }
+            }
         }
     } else {
-        console.log("Indentified zenodoID=" + zenodoID)
-        args.id = zenodoID
+        // We dont have Zotero
+        if (k.zenodoID) {
+            if (k.zoteroKeyFromZenodo) {
+                // However, we have a reference to a zenodo id.
+                console.log("Zenodo ID provided, and it links to Zotero key, but no Zotero key provided. Going to check this pair.")
+                args.key = k.zoteroKeyFromZenodo
+                args.group_id = k.zoteroGroupFromZenodo
+                return await zotzenLinkCheck(args)
+            } else {
+                // return await linkZotZen(args, keySet)
+                return message(1, "You provided a Zenodo ID but no Zotero. At the moment it's not possible to generate a corresponding Zotero element, but this is planned. If the item has been published on Zenodo, please use e.g. the DOI to import to Zotero.", args)
+            }
+        } else {
+            return message(1, "You provided neither a Zotero Key nor Zenodo ID - nothing to do. You can create pairs of records with 'create'", args)
+        }
     }
-    try {
-        console.log("zotzen-lib: calls zenodo.getRecord")
-        zenodoRecord = await zenodo.getrecord(args)
-        console.log("zotzen-lib: zenodo.getRecord returns")
-    } catch (e) {
-        debug(args, "zotzenCreate: error=", e)
-        console.log(e)
-        return null
-    }
-    debug(args, "zotzenCreate: result:", zenodoRecord)
-    //console.log(JSON.stringify(zenodoRecord[0].metadata["related_identifiers"],null,2))
-    let zotlink = null
-    if (zenodoRecord[0].metadata["related_identifiers"]) {
-        const ri = zenodoRecord[0]["metadata"]["related_identifiers"]
-        // We should iterate through these TODO
-        zotlink = ri[0].identifier
-    } else {
-        console.log("The Zenodo item is not linked to a Zoteroitem")
-        // ask prompt or check rags and proceed to link TODO
-        return null
-    }
-    if (!zotlink) {
-        console.log("The zenodo record does not link back to the zotero item - use 'link'")
-        return null
-    }
-    const arr = zotlink.split("/")
-    if (zoteroItem.key == arr[arr.length - 1]) {
-        console.log("Records are linked.")
-    } else {
-        console.log(`Problem: ${zoteroItem.key} vs. ${zotlink}`)
-        console.log("The zenodo record does not link back to the right zotero item - use 'link' to fix")
+}
+
+async function linkZotZen(args, k) {
+    // TODO: The keySet should have zoteroGroup as well, adn this shoudl be checked...
+    /*const keySet = {
+        zoteroKey: zoteroKey,
+        zenodoID: zenodoID,
+        zoteroGroup: zoteroGroup,
+        zenodoIDFromZotero: zenodoIDFromZotero,
+        zoteroKeyFromZenodo: zoteroKeyFromZenodo,
+        zoteroGroupFromZenodo: zoteroGroupFromZenodo,
+        DOI: DOI
+    }*/
+    // We have verified existence of items and linking status above. This function just links.
+    let zenodoRecord
+    if (k.zenodoID && k.zoteroKey) {
+        if (k.zoteroKeyFromZenodo && k.zenodoIDFromZotero) {
+            // Nothing to do - items are linked
+            console.log("Items are linked.")
+        } else {
+            if (!k.zoteroKeyFromZenodo) {
+                // TODO: Testing
+                console.log("Linking from Zenodo to Zotero (alters Zotero record)")
+                // TODO: Need to write zotero.update_doi
+                const status = await zotero.update_doi(k.zoteroKey, k.zoteroGroup, DOI)
+                // Zotero item - attach links ... to Zenodo
+                await zotero.attachLinkToItem(k.zoteroID, "https://zenodo.org/deposit/" + k.zenodoID, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+                // Zotero item - attach links ... to DOI
+                await zotero.attachLinkToItem(k.zoteroKey, "https://doi.org/" + k.DOI, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+            }
+            if (!k.zenodoIDFromZotero) {
+                // TODO: Testing
+                console.log("Linking from Zotero to Zenodo (alters Zenodo record)")
+                args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, "group")
+                args.id = k.zenodoID
+                zenodoRecord = await zenodo.update(args)
+            }
+        }
+    } else if (k.zoteroKey) {
+        // Create a new zenodo record - that's the standard scenario.
+        console.log("Create a new zenodo record.")
+        // TODO: testing
+        args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, "group")
+        [zenodoRecord, DOI] = zenodoCreate(args)
+    } else if (k.zenodoID) {
+        // Create a new zotero record
+        // TODO: complete
+        console.log("Create a new zotero record.")
         process.exit(1)
+    } else {
+        return message(1, "linkZotZen: You have to provide a zenodo id or zotero key.")
     }
     return 0
 }
-
+/*
 function linkZotZen(zoteroKey, zenodoDoi, group, zoteroLink = null) {
     if (args.debug) {
         console.log('DEBUG: linkZotZen');
@@ -384,11 +565,11 @@ function linkZotZen(zoteroKey, zenodoDoi, group, zoteroLink = null) {
             extra: `DOI: ${zenodoDoi}`,
         }
     );
-
+ 
     if (zoteroLink) {
         runCommand(`update ${zenodoDoi} --zotero-link ${zoteroLink}`, false);
     }
-}
+}*/
 
 async function zotzenSyncOne(args) {
     verbose(args, "zotzenSync", args)
@@ -500,6 +681,7 @@ function parseFromZenodoResponse(content, key) {
         .join(':')
         .trim();
 }
+/*
 function zoteroCreate(args) {
     // This could call the zoteroAPI with a subset of args
     // title, group, jsonFile = null) {
@@ -549,7 +731,7 @@ function zenodoCreate(title, creators, zoteroSelectLink, template) {
     if (creators)
         zenodoTemplate.creators = creators;
     return runCommandWithJsonFileInput('create --show', zenodoTemplate, false);
-}
+}*/
 
 function zoteroGet(groupId, userId, itemKey) {
     if (args.debug) {
@@ -585,11 +767,11 @@ function zenodoGetRaw(doi) {
     const fileName = doi.split('.').pop();
     return JSON.parse(fs.readFileSync(`zenodo-cli/${fileName}.json`).toString());
 }
-function getZoteroSelectlink(id, key, group = false) {
-    if (args.debug) {
-        console.log('DEBUG: getZoteroSelectlink');
-    }
-    return `zotero://select/${group ? 'groups' : 'users'}/${id}/items/${key}`;
+function getZoteroSelectLinkV1(group_id, key, group = false) {
+    return `zotero://select/${group ? 'groups' : 'users'}/${group_id}/items/${key}`;
+}
+function getZoteroSelectLink(item_key, group_id, zoteroRecordGType = "group") { // add a switch for collections?
+    return `zotero://select/${zoteroRecordGType}/${group_id}/items/${item_key}`;
 }
 function syncErrors(doi, zenodoRawItem, zoteroSelectLink) {
     if (args.debug) {
@@ -644,7 +826,7 @@ function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
             itemKey,
             doi,
             groupId,
-            getZoteroSelectlink(userId || groupId, itemKey, !!groupId)
+            getZoteroSelectLinkV1(userId || groupId, itemKey, !!groupId)
         );
         runCommand(`upload ${doi} "../${fileName}"`, false);
     }
@@ -707,7 +889,7 @@ async function zotzenGet(args) {
                 }
             }
 
-            const zoteroSelectLink = getZoteroSelectlink(
+            const zoteroSelectLink = getZoteroSelectLinkV1(
                 groupId || userId,
                 itemKey,
                 !!groupId
