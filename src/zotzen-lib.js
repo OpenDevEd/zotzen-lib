@@ -4,6 +4,9 @@ module.exports.link = zotzenLinkCheck;
 module.exports.zenodoCreate = zenodoCreate;
 module.exports.zoteroCreate = zoteroCreate;
 
+// TODO: At the moment, the links produces are not 'sandbox aware'. It's only a minor issue for production, but would be nice for testing.
+// Similarly, check for string '......./zenodo.' where we need to enter missing parts of DOIs properly
+
 const zenodoLibCreate_Args = {
     title: "string",
     date: "date string",
@@ -294,13 +297,15 @@ async function zotzenLink(args) {
 Top Level function
 */
 async function zotzenSync(args) {
-    if (!args.id) return null
-    const ids = args.id
-    delete args["id"]
+    // Todo - this shoudl be changed in the interface defintion, from id to keys
+    if (!args.key) return null
+    const keys = args.key
+    delete args["key"]
     let output = []
-    for (id of ids) {
+    // TODO: Shoudl check whether args.key is an array or not
+    for (const key of keys) {
         let myargs = args
-        myargs.key = id
+        myargs.key = key
         const rec = await zotzenSyncOne(myargs)
         output.push(rec)
     }
@@ -361,8 +366,7 @@ function zoteroParseGroup(str) {
 // This function can be called recursively - it's not efficient...
 async function zotzenLinkCheck(args) {
     // This functions gets whatever items possible, which can then be checked.
-    // console.log("Getting Zotero item if possible.")
-    //-- Get the Zotero item
+    //-- Get the Zotero item [if one was specified]
     let zenodoIDFromZotero = null
     const zoteroKey = args.key ? zoteroParseKey(args.key) : null
     const zoteroGroup = args.group_id ? args.group_id : null
@@ -380,8 +384,7 @@ async function zotzenLinkCheck(args) {
     } else {
         console.log("You did not provided a 'key' (for a zotero item)", args)
     }
-    //-- Zenodo
-    console.log("Getting Zenodo record if possible.")
+    //-- Zenodo Record [if one was specified]
     let zoteroKeyFromZenodo = null
     let zoteroGroupFromZenodo = null
     const zenodoID = args.id ? zenodoParseID(args.id) : null
@@ -432,8 +435,17 @@ async function zotzenLinkCheck(args) {
         zenodo: zenodoRecord
     } // We'll have to pass the data as well - otherwise we have to look it up again below
     // TODO: Fix the DOI above - either take it from the actual DOI or the pre-reserved DOI.
-    const result = await checkZotZenLink(args, keySet, data)
-    console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+    let result = await checkZotZenLink(args, keySet, data)
+    //console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+    // Need to allow for one iteration
+    if (result.originaldata)
+        result.originaldata2 = data
+    else
+        result.originaldata = data
+    if (result.originalkeyset)
+        result.originalkeyset2 = keySet
+    else
+        result.originalkeyset = keySet
     return result
 }
 async function checkZotZenLink(args, k, data) {
@@ -636,27 +648,45 @@ async function zotzenSyncOne(args) {
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
-    const zz = zotzenLinkCheck(args)
+    const zz = await zotzenLinkCheck(args)
     // Records are correctly linked - we can now proceed to sync/push
     // const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
     // const doistr = 'DOI: ' + DOI
     /* --- */
     // if (!syncErrors(doi, zenodoRawItem, zoteroSelectLink)) {
+    if (!zz.status == 0)
+        return message(1, "sorry, but the records concerned are not properly linked. Aborting.", args)
+    console.log("zz=" + JSON.stringify(zz, null, 2))
+    /* TODO:
+        Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
+        produce a new version
+    */
+    const zenodoID = zz.data.zenodoID
     if (args.metadata) {
-        // Sync metadata
-        let updateDoc = {
-            title: zoteroItem.title,
-            description: zoteroItem.abstractNote,
-            creators: zoteroItem.creators.map((c) => {
-                return {
-                    name: `${c.name ? c.name : c.lastName + ', ' + c.firstName}`,
-                };
-            }),
-        };
-        if (zoteroItem.date) {
-            updateDoc.publication_date = zoteroItem.date;
+        if (zz.originaldata && zz.originaldata.zotero) {
+            const zoteroItem = zz.originaldata.zotero
+            // Sync metadata
+            let updateDoc = {
+                id: zenodoID,
+                title: zoteroItem.title,
+                description: zoteroItem.abstractNote,
+                // TODO title and description works, but creators doesn't... new authors in zotero dont make it to zenodo
+                creators: zoteroItem.creators.map((c) => {
+                    return {
+                        name: `${c.name ? c.name : c.lastName + ', ' + c.firstName}`,
+                    };
+                }),
+            };
+            if (zoteroItem.date) {
+                updateDoc.publication_date = zoteroItem.date;
+            }
+            // TODO: capture this output
+            await zenodo.update(updateDoc)
+        } else {
+            return message(1, "sorry, did not find sync data", args)
         }
-        await zenodo.update(updateDoc)
+    } else {
+        console.log("metadata sync was not requested")
     }
     if (args.attachments) {
         // push attachments. TODO: We should remove existing draft attachments in the Zenodo record
@@ -667,7 +697,8 @@ async function zotzenSyncOne(args) {
         )
         const attachmentType = args.type.toLowerCase();
         if (attachmentType !== 'all') {
-            attachments = attachments.filter((a) => a.data.filename.endsWith(attachmentType)
+            attachments = attachments.filter(
+                (a) => a.data.filename.endsWith(attachmentType)
             );
         }
         if (!attachments.length) {
@@ -686,9 +717,35 @@ async function zotzenSyncOne(args) {
         }
         // }
         // return dummycreate(args) */
+    } else {
+        console.log("attachment sync was not requested")
     }
+    // TODO - this should report on what was done: List the metadata and the files.
+    return message(0, "Sync complete")
+    // TODO? Final actions?
 }
 
+async function newVersion() {
+    // TODO: What about concept DOIs? When we add a DOI to a Zeotero record, we should add ConceptDOI as well.
+    console.log('Creating new version on Zenodo.')
+    const newVersionResponse = runCommand(`newversion ${doi}`, false);
+    doi = doi.replace(
+        /zenodo.*/,
+        `zenodo.${parseFromZenodoResponse(newVersionResponse, 'latest_draft')
+            .split('/')
+            .slice(-1)[0]}`
+    );
+    console.log('Linking new version to Zotero.')
+    linkZotZen(
+        itemKey,
+        doi,
+        groupId,
+        getZoteroSelectLinkV1(userId || groupId, itemKey, !!groupId)
+    );
+
+}
+
+// TODO: test attachments function
 // Copy attachment from Zotero to Zenodo
 async function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
     if (args.debug) {
@@ -707,31 +764,17 @@ async function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
         with: false
     })
     // Rather than looking at this, we should first check the status of the Zenodo item.
+    // TODO: use this above!
     if (pushResult.status === 403) {
         console.log(pushResult.message);
-        console.log('Creating new version.');
-        const newVersionResponse = runCommand(`newversion ${doi}`, false);
-        doi = doi.replace(
-            /zenodo.*/,
-            `zenodo.${parseFromZenodoResponse(newVersionResponse, 'latest_draft')
-                .split('/')
-                .slice(-1)[0]}`
-        );
-        linkZotZen(
-            itemKey,
-            doi,
-            groupId,
-            getZoteroSelectLinkV1(userId || groupId, itemKey, !!groupId)
-        );
-        await zenodo.upload({
-            dummy: `upload ${doi} "../${fileName}"`,
-            with: false
-        })
+        // should not get here
+        return message(1, "Error - record is locked. We should not get here.")
     }
-    fs.unlinkSync(fileName);
+    // What does this do?
+    const newLocal = fs.unlinkSync(fileName);
     // TODO: How does the user know this was successful?
     console.log('Upload successfull.'); //This shoukd be good enough. User can always use --show or --open to see/open the record.
-    return doi;
+    return message(0, "Upload successful")
 }
 function getZoteroSelectLinkV1(group_id, key, group = false) {
     return `zotero://select/${group ? 'groups' : 'users'}/${group_id}/items/${key}`;
@@ -1110,11 +1153,10 @@ async function zotzenGet(args) {
 }
 // This should not be needed as we're passing things through to the API.
 */
-/*
 async function finalActions() {
-    //-- final actions
-    if (args.publish && doi) {
-        runCommand(`get ${doi} --publish`, false);
+    // Should final actions also include setting the _publish tag on the Zotero attachments?
+    if (args.publish) {
+        // TODO runCommand(`get ${doi} --publish`, false);
     }
 
     if (args.show) {
@@ -1156,4 +1198,4 @@ async function finalActions() {
         }
     }
 }
-*/
+
