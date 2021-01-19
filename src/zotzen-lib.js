@@ -1,6 +1,6 @@
 module.exports.sync = zotzenSync;
 module.exports.create = zotzenCreate;
-module.exports.link = zotzenLinkCheck;
+module.exports.link = zotzenLink;
 module.exports.zenodoCreate = zenodoCreate;
 module.exports.zoteroCreate = zoteroCreate;
 
@@ -192,8 +192,67 @@ async function zoteroCreate(args) {
 /*
 TOP-LEVEL FUNCTION 
 */
-async function zotzenCreate(args) {
+async function zotzenCreate(args, subparsers) {
     // TODO - we have to fix the communities for Zenodo.
+    if (args.getInterface && subparsers) {
+        const parser_create = subparsers.add_parser(
+            "create", {
+            "help": "Create a new pair of Zotero/Zenodo entries. Note: If you already have a Zotero item, use 'link' instead. If you have a Zenodo item already, but not Zotero item, make a zotero item in the Zotero application and also use 'link'."
+        });
+        parser_create.set_defaults({ "func": zotzenCreate });
+        parser_create.add_argument('--group', {
+            "nargs": 1,
+            help: 'Group ID for which the new item Zotero is to be created. (Can be provided via Zotero config file.)',
+        });
+        // This set of options should match zenodo-cli create
+        parser_create.add_argument("--json", {
+            "action": "store",
+            "help": "Path of the JSON file with the metadata for the zenodo record to be created. If this file is not provided, a template is used. The following options override settings from the JSON file / template."
+        });
+        parser_create.add_argument("--title", {
+            "action": "store",
+            "help": "The title of the record. Overrides data provided via --json."
+        });
+        parser_create.add_argument("--date", {
+            "action": "store",
+            "help": "The date of the record. Overrides data provided via --json."
+        });
+        parser_create.add_argument("--description", {
+            "action": "store",
+            "help": "The description (abstract) of the record. Overrides data provided via --json."
+        });
+        parser_create.add_argument("--communities", {
+            "action": "store",
+            "help": "Read list of communities for the record from a file. Overrides data provided via --json."
+        });
+        parser_create.add_argument("--add-communities", {
+            "nargs": "*",
+            "action": "store",
+            "help": "List of communities to be added to the record (provided on the command line, one by one). Overrides data provided via --json."
+        });
+        // Not needed as we're creating new records
+        /* parser_create.add_argument("--remove-communities", {
+          "nargs": "*",
+          "action": "store",
+          "help": "List of communities to be removed from the record (provided on the command line, one by one). Overrides data provided via --json."
+        }); */
+        parser_create.add_argument("--authors", {
+            "nargs": "*",
+            "action": "store",
+            "help": "List of authors, (provided on the command line, one by one). Separate institution and ORCID with semicolon, e.g. 'Lama Yunis;University of XYZ;0000-1234-...'. (You can also use --authordata.) Overrides data provided via --json."
+        });
+        parser_create.add_argument("--authordata", {
+            "action": "store",
+            "help": "A text file with a database of authors. Each line has author, institution, ORCID (tab-separated). The data is used to supplement insitution/ORCID to author names specified with --authors. Note that authors are only added to the record when specified with --authors, not because they appear in the specified authordate file. "
+        });
+        // Not needed, as we're creating this. 
+        /* parser_create.add_argument("--zotero-link", {
+          "action": "store",
+          "help": "Zotero link of the zotero record to be linked. Overrides data provided via --json."
+        }); */
+        return { status: 0, message: "success" }
+    }
+
     verbose(args, "zotzenlib.zotzenCreate", args)
     // let result = dummycreate(args)
     // Create zenodo record
@@ -296,8 +355,40 @@ async function zotzenLink(args) {
 /*
 Top Level function
 */
-async function zotzenSync(args) {
-    // Todo - this shoudl be changed in the interface defintion, from id to keys
+async function zotzenSync(args, subparsers) {
+    if (args.getInterface && subparsers) {
+        const parser_sync = subparsers.add_parser(
+            "sync", {
+            "help": "Synchronise data from one or more Zotero items to their corresponding Zenodo items. Note that synching from Zenodo to Zotero is not implemented."
+        });
+        parser_sync.set_defaults({ "func": zotzenSync });
+        parser_sync.add_argument(
+            "key", {
+            "nargs": "*",
+            "help": "One or more Zotero keys for synchronisation."
+        });
+        parser_sync.add_argument(
+            '--metadata', {
+            action: 'store_true',
+            help: 'Push metadata from zotero to zenodo.'
+        });
+        parser_sync.add_argument(
+            '--attachments', {
+            action: 'store_true',
+            help: 'Push Zotero attachments to Zenodo.'
+        });
+        parser_sync.add_argument(
+            '--type', {
+            action: 'store',
+            help: 'Type of the attachments to be pushed.',
+            default: 'all'
+        });
+        parser_sync.add_argument('--publish', {
+            action: 'store_true',
+            help: 'Publish zenodo record.'
+        });
+        return { status: 0, message: "success" }
+    }
     if (!args.key) return null
     const keys = args.key
     delete args["key"]
@@ -364,8 +455,26 @@ function zoteroParseGroup(str) {
 }
 
 // This function can be called recursively - it's not efficient...
-async function zotzenLinkCheck(args) {
+async function zotzenLink(args, subparsers) {
     // This functions gets whatever items possible, which can then be checked.
+    if (args.getInterface && subparsers) {
+        const parser_link = subparsers.add_parser(
+            "link", {
+            "help": "Link Zotero item with a Zenodo item, or generate a missing item."
+        });
+        parser_link.set_defaults({ "func": zotzenLink });
+        parser_link.add_argument(
+            "id", {
+            "nargs": 2,
+            "help": "Check for links between Zotero item with a Zenodo record. Use --link to link/generate a missing item. Provide one/no Zotero item and provide one/no Zenodo item. Items should be of the format zotero://... and a Zenodo DOI or https://zenodo.org/... url."
+        });
+        parser_link.add_argument(
+            '--link', {
+            action: 'store_true',
+            help: 'Perform links/item creation as needed.'
+        });
+        return { status: 0, message: "success" }
+    }
     //-- Get the Zotero item [if one was specified]
     let zenodoIDFromZotero = null
     const zoteroKey = args.key ? zoteroParseKey(args.key) : null
@@ -502,7 +611,7 @@ async function checkZotZenLink(args, k, data) {
                 // However, we have a reference to a zenodo id.
                 console.log("Zotero key provided, and it links to Zenodo ID, but no Zenodo ID provided. Going to check this pair.")
                 args.id = k.zenodoIDFromZotero
-                return await zotzenLinkCheck(args)
+                return await zotzenLink(args)
             } else {
                 if (args.link) {
                     return await linkZotZen(args, k, data)
@@ -519,7 +628,7 @@ async function checkZotZenLink(args, k, data) {
                 console.log("Zenodo ID provided, and it links to Zotero key, but no Zotero key provided initially. Going to check this pair.")
                 args.key = k.zoteroKeyFromZenodo
                 args.group_id = k.zoteroGroupFromZenodo
-                return await zotzenLinkCheck(args)
+                return await zotzenLink(args)
             } else {
                 if (args.link) {
                     return await linkZotZen(args, k, data)
@@ -648,7 +757,7 @@ async function zotzenSyncOne(args) {
     // // remove some args/add some args
     // zoteroArgs["func"] = "create"
     // const zoteroRecord = zoteroAPI(zoteroArgs);
-    const zz = await zotzenLinkCheck(args)
+    const zz = await zotzenLink(args)
     // Records are correctly linked - we can now proceed to sync/push
     // const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
     // const doistr = 'DOI: ' + DOI
