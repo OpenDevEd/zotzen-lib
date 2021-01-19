@@ -1151,17 +1151,17 @@ async function zotzenGet(args) {
         )
     );
 }
-// This should not be needed as we're passing things through to the API.
 */
-async function finalActions() {
+// This should not be needed as we're passing things through to the API.
+async function finalActions(zoteroItem, zenodoResponse) {
+    const zenodoRecord = zenodolib.pruneData(zenodoResponse)
     // Should final actions also include setting the _publish tag on the Zotero attachments?
     if (args.publish) {
         // TODO runCommand(`get ${doi} --publish`, false);
     }
-
     if (args.show) {
         console.log('Zotero:');
-        console.log(`- Item key: ${itemKey}`);
+        console.log(`- Item key: ${zoteroItem.key}`);
         zoteroItem.data.creators.forEach((c) => {
             console.log(
                 '-',
@@ -1174,27 +1174,25 @@ async function finalActions() {
         console.log(`- DOI: ${doi}`);
         console.log('');
 
-        if (doi) {
-            zenodoRawItem = zenodoGetRaw(doi);
-            zenodoItem = zenodoGet(doi);
-            console.log('Zenodo:');
-            console.log('* Item available.');
-            console.log(`* Item status: ${zenodoItem.status}`);
-            console.log(`* Item is ${zenodoItem.writable} writable`);
-            console.log(`- Title: ${zenodoRawItem.title}`);
-            zenodoRawItem.creators &&
-                zenodoRawItem.creators.forEach((c) => {
-                    console.log(`- Author: ${c.name}`);
-                });
-            console.log(`- Publication date: ${zenodoRawItem.publication_date}`);
-            console.log('');
-        }
+        console.log('Zenodo:');
+        console.log('* Item available.');
+        console.log(`* Item status: ${zenodoResponse.status}`);
+        console.log(`* Item is ${zenodoResponse.writable} writable`);
+        console.log(`- Title: ${zenodoRecord.title}`);
+        zenodoRawItem.creators &&
+            zenodoRecord.creators.forEach((c) => {
+                console.log(`- Author: ${c.name}`);
+            });
+        console.log(`- Publication date: ${zenodoRecord.publication_date}`);
+        console.log('');
+
     }
 
+    // TODO needs fixing.
     if (args.open) {
         opn(zoteroSelectLink);
-        if (zenodoItem) {
-            opn(zenodoItem.url);
+        if (zenodoRecord) {
+            opn(zenodoRecord.url);
         }
     }
 }

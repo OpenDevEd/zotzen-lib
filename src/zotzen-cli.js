@@ -103,6 +103,60 @@ function getArguments() {
     "help": "Create a new pair of Zotero/Zenodo entries. Note: If you already have a Zotero item, use 'link' instead. If you have a Zenodo item already, but not Zotero item, make a zotero item in the Zotero application and also use 'link'."
   });
   parser_create.set_defaults({ "func": zotzenlib.create });
+  zotzenlib.configure_parser_create(parser_create);
+
+  /* link */
+  const parser_link = subparsers.add_parser(
+    "link", {
+    "help": "Link Zotero item with a Zenodo item, or generate a missing item."
+  });
+  parser_link.set_defaults({ "func": zotzenlib.link });
+  parser_link.add_argument(
+    "id", {
+    "nargs": 2,
+    "help": "Check for links between Zotero item with a Zenodo record. Use --link to link/generate a missing item. Provide one/no Zotero item and provide one/no Zenodo item. Items should be of the format zotero://... and a Zenodo DOI or https://zenodo.org/... url."
+  });
+  parser_link.add_argument(
+    '--link', {
+    action: 'store_true',
+    help: 'Perform links/item creation as needed.'
+  });
+
+  /* sync */
+  const parser_sync = subparsers.add_parser(
+    "sync", {
+    "help": "Synchronise data from one or more Zotero items to their corresponding Zenodo items. Note that synching from Zenodo to Zotero is not implemented."
+  });
+  parser_sync.set_defaults({ "func": zotzenlib.sync });
+  parser_sync.add_argument(
+    "key", {
+    "nargs": "*",
+    "help": "One or more Zotero keys for synchronisation."
+  });
+  parser_sync.add_argument(
+    '--metadata', {
+    action: 'store_true',
+    help: 'Push metadata from zotero to zenodo.'
+  });
+  parser_sync.add_argument(
+    '--attachments', {
+    action: 'store_true',
+    help: 'Push Zotero attachments to Zenodo.'
+  });
+  parser_sync.add_argument(
+    '--type', {
+    action: 'store',
+    help: 'Type of the attachments to be pushed.',
+    default: 'all'
+  });
+  parser_sync.add_argument('--publish', {
+    action: 'store_true',
+    help: 'Publish zenodo record.'
+  });
+  return parser.parse_args();
+}
+
+function configure_parser_create(parser_create) {
   parser_create.add_argument('--group', {
     "nargs": 1,
     help: 'Group ID for which the new item Zotero is to be created. (Can be provided via Zotero config file.)',
@@ -153,52 +207,8 @@ function getArguments() {
     "action": "store",
     "help": "Zotero link of the zotero record to be linked. Overrides data provided via --json."
   }); */
-
-  /* link */
-  const parser_link = subparsers.add_parser(
-    "link", {
-    "help": "Link Zotero item with a Zenodo item, or generate a missing item."
-  });
-  parser_link.set_defaults({ "func": zotzenlib.link });
-  parser_link.add_argument(
-    "id", {
-    "nargs": 2,
-    "help": "Link Zotero item with a Zenodo item, or generate a missing item. Provide one/no Zotero item and provide one/no Zenodo item. Items should be of the format zotero://... and a Zenodo DOI or https://zenodo.org/... url."
-  });
-
-  /* sync */
-  const parser_push = subparsers.add_parser(
-    "sync", {
-    "help": "Move/synchronise Zotero data to Zenodo."
-  });
-  parser_push.set_defaults({ "func": zotzenlib.sync });
-  parser_push.add_argument(
-    "id", {
-    "nargs": "*",
-    "help": "Move/synchronise Zotero data to Zenodo. Provide one or more Zotero ids."
-  });
-  parser_push.add_argument(
-    '--metadata', {
-    action: 'store_true',
-    help: 'Push metadata from zotero to zenodo.'
-  });
-  parser_push.add_argument(
-    '--attachments', {
-    action: 'store_true',
-    help: 'Push Zotero attachments to Zenodo.'
-  });
-  parser_push.add_argument(
-    '--type', {
-    action: 'store',
-    help: 'Type of the attachments to be pushed.',
-    default: 'all'
-  });
-  parser_push.add_argument('--publish', {
-    action: 'store_true',
-    help: 'Publish zenodo record.'
-  });
-  return parser.parse_args();
 }
+
 
 // -------------------------- main ---------------------------------------
 

@@ -26,11 +26,12 @@ async function main() {
         link: false
     }
     let result = await zotzenlib.link(linkrequest)
-    linkrequest.link = true
+    /* linkrequest.link = true
     result = await zotzenlib.link(linkrequest)
     linkrequest.link = false
     result = await zotzenlib.link(linkrequest)
-    console.log("zotzen result=" + JSON.stringify(result, null, 2))
+    */
+    console.log("zotzen result=" + JSON.stringify(result, null, 2)) 
 }
 main();
 

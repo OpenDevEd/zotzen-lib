@@ -33,5 +33,7 @@ async function main() {
     // Now sync metadata
     result = await zotzenlib.sync({ key: [data.zoteroItemKey], metadata: true, show: true })
     console.log("result =" + JSON.stringify(result, null, 2))
+    result = await zotzenlib.sync({ key: [data.zoteroItemKey], metadata: true, attachments: true, show: true })
+
 }
 main();
