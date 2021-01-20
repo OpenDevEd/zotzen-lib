@@ -11,7 +11,8 @@ const {
 // This only works when running package from directory.
 // const version = process.env.npm_package_version
 // Read package.json, and extract version.
-var pjson = require('../package.json')
+var pjson = require('../package.json');
+const { getVersion } = require("./getVersion");
 if (pjson.version)
   console.log("zotzen version=" + pjson.version)
 
@@ -87,6 +88,10 @@ function getArguments() {
     "help": "Show what command would be run.",
     "default": false
   });
+  parser.add_argument("--version", {
+    "action": "store_true",
+    "help": "Show version",
+  });
 
   /* help */
   const subparsers = parser.add_subparsers({ "help": "sub-command help" });
@@ -103,20 +108,22 @@ function getArguments() {
 
   /* link */
   zotzenlib.link({ getInterface: true }, subparsers)
- 
+
   /* sync */
   zotzenlib.sync({ getInterface: true }, subparsers)
-  
+
   return parser.parse_args();
 }
 
-
-// -------------------------- main ---------------------------------------
 
 async function main() {
   console.log('main: arguments');
   const args = getArguments();
   console.log('main: api calls');
+  if (args.version) {
+    getVersion()
+    process.exit(0)
+  }
   if (args.func) {
     console.log("Action: " + args.func.name)
     if (args.dryrun) {
