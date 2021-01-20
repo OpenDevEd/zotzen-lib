@@ -27,8 +27,8 @@
   },
   "homepage": "https://github.com/OpenDevEd/zotzen-lib#readme",
   "dependencies": {
-    "zenodo-lib": "^1.0.30",
-    "zotero-lib": "^1.0.17",
+    "zenodo-lib": "^1.0.31",
+    "zotero-lib": "^1.0.19",
     "axios": "^0.21.1",
     "fs": "0.0.1-security",
     "json": "^10.0.0",
