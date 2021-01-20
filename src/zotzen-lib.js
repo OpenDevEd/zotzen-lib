@@ -111,6 +111,13 @@ async function zoteroCreate(args) {
             }
         }
     })
+    if (!args.collections) {
+        args.collections = []
+    } else {
+        if (!Array.isArray(args.collections)) {
+            args.collections = [args.collections]
+        }
+    }
     const doistr = args.doi ? 'DOI: ' + args.doi : ""
     let tagsarr = zotero.objectifyTags(args.tags)
     let authorsarr = []
@@ -181,6 +188,8 @@ async function zoteroCreate(args) {
         // Zotero item - attach links ... to DOI
         await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
     }
+
+
 
     return [zoteroRecord,
         zoteroRecordGType,
@@ -557,6 +566,7 @@ async function zotzenLink(args, subparsers) {
         result.originalkeyset = keySet
     return result
 }
+
 async function checkZotZenLink(args, k, data) {
     if (k.zoteroKey) {
         // Zotero key provided
