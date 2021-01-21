@@ -75,7 +75,7 @@ async function zenodoCreate(args) {
     // TODO: What if this is a user lib?
     if (!args.zotero_link && args.key && args.group_id) {
         console.log("Adding args.zotero_link from key/group_id provided")
-        args.zotero_link = getZoteroSelectLink(args.key, args.group_id, "group")
+        args.zotero_link = getZoteroSelectLink(args.key, args.group_id, true)
     }
     try {
         console.log("zotzen-lib: calls zenodo.create")
@@ -180,22 +180,136 @@ async function zoteroCreate(args) {
     const zoteroRecordGroup = zoteroResult.successful["0"].library.id
 
     // The following two don't make sense - either ID or DOI should be ok! Need to get one from the other.
+    let decorations = []
     if (args.id) {
         // Zotero item - attach links ... to Zenodo
-        await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+        decorations.push(res)
     }
     if (args.doi) {
         // Zotero item - attach links ... to DOI
-        await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+        decorations.push(res)
     }
 
+    for (const i in args.collections) {
+        // Ⓩ🅩🆉
+        //console.log(args.collections[i])
+        //process.exit(1)
+        const res = await zotero.attachLinkToItem(
+            zoteroRecord.key,
+            getZoteroSelectLink(args.collections[i], zoteroRecordGroup, true, false),
+            {
+                title: "🆉View primary collection for this item" + (args.collections.length > 0 ? " [" + i + "]" : ""),
+                tags: ["_r:collection", "_r:zotzen"]
+            })
+        decorations.push(res)
+    }
 
+    // Zotero item - attach links ... to Google Doc
+    if (args.googledoc) {
+        // Attach link to google doc, if there is one:
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "📝View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] })
+        decorations.push(res)
+    }
 
-    return [zoteroRecord,
+    // Zotero item - attach note
+    const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : ""
+    const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : ""
+    const content = `${team} ${note}`
+    const res = await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm", "_r:zotzen"] })
+    decorations.push(res)
+
+    // Attach kerko url to Zotero record (as url)
+    newZoteroRecord = zoteroRecord
+    const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
+    if (kerko_url != "") {
+        console.log("updating...")
+        const zoteroUpdate = {
+            key: zoteroRecord.key,
+            version: zoteroRecordVersion,
+            update: { url: kerko_url },
+            fullresponse: false
+        }
+        const status = await zotero.update_item(zoteroUpdate)
+        // update_item doesn't return the item, but only a status - we should check the status at this point.
+        newZoteroRecord = await zotero.item({ key: zoteroRecord.key, fullresponse: false })
+        // Attach link to kerko
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "👀View item in Evidence Library", tags: ["_r:kerko", "_r:zotzen"] })
+        decorations.push(res)
+    }
+    // The following two don't make sense - either ID or DOI should be ok! Need to get one from the other.
+    /* let decorations = Promise.all([
+        async () => {
+            if (args.id) {
+                // Zotero item - attach links ... to Zenodo
+                return await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] });
+            }
+        },
+        async () => {
+            if (args.doi) {
+                // Zotero item - attach links ... to DOI
+                return await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] });
+            }
+        },
+        async () => {
+            for (const i in args.collections) {
+                // Ⓩ🅩🆉
+                //console.log(args.collections[i])
+                //process.exit(1)
+                return await zotero.attachLinkToItem(
+                    zoteroRecord.key,
+                    getZoteroSelectLink(args.collections[i], zoteroRecordGroup, true, false),
+                    {
+                        title: "🆉View primary collection for this item" + (args.collections.length > 0 ? " [" + i + "]" : ""),
+                        tags: ["_r:collection", "_r:zotzen"]
+                    });
+            }
+        },
+        async () => {
+            // Zotero item - attach links ... to Google Doc
+            if (args.googledoc) {
+                // Attach link to google doc, if there is one:
+                return await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "📝View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] });
+            }
+        },
+        async () => {
+            // Zotero item - attach note
+            const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : "";
+            const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : "";
+            const content = `${team} ${note}`;
+            return await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm", "_r:zotzen"] });
+        },
+        async () => {
+            // Attach kerko url to Zotero record (as url)
+            const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : "";
+            if (kerko_url != "") {
+                console.log("updating...");
+                const zoteroUpdate = {
+                    key: zoteroRecord.key,
+                    version: zoteroRecordVersion,
+                    update: { url: kerko_url },
+                    fullresponse: false
+                };
+                const status = await zotero.update_item(zoteroUpdate);
+                // update_item doesn't return the item, but only a status - we should check the status at this point.
+                newZoteroRecord = await zotero.item({ key: zoteroRecord.key, fullresponse: false });
+                // Attach link to kerko
+                return await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "👀View item in Evidence Library", tags: ["_r:kerko", "_r:zotzen"] });
+            }
+        }
+    ]).then(
+    ) */
+
+    return [newZoteroRecord,
         zoteroRecordGType,
         zoteroRecordGroup,
-        zoteroRecordVersion
+        zoteroRecordVersion,
+        decorations
     ]
+}
+
+async function zoteroCreateCollections(itemKey, collectionKey = "", groupID, isgroup = true) {
 }
 
 /*
@@ -271,7 +385,8 @@ async function zotzenCreate(args, subparsers) {
     const [zoteroRecord,
         zoteroRecordGType,
         zoteroRecordGroup,
-        zoteroRecordVersion
+        zoteroRecordVersion,
+        decorations
     ] = await zoteroCreate(args)
     // const zoteroGroup = args.group_id
     // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
@@ -284,9 +399,7 @@ async function zotzenCreate(args, subparsers) {
     // process.exit(1)
     // Now update the zenodo record with the ZoteroId.
     let zenodoRecord2
-    let newZoteroRecord
-    const zoteroSelectLink = getZoteroSelectLink(zoteroRecord.key, zoteroRecordGroup, "group")
-    const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
+    const zoteroSelectLink = getZoteroSelectLink(zoteroRecord.key, zoteroRecordGroup, true)
     promiseall: {
         // The creation of the first Zotero/Zenodo record needs to be sequences.
         // However, the items below could be done through a 'Promise all' as they can run in parallel.
@@ -299,37 +412,8 @@ async function zotzenCreate(args, subparsers) {
         }
         zenodoRecord2 = await zenodo.update(args)
         //console.log(JSON.stringify(zenodoRecord2, null, 2))
-
-        // Zotero item - attach links ... to Google Doc
-        if (args.googledoc) {
-            // Attach link to google doc, if there is one:
-            await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "🔄View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] })
-        }
-
-        // Zotero item - attach note
-        const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : ""
-        const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : ""
-        const content = `${team} ${note}`
-        await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm", "_r:zotzen"] })
-
-        // Attach kerko url to Zotero record (as url)
-        newZoteroRecord = zoteroRecord
-        if (kerko_url != "") {
-            console.log("updating...")
-            const zoteroUpdate = {
-                key: zoteroRecord.key,
-                version: zoteroRecordVersion,
-                update: { url: kerko_url },
-                fullresponse: false
-            }
-            const status = await zotero.update_item(zoteroUpdate)
-            // update_item doesn't return the item, but only a status - we should check the status at this point.
-            newZoteroRecord = await zotero.item({ key: zoteroRecord.key, fullresponse: false })
-            // Attach link to kerko
-            await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "🔄View item Evidence Library - click to open", tags: ["_r:kerko", "_r:zotzen"] })
-        }
-
     }
+    const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
     const record = {
         status: 0,
         message: "success",
@@ -338,11 +422,13 @@ async function zotzenCreate(args, subparsers) {
             zoteroItemKey: zoteroRecord.key,
             zoteroGroup: zoteroRecordGroup,
             zoteroSelectLink: zoteroSelectLink,
+            zoteroRecordVersion: zoteroRecordVersion,
             DOI: DOI,
             kerko_url: kerko_url
         },
         zotero: {
-            data: newZoteroRecord
+            data: zoteroRecord,
+            decorations: decorations
         },
         zenodo: {
             data: zenodoRecord2.metadata
@@ -351,6 +437,8 @@ async function zotzenCreate(args, subparsers) {
     console.log('Zotero/Zenodo records successfully created.');
     return record
 }
+
+
 
 /*
 async function zotzenLink(args) {
@@ -688,7 +776,7 @@ async function linkZotZen(args, k, data) {
             if (!k.zenodoIDFromZotero) {
                 // TODO: Testing
                 console.log("Linking from Zotero to Zenodo (alters Zenodo record)")
-                args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, "group")
+                args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, true)
                 args.id = k.zenodoID
                 zenodoRecord = await zenodo.update(args)
             }
@@ -698,7 +786,7 @@ async function linkZotZen(args, k, data) {
         // If yes, create a new zenodo record - that's the standard scenario.
         console.log("Using the zotero item to create a new zenodo record.")
         // TODO: testing
-        args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, "group")
+        args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, true)
         args.title = data.zotero.title
         args.description = data.zotero.description
         args.date = data.date
@@ -898,9 +986,11 @@ async function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
 function getZoteroSelectLinkV1(group_id, key, group = false) {
     return `zotero://select/${group ? 'groups' : 'users'}/${group_id}/items/${key}`;
 }
-function getZoteroSelectLink(item_key, group_id, zoteroRecordGType = "group") { // add a switch for collections?
-    return `zotero://select/${zoteroRecordGType}/${group_id}/items/${item_key}`;
+function getZoteroSelectLink(item_key, group_id, isgroup = true, isitem = true) {
+    return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'}/${item_key}`;
 }
+//zotero://select/groups/2259720/collections/HP6NALR4
+//zotero://select/groups/2259720/items/Q6FADQE3
 /*
 // TODO
 Replace runCommand with two functions:
