@@ -321,38 +321,38 @@ async function zotzenCreate(args, subparsers) {
         const parser_create = subparsers.add_parser(
             "create", {
             "help": "Create a new pair of Zotero/Zenodo entries. Note: If you already have a Zotero item, use 'link' instead. If you have a Zenodo item already, but not Zotero item, make a zotero item in the Zotero application and also use 'link'."
-        });
+        })
         parser_create.set_defaults({ "func": zotzenCreate });
-        parser_create.add_argument('--group', {
+        parser_create.add_argument('--group-id', {
             "nargs": 1,
             help: 'Group ID for which the new item Zotero is to be created. (Can be provided via Zotero config file.)',
-        });
+        })
         // This set of options should match zenodo-cli create
         parser_create.add_argument("--json", {
             "action": "store",
             "help": "Path of the JSON file with the metadata for the zenodo record to be created. If this file is not provided, a template is used. The following options override settings from the JSON file / template."
-        });
+        })
         parser_create.add_argument("--title", {
             "action": "store",
             "help": "The title of the record. Overrides data provided via --json."
-        });
+        })
         parser_create.add_argument("--date", {
             "action": "store",
             "help": "The date of the record. Overrides data provided via --json."
-        });
+        })
         parser_create.add_argument("--description", {
             "action": "store",
             "help": "The description (abstract) of the record. Overrides data provided via --json."
-        });
+        })
         parser_create.add_argument("--communities", {
             "action": "store",
             "help": "Read list of communities for the record from a file. Overrides data provided via --json."
-        });
+        })
         parser_create.add_argument("--add-communities", {
             "nargs": "*",
             "action": "store",
             "help": "List of communities to be added to the record (provided on the command line, one by one). Overrides data provided via --json."
-        });
+        })
         // Not needed as we're creating new records
         /* parser_create.add_argument("--remove-communities", {
           "nargs": "*",
@@ -363,11 +363,20 @@ async function zotzenCreate(args, subparsers) {
             "nargs": "*",
             "action": "store",
             "help": "List of authors, (provided on the command line, one by one). Separate institution and ORCID with semicolon, e.g. 'Lama Yunis;University of XYZ;0000-1234-...'. (You can also use --authordata.) Overrides data provided via --json."
-        });
+        })
         parser_create.add_argument("--authordata", {
             "action": "store",
             "help": "A text file with a database of authors. Each line has author, institution, ORCID (tab-separated). The data is used to supplement insitution/ORCID to author names specified with --authors. Note that authors are only added to the record when specified with --authors, not because they appear in the specified authordate file. "
-        });
+        })
+        parser_create.add_argument("--collections", {
+            "nargs": "*",
+            "action": "store",
+            "help": "List of collections for the Zotero item."
+        })
+        parser_create.add_argument('--kerko-url', {
+            "nargs": 1,
+            help: 'If you have a kerko instance, you can pass the base URL here. It will be used to add a URL to the Zotero record.)',
+        })
         // Not needed, as we're creating this. 
         /* parser_create.add_argument("--zotero-link", {
           "action": "store",

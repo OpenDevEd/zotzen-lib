@@ -1,0 +1,1 @@
+node src/zotzen-cli.js create --title "Structured Pedagogy and EdTech" --authors "Adam, Taskeen; EdTech Hub" "Chuang, Rachel; EdTech Hub" "Haßler, Björn; EdTech Hub; 0000-0002-5277-9947" --date "2021-02-01" --group-id $zdeth --collections A2W8L3LS
