@@ -318,6 +318,15 @@ TOP-LEVEL FUNCTION
 */
 async function zotzenCreate(args, subparsers) {
     // TODO - we have to fix the communities for Zenodo.
+    const testargs = {
+        reportNumber: "100-from-form",
+        reportType: "Some report type - from form",
+        note: "Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.",
+        institution: "EdTech Hub",
+        language: "en",
+        rights: "Creative Commons Attribution 4.0",
+        tags: ["_r:AddedByZotZen"],
+    }
     if (args.getInterface && subparsers) {
         const parser_create = subparsers.add_parser(
             "create", {
@@ -335,24 +344,33 @@ async function zotzenCreate(args, subparsers) {
         })
         parser_create.add_argument("--title", {
             "action": "store",
-            "help": "The title of the record. Overrides data provided via --json."
+            "help": "The title of the record. Overrides data provided via --json. (Zotero/Zenodo)"
+        })
+        parser_create.add_argument("--authors", {
+            "nargs": "*",
+            "action": "store",
+            "help": "List of authors, (provided on the command line, one by one). Separate institution and ORCID with semicolon, e.g. 'Lama Yunis;University of XYZ;0000-1234-...'. (You can also use --authordata.) Overrides data provided via --json. (Zotero/Zenodo)"
+        })
+        parser_create.add_argument("--authordata", {
+            "action": "store",
+            "help": "A text file with a database of authors. Each line has author, institution, ORCID (tab-separated). The data is used to supplement insitution/ORCID to author names specified with --authors. Note that authors are only added to the record when specified with --authors, not because they appear in the specified authordate file. (Zotero/Zenodo)"
         })
         parser_create.add_argument("--date", {
             "action": "store",
-            "help": "The date of the record. Overrides data provided via --json."
+            "help": "The date of the record. Overrides data provided via --json. (Zotero/Zenodo)"
         })
         parser_create.add_argument("--description", {
             "action": "store",
-            "help": "The description (abstract) of the record. Overrides data provided via --json."
+            "help": "The description (abstract) of the record. Overrides data provided via --json. (Zotero/Zenodo)"
         })
         parser_create.add_argument("--communities", {
             "action": "store",
-            "help": "Read list of communities for the record from a file. Overrides data provided via --json."
+            "help": "Read list of communities for the record from a file. Overrides data provided via --json. (Zenodo only)"
         })
         parser_create.add_argument("--add-communities", {
             "nargs": "*",
             "action": "store",
-            "help": "List of communities to be added to the record (provided on the command line, one by one). Overrides data provided via --json."
+            "help": "List of communities to be added to the record (provided on the command line, one by one). Overrides data provided via --json.  (Zenodo only)"
         })
         // Not needed as we're creating new records
         /* parser_create.add_argument("--remove-communities", {
@@ -360,23 +378,18 @@ async function zotzenCreate(args, subparsers) {
           "action": "store",
           "help": "List of communities to be removed from the record (provided on the command line, one by one). Overrides data provided via --json."
         }); */
-        parser_create.add_argument("--authors", {
-            "nargs": "*",
-            "action": "store",
-            "help": "List of authors, (provided on the command line, one by one). Separate institution and ORCID with semicolon, e.g. 'Lama Yunis;University of XYZ;0000-1234-...'. (You can also use --authordata.) Overrides data provided via --json."
-        })
-        parser_create.add_argument("--authordata", {
-            "action": "store",
-            "help": "A text file with a database of authors. Each line has author, institution, ORCID (tab-separated). The data is used to supplement insitution/ORCID to author names specified with --authors. Note that authors are only added to the record when specified with --authors, not because they appear in the specified authordate file. "
-        })
         parser_create.add_argument("--collections", {
             "nargs": "*",
             "action": "store",
-            "help": "List of collections for the Zotero item."
+            "help": "List of collections for the Zotero item. (Zotero only)"
         })
         parser_create.add_argument('--kerko-url', {
             "nargs": 1,
-            help: 'If you have a kerko instance, you can pass the base URL here. It will be used to add a URL to the Zotero record.)',
+            help: 'If you have a kerko instance, you can pass the base URL here. It will be used to add a URL to the Zotero record.) (Zotero only)',
+        })
+        parser_create.add_argument('--googledoc', {
+            "nargs": 1,
+            help: 'Provide a google doc as a source for your document (Zotero only)',
         })
         // Not needed, as we're creating this. 
         /* parser_create.add_argument("--zotero-link", {
@@ -386,12 +399,13 @@ async function zotzenCreate(args, subparsers) {
         return { status: 0, message: "success" }
     }
 
-    verbose(args, "zotzenlib.zotzenCreate", args)
+    verbose(args, "zotzenlib.zotzenCreate -> zenodo", args)
     // let result = dummycreate(args)
     // Create zenodo record
     const [zenodoRecord, DOI] = await zenodoCreate(args)
     args.id = zenodoRecord.id
     args.doi = DOI
+    verbose(args, "zotzenlib.zotzenCreate -> zotero", args)
     const [zoteroRecord,
         zoteroRecordGType,
         zoteroRecordGroup,
@@ -535,10 +549,11 @@ function zenodoParseID(str) {
     return parseInt(zenodoIDref)
 }
 
+// TODO - these shoudl be replaced by the native zotero-lib functions
 function zoteroParseKey(str) {
     //const arr = zotlink.split("/")
     //arr[arr.length - 1]       
-    console.log(`zoteroParseeKey = ${str}`)
+    console.log(`zoteroParseKey = ${str}`)
     if (Array.isArray(str))
         str = str[0]
     let zoteroKey = str;
@@ -553,6 +568,7 @@ function zoteroParseGroup(str) {
     //const arr = zotlink.split("/")
     //arr[arr.length - 1]        
     let zoteroGroup = null
+    str = str.toString()
     const a = str.match(/\/(\d+)\//s)
     if (a) {
         zoteroGroup = a[1]
@@ -618,7 +634,12 @@ async function zotzenLink(args, subparsers) {
     let zenodoIDFromZotero = null
     const zoteroKey = args.key ? zoteroParseKey(args.key) : null
     // TODO: Parse zoteroGroup from key if poss.
-    const zoteroGroup = args.group_id ? args.group_id : null
+    const zoteroGroup = args.group_id ? args.group_id :
+        args.key ? zoteroParseGroup(args.key) : null
+    if (!zoteroGroup) {
+        console.log("unable to extract group")
+        return null
+    }
     let zoteroItem = null
     args.key = zoteroKey
     if (zoteroKey) {
@@ -924,11 +945,11 @@ async function zotzenSyncOne(args) {
     if (!zz.status == 0)
         return message(1, "sorry, but the records concerned are not properly linked. Aborting.", args)
     verbose(args, "zz=", zz)
-    console.log("TEMPORARY="+JSON.stringify( zz.data        ,null,2))
-         /* TODO:
-        Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
-        produce a new version
-    */
+    console.log("TEMPORARY=" + JSON.stringify(zz.data, null, 2))
+    /* TODO:
+   Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
+   produce a new version
+*/
     const zenodoID = zz.data.zenodoID
     if (args.metadata) {
         if (zz.originaldata && zz.originaldata.zotero) {
