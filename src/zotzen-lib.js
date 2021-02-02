@@ -180,11 +180,22 @@ async function zoteroCreate(args) {
     const zoteroRecordGType = zoteroResult.successful["0"].library.type
     const zoteroRecordGroup = zoteroResult.successful["0"].library.id
 
-    // The following two don't make sense - either ID or DOI should be ok! Need to get one from the other.
+    // TODO: The following two don't make sense - either ID or DOI should be ok! Need to get one from the other.
+    // TODO: Move Zotero functions here? Or use Zotero functions... atm it's duplicated.
     let decorations = []
     if (args.id) {
         // Zotero item - attach links ... to Zenodo
-        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+        decorations.push(res)
+    }
+    if (args.id) {
+        // Zotero item - attach links ... to Zenodo
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+        decorations.push(res)
+    }
+    if (args.id) {
+        // Zotero item - attach links ... to Zenodo
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (record)", tags: ["_r:zenodoRecord", "_r:zotzen"] })
         decorations.push(res)
     }
     if (args.doi) {
