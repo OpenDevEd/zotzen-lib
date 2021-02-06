@@ -43,7 +43,7 @@
     "request-promise-native": "^1.0.9",
     "requests": "^0.3.0",
     "sys": "0.0.1",
-    "zenodo-lib": "^1.0.43",
+    "zenodo-lib": "^1.0.44",
     "zotero-lib": "^1.0.32"
   },
   "files": [

@@ -164,15 +164,16 @@ async function zoteroCreate(args) {
         "tags": tagsarr,
         "collections": args.collections
     }
-    // We need to get the full response
+
+    //copy selected args to zarg
     let zarg = {
         item: report,
+        // We need to get the full response
         fullresponse: true
     }
     if (args.group_id) {
         zarg.group_id = args.group_id
     }
-
     // Copy explicit config if it's been given:
     zarg.config = args.zotero_config ? args.zotero_config : null
     zarg.config_json = args.zotero_config_json ? args.zotero_config_json : null
@@ -197,12 +198,7 @@ async function zoteroCreate(args) {
     }
     if (args.id) {
         // Zotero item - attach links ... to Zenodo
-        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
-        decorations.push(res)
-    }
-    if (args.id) {
-        // Zotero item - attach links ... to Zenodo
-        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (record)", tags: ["_r:zenodoRecord", "_r:zotzen"] })
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/record/" + args.id, { title: "🔄View entry on Zenodo (record)", tags: ["_r:zenodoRecord", "_r:zotzen"] })
         decorations.push(res)
     }
     if (args.doi) {
