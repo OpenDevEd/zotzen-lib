@@ -36,16 +36,41 @@ function getArguments() {
  
   */
   parser.add_argument(
-    "--zoteroconfig", {
+    "--zotero-config", {
     "action": "store",
     "default": "zotero-cli.toml",
-    "help": "Config file with API key. By default config.json then ~/.config/zotero-cli/zotero-cli.toml are used if no config is provided."
+    "help": "Config file with API key. By default ./zotero-cli.toml then ~/.config/zotero-cli/zotero-cli.toml are used if no config is provided."
   });
   parser.add_argument(
-    "--zenodoconfig", {
+    "--zenodo-config", {
     "action": "store",
     "default": "config.json",
-    "help": "Config file with API key. By default config.json then ~/.config/zenodo-cli/config.json are used if no config is provided."
+    "help": "Config file with API key. By default ./config.json then ~/.config/zenodo-cli/config.json are used if no config is provided."
+  });
+  parser.add_argument(
+    "--zotero-config-json", {
+    "action": "store",
+    "help": "Configuration string/object with API key. E.g., '{ api_key: \"...\", group_id = 123, library_type = \"group\", indent: 4 }'. Note: Elements override --zotero-config. On the command line, pass a string. For library use, pass string or object."
+  });
+  parser.add_argument(
+    "--zenodo-config-json", {
+    "action": "store",
+    "help": "Config string/object with API key.E.g., '{\"accessToken\": \"...\", \"env\": \"sandbox\"}'. Note: Elements override --zenodo-config. On the command line, pass a string. For library use, pass string or object."
+  });
+  parser.add_argument(
+    "--zotero-api-key", {
+    "action": "store",
+    "help": "API key for Zotero. If provided, overrides config file."
+  });
+  parser.add_argument(
+    "--zenodo-access_token", {
+    "action": "store",
+    "help": "Access token (api key) for Zenodo. If provided, it overrides --zenodo-config file and --zenodo-config-json."
+  });
+  parser.add_argument(
+    "--zenodo-sandbox", {
+    "action": "store_true",
+    "help": "Indicate that the Zenodo API key provided is for the Zenodo sandbox. If provided, it overrides --zenodo-config file and --zenodo-config-json."
   });
   parser.add_argument(
     "--verbose", {

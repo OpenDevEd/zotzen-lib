@@ -103,7 +103,7 @@ async function zenodoCreate(args) {
 
 async function zoteroCreate(args) {
     // complement the set of args provided according to zenodoLibCreate_Args
-    Object.keys(zenodoLibCreate_Args).forEach(mykey => {
+    Object.keys(args).forEach(mykey => {
         if (!args[mykey]) {
             if (mykey == "collections") { // mykey == "tags" || authors
                 args[mykey] = []
@@ -172,6 +172,13 @@ async function zoteroCreate(args) {
     if (args.group_id) {
         zarg.group_id = args.group_id
     }
+
+    // Copy explicit config if it's been given:
+    zarg.config = args.zotero_config ? args.zotero_config : null
+    zarg.config_json = args.zotero_config_json ? args.zotero_config_json : null
+    zarg.zotero_api_key = args.zotero_api_key ? args.zotero_api_key : null
+    zarg.api_key = args.api_key ? args.api_key : null
+
     debug(args, "zoteroCreate: call", null)
     const zoteroResult = await zotero.create_item(zarg)
     const zoteroRecord = zotero.pruneData(zoteroResult)
@@ -650,6 +657,8 @@ async function zotzenLink(args, subparsers) {
     if (!zoteroGroup) {
         console.log("unable to extract group")
         return null
+    } else {
+        args.group_id = zoteroGroup
     }
     let zoteroItem = null
     args.key = zoteroKey
@@ -835,9 +844,14 @@ async function checkZotZenLink(args, k, data) {
 async function update_doi_and_link(k) {
     const status = await zotero.update_doi({ key: k.zoteroKey, group: k.zoteroGroup, doi: k.doi })
     // Zotero item - attach links ... to Zenodo
-    await zotero.attachLinkToItem(k.zoteroKey, "https://zenodo.org/deposit/" + k.zenodoID, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+    await zotero.attachLinkToItem(k.zoteroKey, "https://zenodo.org/deposit/" + k.zenodoID, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+    await zotero.attachLinkToItem(k.zoteroKey, "https://zenodo.org/record/" + k.zenodoID, { title: "🔄View entry on Zenodo (record)", tags: ["_r:zenodoRecord", "_r:zotzen"] })
     // Zotero item - attach links ... to DOI
-    await zotero.attachLinkToItem(k.zoteroKey, "https://doi.org/" + k.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+    if (k.doi) {
+        await zotero.attachLinkToItem(k.zoteroKey, "https://doi.org/" + k.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+    } else {
+        await zotero.attachLinkToItem(k.zoteroKey, "https://doi.org/10.5281/zenodo." + k.zenodoID, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] })
+    }
     return status
 }
 
@@ -886,6 +900,7 @@ async function linkZotZen(args, k, data) {
         const [zenodoRecord, doi] = await zenodoCreate(args)
         data_out["zenodo"] = zenodoRecord
         k.doi = doi
+        k.id = zenodoRecord.id
         await update_doi_and_link(k)
         // TODO: To copy the data as comprehensively as possible, we should now run a sync.
         // synchronise(args)
