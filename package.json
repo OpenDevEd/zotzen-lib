@@ -44,7 +44,7 @@
     "requests": "^0.3.0",
     "sys": "0.0.1",
     "zenodo-lib": "^1.0.45",
-    "zotero-lib": "^1.0.34"
+    "zotero-lib": "^1.0.35"
   },
   "files": [
     "build/*",
