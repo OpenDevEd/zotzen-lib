@@ -4,7 +4,9 @@ const zotzenlib = require('../src/zotzen-lib')
 // const zotzenlib = require('zotzen-lib')
 async function main() {
   // For how to retrieve collections, see example test_create_in_collections.js
+  homedir = require('os').homedir()+"/"
   const result = await zotzenlib.create({
+    zenodo_config: homedir+".config/zenodo-cli/config.sandbox.json",
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
     // FROM FORM

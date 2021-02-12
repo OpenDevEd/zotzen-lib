@@ -78,6 +78,8 @@ async function zenodoCreate(args) {
         console.log("Adding args.zotero_link from key/group_id provided")
         args.zotero_link = getZoteroSelectLink(args.key, args.group_id, true)
     }
+    console.log("TEMPORARY=" + JSON.stringify(args, null, 2))
+
     try {
         console.log("zotzen-lib: calls zenodo.create")
         zenodoRecord = await zenodo.create(args)
@@ -97,7 +99,9 @@ async function zenodoCreate(args) {
         process.exit(1)
     }
     const DOI = zenodoRecord["metadata"]["prereserve_doi"]["doi"]
-    return [zenodoRecord, DOI]
+    const base = zenodoRecord["links"]["self"].search(/sandbox/) ? "sandbox" : ""
+    console.log(base)
+    return [zenodoRecord, DOI, base]
     // [zenodoRecord, DOI] = zenodoCreate(args)
 }
 
@@ -190,15 +194,23 @@ async function zoteroCreate(args) {
 
     // TODO: The following two don't make sense - either ID or DOI should be ok! Need to get one from the other.
     // TODO: Move Zotero functions here? Or use Zotero functions... atm it's duplicated.
+    // TODO: Visit both refs to zenodo.org and check for (a) sandbox, and (b) decodation.
     let decorations = []
+    // What if we are in the sandbox?
+    console.log(args.base)
+    const base = args.base == "sandbox" ? "sandbox." : ""
+    if (args.id === null) {
+        console.log("TEMPORARY=" + JSON.stringify(args, null, 2))
+        process.exit(1)
+    }
     if (args.id) {
         // Zotero item - attach links ... to Zenodo
-        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, `https://${base}zenodo.org/deposit/${args.id}`, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
         decorations.push(res)
     }
     if (args.id) {
         // Zotero item - attach links ... to Zenodo
-        const res = await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/record/" + args.id, { title: "🔄View entry on Zenodo (record)", tags: ["_r:zenodoRecord", "_r:zotzen"] })
+        const res = await zotero.attachLinkToItem(zoteroRecord.key, `https://${base}zenodo.org/record/${args.id}`, { title: "🔄View entry on Zenodo (record)", tags: ["_r:zenodoRecord", "_r:zotzen"] })
         decorations.push(res)
     }
     if (args.doi) {
@@ -416,9 +428,11 @@ async function zotzenCreate(args, subparsers) {
     verbose(args, "zotzenlib.zotzenCreate -> zenodo", args)
     // let result = dummycreate(args)
     // Create zenodo record
-    const [zenodoRecord, DOI] = await zenodoCreate(args)
+    const [zenodoRecord, DOI, base] = await zenodoCreate(args)
+    // console.log("TEMPORARYXXX="+JSON.stringify(   base         ,null,2))
     args.id = zenodoRecord.id
     args.doi = DOI
+    args.base = base
     verbose(args, "zotzenlib.zotzenCreate -> zotero", args)
     const [zoteroRecord,
         zoteroRecordGType,
@@ -838,6 +852,7 @@ async function checkZotZenLink(args, k, data) {
 }
 
 async function update_doi_and_link(k) {
+    // TODO: Visit all refs to zenodo.org and check for (a) sandbox, and (b) decodation.
     const status = await zotero.update_doi({ key: k.zoteroKey, group: k.zoteroGroup, doi: k.doi })
     // Zotero item - attach links ... to Zenodo
     await zotero.attachLinkToItem(k.zoteroKey, "https://zenodo.org/deposit/" + k.zenodoID, { title: "🔄View entry on Zenodo (deposit)", tags: ["_r:zenodoDeposit", "_r:zotzen"] })
@@ -896,7 +911,7 @@ async function linkZotZen(args, k, data) {
         const [zenodoRecord, doi] = await zenodoCreate(args)
         data_out["zenodo"] = zenodoRecord
         k.doi = doi
-        k.id = zenodoRecord.id
+        k.zenodoID = zenodoRecord.id
         await update_doi_and_link(k)
         // TODO: To copy the data as comprehensively as possible, we should now run a sync.
         // synchronise(args)
