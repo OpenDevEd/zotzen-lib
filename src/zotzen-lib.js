@@ -887,14 +887,14 @@ async function linkZotZen(args, k, data) {
             // There's two items, but at least one of them is not linked to the other.
             if (!k.zoteroKeyFromZenodo) {
                 // TODO: Testing
-                console.log("Linking from Zotero to Zenodo (alters Zenodo record)")
+                console.log("Linking from Zenodo to Zotero (alters Zenodo record)")
                 args.zotero_link = getZoteroSelectLink(k.zoteroKey, k.zoteroGroup, true)
                 args.id = k.zenodoID
                 zenodoRecord = await zenodo.update(args)
             }
             if (!k.zenodoIDFromZotero) {
                 // TODO: Testing
-                console.log("Linking from Zenodo to Zotero (alters Zotero record)")
+                console.log("Linking from Zotero to Zenodo (alters Zotero record)")
                 const status = await update_doi_and_link(k)
             }
         }
