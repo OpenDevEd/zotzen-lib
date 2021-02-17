@@ -539,7 +539,7 @@ async function zotzenSync(args, subparsers) {
         return { status: 0, message: "success" }
     }
     if (!args.key) return null
-    const keys = args.key
+    const keys = Array.isArray(args.key) ? args.key : [args.key]
     delete args["key"]
     let output = []
     // TODO: Shoudl check whether args.key is an array or not
@@ -986,7 +986,7 @@ async function zotzenSyncOne(args) {
     /* TODO:
    Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
    produce a new version
-*/
+    */
     const zenodoID = zz.data.zenodoID
     if (args.metadata) {
         if (zz.originaldata && zz.originaldata.zotero) {
@@ -1015,8 +1015,12 @@ async function zotzenSyncOne(args) {
         console.log("metadata sync was not requested")
     }
     if (args.attachments) {
-        // push attachments. TODO: We should remove existing draft attachments in the Zenodo record
-        const children = zotero.children(groupId, "get /items/${itemKey}/children")
+        // get information about attachments
+        let myargs = { ...args, children: true }
+        //console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))          
+        const children = await zotero.item(myargs)
+        //console.log("TEMPORARY="+JSON.stringify(   children         ,null,2))
+        // Select file attachments
         let attachments = children.filter(
             (c) => c.data.itemType === 'attachment' &&
                 c.data.linkMode === 'imported_file'
@@ -1027,6 +1031,7 @@ async function zotzenSyncOne(args) {
                 (a) => a.data.filename.endsWith(attachmentType)
             );
         }
+        // TODO: We should remove existing draft attachments in the Zenodo record
         if (!attachments.length) {
             console.log('No attachments found.');
         } else {
