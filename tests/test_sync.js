@@ -38,7 +38,7 @@ const data = result.data */
     metadata: true,
     attachments: true, show: true
   })
-  console.log("result =" + JSON.stringify(result, null, 2))
+  console.log("result = " + JSON.stringify(result, null, 2))
 
 }
 main();

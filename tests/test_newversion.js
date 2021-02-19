@@ -2,73 +2,51 @@
 const zotzenlib = require('../src/zotzen-lib')
 // To run independently
 // const zotzenlib = require('zotzen-lib')
+const zenodo = require('zenodo-lib')
+
 async function main() {
   const Zotero = require('zotero-lib')
   const fs = require('fs')
 
-  var zotero = new Zotero({ verbose: true, "group-id": 2405685 })
-  let items = await zotero.items({
-    collection: "WH2PXB8P",
-    top: true
+  const groupid = 2259720
+  const gtype = "group"
+  const key = "GTAMHC4B"
+  var zotero = new Zotero({ verbose: true, "group-id": groupid })
+  let linkrequest = {
+    key: key,
+    group_id: groupid,
+    library_type: gtype,
+    debug: false,
+    show: false,
+    link: false
+  }
+  let result = await zotzenlib.link(linkrequest)
+  // console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+  if (result.status != 0) {
+    console.log("The items provided are not linked")
+    process.exit(1)
+  }
+  if (result.originaldata.zenodo.length != 1) {
+    console.log("LIBRARY-ERROR: Zenodo item was not retrieved.")
+    process.exit(1)
+  }
+
+  const zenodorecord = result.originaldata.zenodo[0]
+  console.log("TEMPORARY=" + JSON.stringify(zenodorecord, null, 2))
+  if (zenodorecord.state === "unsubmitted") {
+    console.log("The Zenodo item had pending changes. Cannot create new version.")
+    process.exit(1)
+  }
+  if (!zenodorecord.submitted) {
+    console.log("The Zenodo item is unsubmitted. You do not have to create a new version.")
+    process.exit(1)
+  }
+  console.log("Proceeding to create a new version.")
+  const res = await zenodo.newversion({
+    id: [ zenodorecord.id ]
   })
-  items = items.map(element => {
-    let doi = ""
-    let id = 0
-    const extra = element.data.extra.split("\n")
-    extra.forEach(element => {
-      let res = element.match(/^\s*doi:\s*(.*?(\d+))$/i)
-      if (res) {
-        doi = res[1]
-        id = res[2]
-      }
-    });
-    return {
-      itemType: element.data.itemType,
-      key: element.data.key,
-      reportType: element.data.reportType,
-      reportNumber: element.data.reportNumber,
-      extra: element.data.extra,
-      title: element.data.title,
-      doi: doi,
-      id: id
-    }
-  });
-  // console.log("final=" + JSON.stringify(items, null, 2))
-  let result = []
-  items.sort((a,b) => (a.reportNumber > b.reportNumber) ? 1 : ((b.reportNumber > a.reportNumber) ? -1 : 0))
-  for (i in items) {
-    console.log(`----------****  ${i}      *****---------------`)
-    const element = items[i]
-    console.log("element=" + JSON.stringify(element, null, 2))
-    if (element.id != "") {
-      const r = await zotzenlib.zotzenSyncOne({
-        group_id: 2405685,
-        key: element.key,
-        id: element.id
-      })
-      result.push(r)
-    } else {
+  console.log("TEMPORARY="+JSON.stringify(   res     ,null,2))   
+  // Link Zotero item with Zenodo item.
 
-    }
-  };
-  console.log("--------------------------------")
-  //console.log("final=" + JSON.stringify(result, null, 2))
-
-  /*
-      const data = {
-          "zenodoRecordID": 717569,
-          "zoteroItemKey": "NKX3RG5B",
-          "zoteroGroup": 2259720,
-          "zoteroSelectLink": "zotero://select/group/2259720/items/NKX3RG5B",
-          "DOI": "10.5072/zenodo.717569",
-      }
-      let result
-      //result = await zotzenlib.sync({ key: [data.zoteroItemKey], debug: false, show: false })
-      //console.log("dry-run (much like 'link' =" + JSON.stringify(result, null, 2))
-      // Now sync metadata
-      result = await zotzenlib.sync({ key: [data.zoteroItemKey], metadata: true, show: true })
-      console.log("result =" + JSON.stringify(result, null, 2))
-      result = await zotzenlib.sync({ key: [data.zoteroItemKey], metadata: true, attachments: true, show: true })
-  */
 }
 main();

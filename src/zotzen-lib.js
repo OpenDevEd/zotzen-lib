@@ -78,7 +78,8 @@ async function zenodoCreate(args) {
         console.log("Adding args.zotero_link from key/group_id provided")
         args.zotero_link = getZoteroSelectLink(args.key, args.group_id, true)
     }
-    console.log("TEMPORARY=" + JSON.stringify(args, null, 2))
+
+    console.log("zenodoCreate, args=" + JSON.stringify(args, null, 2))
 
     try {
         console.log("zotzen-lib: calls zenodo.create")
@@ -693,6 +694,8 @@ async function zotzenLink(args, subparsers) {
     args.id = zenodoID
     if (zenodoID) {
         //-- Get the zenodo record
+        console.log("Get the zenodo record, TEMPORARY="+JSON.stringify(     args       ,null,2))
+         
         const zenodoID = args.id ? zenodoParseID(args.id) : null
         try {
             console.log("zotzen-lib: calls zenodo.getRecord")
