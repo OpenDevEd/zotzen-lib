@@ -21,9 +21,8 @@ async function main() {
 console.log("zotzen result=" + JSON.stringify(result, null, 2))
 const data = result.data */
   const data = {
-    "zenodoRecordID": 717569,
-    "zoteroItemKey": "NKX3RG5B",
-    "zoteroGroup": 2259720,
+    "zoteroItemKey": "ZQCX7TX3",
+    "zoteroGroup": 2405685,
     "zoteroSelectLink": "zotero://select/group/2259720/items/NKX3RG5B",
     "DOI": "10.5072/zenodo.717569",
   }
@@ -36,7 +35,10 @@ const data = result.data */
     key: data.zoteroItemKey,
     group_id: data.zoteroGroup,
     metadata: true,
-    attachments: true, show: true
+    attachments: true, 
+    //verbose: true,
+    //debug: true,
+    //show: true
   })
   console.log("result = " + JSON.stringify(result, null, 2))
 

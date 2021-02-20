@@ -694,8 +694,8 @@ async function zotzenLink(args, subparsers) {
     args.id = zenodoID
     if (zenodoID) {
         //-- Get the zenodo record
-        console.log("Get the zenodo record, TEMPORARY="+JSON.stringify(     args       ,null,2))
-         
+        console.log("Get the zenodo record, TEMPORARY=" + JSON.stringify(args, null, 2))
+
         const zenodoID = args.id ? zenodoParseID(args.id) : null
         try {
             console.log("zotzen-lib: calls zenodo.getRecord")
@@ -985,18 +985,22 @@ async function zotzenSyncOne(args) {
     if (!zz.status == 0)
         return message(1, "sorry, but the records concerned are not properly linked. Aborting.", args)
     verbose(args, "zz=", zz)
-    console.log("TEMPORARY=" + JSON.stringify(zz.data, null, 2))
+    console.log("TEMPORARY syncone=" + JSON.stringify(zz.data, null, 2))
     /* TODO:
    Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
    produce a new version
     */
     const zenodoID = zz.data.zenodoID
+    let updateDoc = {
+        id: zenodoID
+    }
     if (args.metadata) {
+        console.log("metadata")
         if (zz.originaldata && zz.originaldata.zotero) {
             const zoteroItem = zz.originaldata.zotero
             // Sync metadata
-            let updateDoc = {
-                id: zenodoID,
+            updateDoc = {
+                ...updateDoc,
                 title: zoteroItem.title,
                 description: zoteroItem.abstractNote,
                 // TODO title and description works, but creators doesn't... new authors in zotero dont make it to zenodo
@@ -1009,44 +1013,42 @@ async function zotzenSyncOne(args) {
             if (zoteroItem.date) {
                 updateDoc.publication_date = zoteroItem.date;
             }
+            // console.log("TEMPORARY="+JSON.stringify( updateDoc           ,null,2))             
             // TODO: capture this output
-            await zenodo.update(updateDoc)
+            console.log("metadata done")
+            //console.log("TEMPORARY updated="+JSON.stringify(  updated          ,null,2))
         } else {
             return message(1, "sorry, did not find sync data", args)
         }
     } else {
         console.log("metadata sync was not requested")
     }
+    console.log("Attachments")
     if (args.attachments) {
         // get information about attachments
-        let myargs = { ...args, children: true }
+        let myargs = { ...args, children: true, savefiles: true }
         //console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))          
         const children = await zotero.item(myargs)
-        //console.log("TEMPORARY="+JSON.stringify(   children         ,null,2))
         // Select file attachments
         let attachments = children.filter(
             (c) => c.data.itemType === 'attachment' &&
                 c.data.linkMode === 'imported_file'
         )
-        const attachmentType = args.type.toLowerCase();
-        if (attachmentType !== 'all') {
-            attachments = attachments.filter(
-                (a) => a.data.filename.endsWith(attachmentType)
-            );
-        }
+        if ('type' in args && args.type) {
+            const attachmentType = args.type.toLowerCase();
+            if (attachmentType !== 'all') {
+                attachments = attachments.filter(
+                    (a) => a.data.filename.endsWith(attachmentType)
+                );
+            }
+         }
+        //    console.log("TEMPORARY="+JSON.stringify(   attachments         ,null,2))
         // TODO: We should remove existing draft attachments in the Zenodo record
         if (!attachments.length) {
             console.log('No attachments found.');
         } else {
-            attachments.forEach((attachment) => {
-                doi = pushAttachment(
-                    itemKey,
-                    attachment.data.key,
-                    attachment.data.filename,
-                    doi,
-                    groupId,
-                    userId
-                );
+            updateDoc.files = attachments.map((attachment) => {
+               return attachment.data.filename
             });
         }
         // }
@@ -1054,8 +1056,11 @@ async function zotzenSyncOne(args) {
     } else {
         console.log("attachment sync was not requested")
     }
+    //console.log("TEMPORARY="+JSON.stringify(   updateDoc     ,null,2))
+    const updated = await zenodo.update(updateDoc)
+    // TODO: updated has the md5 sums for the files. They should be compared the md5 sums from Zotero.
     // TODO - this should report on what was done: List the metadata and the files.
-    return message(0, "Sync complete")
+    return updated //message(0, "Sync complete")
     // TODO? Final actions?
 }
 
@@ -1079,15 +1084,16 @@ async function newVersion() {
 
 }
 
+/*
 // TODO: test attachments function
 // Copy attachment from Zotero to Zenodo
-async function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
+async function pushAttachment(itemKey, attachmentkey, fileName, doi, groupId, userId) {
     if (args.debug) {
         console.log('DEBUG: pushAttachment');
     }
     console.log(`Pushing from Zotero to Zenodo: ${fileName}`);
     await zotero.attachment({
-        dummy: `${groupId ? '--group-id ' + groupId : ''} attachment --key ${key} --save "../${fileName}"`
+        dummy: `${groupId ? '--group-id ' + groupId : ''} attachment --key ${attachmentkey} --save "../${fileName}"`
     });
     // TODO: What is the above command fails?
     // TODO: Also, I've inserted "..." in case the filename contains spaces. However, really the filename should be made shell-proof.
@@ -1110,6 +1116,8 @@ async function pushAttachment(itemKey, key, fileName, doi, groupId, userId) {
     console.log('Upload successfull.'); //This shoukd be good enough. User can always use --show or --open to see/open the record.
     return message(0, "Upload successful")
 }
+*/
+
 function getZoteroSelectLinkV1(group_id, key, group = false) {
     return `zotero://select/${group ? 'groups' : 'users'}/${group_id}/items/${key}`;
 }
