@@ -706,12 +706,14 @@ async function zotzenLink(args, subparsers) {
             console.log(e)
             return null
         }
-        debug(args, "zotzenCreate: result:", zenodoRecord)
+        if (Array.isArray(zenodoRecord))
+            zenodoRecord = zenodoRecord[0]
+        debug(args, "zotzenLink: result:", zenodoRecord)
         //console.log(JSON.stringify(zenodoRecord[0].metadata["related_identifiers"],null,2))
         let zotlink = null
-        if (zenodoRecord && zenodoRecord[0]) {
-            if (zenodoRecord[0].metadata["related_identifiers"]) {
-                const ri = zenodoRecord[0]["metadata"]["related_identifiers"]
+        if (zenodoRecord) {
+            if (zenodoRecord.metadata["related_identifiers"]) {
+                const ri = zenodoRecord["metadata"]["related_identifiers"]
                 // We should iterate through these TODO
                 zotlink = ri[0].identifier
                 zoteroKeyFromZenodo = zoteroParseKey(zotlink)
@@ -730,8 +732,11 @@ async function zotzenLink(args, subparsers) {
         console.log("You did not provided an 'id' (for a zenodo item)", args)
     }
     // We now have all potential keys and links:
-    const zenodoState = zenodoRecord && zenodoRecord[0] && zenodoRecord[0].state ? zenodoRecord[0].state : null
-    const zenodoSubmitted = zenodoRecord && zenodoRecord[0] && zenodoRecord[0].submitted ? zenodoRecord[0].submitted : null
+    // TODO - these values are not set correctly...
+    const zenodoState = zenodoRecord && ("state" in zenodoRecord) ? zenodoRecord.state : null
+    const zenodoSubmitted = zenodoRecord && ("submitted" in zenodoRecord) ? zenodoRecord.submitted : null
+    if (zenodoRecord && ("state" in zenodoRecord))
+        console.log(`zotzenLink:: state: ${zenodoState} = ${zenodoRecord.state}; submitted: ${zenodoSubmitted}=${zenodoRecord.submitted}`)
     const keySet = {
         zoteroKey: zoteroKey,
         zenodoID: zenodoID,
@@ -739,7 +744,7 @@ async function zotzenLink(args, subparsers) {
         zenodoIDFromZotero: zenodoIDFromZotero,
         zoteroKeyFromZenodo: zoteroKeyFromZenodo,
         zoteroGroupFromZenodo: zoteroGroupFromZenodo,
-        doi: "......../zenodo." + zenodoID,
+        doi: "[...]/zenodo." + zenodoID,
         zenodoState: zenodoState,
         zenodoSubmitted: zenodoSubmitted
     }
@@ -828,7 +833,7 @@ async function checkZotZenLink(args, k, data) {
                 if (args.link) {
                     return await linkZotZen(args, k, data)
                 } else {
-                    return message(1, "You provided both a Zotero Key but no Zenodo ID. You can generate a Zenodo by providing the option 'link'. Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will provided a DOI for the Zotero item.", k)
+                    return message(1, "You provided a Zotero Key but no Zenodo ID. You can generate a Zenodo by providing the option 'link'. Zenodo record links to the Zotero item, but Zotero does not link back. You can link the items by providing the option 'link'. This will provided a DOI for the Zotero item.", k)
                 }
             }
         }
@@ -983,7 +988,7 @@ async function zotzenSyncOne(args) {
     /* --- */
     // if (!syncErrors(doi, zenodoRawItem, zoteroSelectLink)) {
     if (!zz.status == 0)
-        return message(1, "sorry, but the records concerned are not properly linked. Aborting.", args)
+        return message(1, "sorry, but the record(s) concerned is/are not properly linked (or there is only one record). Aborting.", args)
     verbose(args, "zz=", zz)
     console.log("TEMPORARY syncone=" + JSON.stringify(zz.data, null, 2))
     /* TODO:
@@ -1041,14 +1046,15 @@ async function zotzenSyncOne(args) {
                     (a) => a.data.filename.endsWith(attachmentType)
                 );
             }
-         }
+        }
         //    console.log("TEMPORARY="+JSON.stringify(   attachments         ,null,2))
         // TODO: We should remove existing draft attachments in the Zenodo record
         if (!attachments.length) {
+            // TODO: If the Zotern item has too many attachments (>25?) they don't all get picked up. Need to fix that above.
             console.log('No attachments found.');
         } else {
             updateDoc.files = attachments.map((attachment) => {
-               return attachment.data.filename
+                return attachment.data.filename
             });
         }
         // }
@@ -1057,7 +1063,10 @@ async function zotzenSyncOne(args) {
         console.log("attachment sync was not requested")
     }
     //console.log("TEMPORARY="+JSON.stringify(   updateDoc     ,null,2))
+    // make sure we get the file links:
+    updateDoc.strict = true
     const updated = await zenodo.update(updateDoc)
+    // TODOMD5
     // TODO: updated has the md5 sums for the files. They should be compared the md5 sums from Zotero.
     // TODO - this should report on what was done: List the metadata and the files.
     return updated //message(0, "Sync complete")
