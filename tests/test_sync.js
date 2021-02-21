@@ -27,6 +27,7 @@ async function main() {
     //debug: true,
     //show: true
   })
+  // ^^^ This doesn't publish ... needs figuring out TODO
   // console.log("result 1 = " + JSON.stringify(syncresult, null, 2))
   // If you specify 'strict' above, you get the filenames back:
   // result[0].files[0].filename
