@@ -32,14 +32,15 @@ const zenodoLibCreate_Args = {
 
 //const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
-//const zotero = require("zotero-api-lib");
 const zenodo = require("zenodo-lib");
 const Zotero = require("zotero-lib");
-var zotero = new Zotero({})
 
-// TESTING: Load locally for testing
-// const zotero = require("../zotero-api-lib/index"); ///??
-// const zenodo = require("../zenodo-cli/build/functions")
+// TODO - TESTING: Load locally for testing:
+//const zenodo = require("../zenodo-lib/build/zenodo-lib.js")
+//const Zotero = require("../zotero-lib/build/zotero-lib.js")
+// ^^^ This requires for zotzen-lib, zenodo-lib and zotero-lib to be in the same directory.
+
+var zotero = new Zotero({})
 
 //var fs = require('fs');
 function dummycreate(args) {
