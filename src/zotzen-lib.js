@@ -4,6 +4,7 @@ module.exports.link = zotzenLink;
 module.exports.zenodoCreate = zenodoCreate;
 module.exports.zoteroCreate = zoteroCreate;
 module.exports.zotzenSyncOne = zotzenSyncOne;
+module.exports.newversion = newversion;
 
 // TODO: At the moment, the links produces are not 'sandbox aware'. It's only a minor issue for production, but would be nice for testing.
 // Similarly, check for string '......./zenodo.' where we need to enter missing parts of DOIs properly
@@ -1073,24 +1074,68 @@ async function zotzenSyncOne(args) {
     // TODO? Final actions?
 }
 
-async function newVersion() {
+async function newversion(args, subparsers) {
+    if (args.getInterface && subparsers) {
+        const parser_sync = subparsers.add_parser(
+            "newversion", {
+            "help": "Generate a new version of the Zenodo record linked to the same Zotero item."
+        });
+        parser_sync.set_defaults({ "func": newversion });
+        parser_sync.add_argument(
+            "--key", {
+            "nargs": 1,
+            "help": "One Zotero key for updating."
+        });
+
+        return { status: 0, message: "success" }
+    }
+    if (!args.key) return null
     // TODO: What about concept DOIs? When we add a DOI to a Zeotero record, we should add ConceptDOI as well.
     console.log('Creating new version on Zenodo.')
-    const newVersionResponse = runCommand(`newversion ${doi}`, false);
-    doi = doi.replace(
-        /zenodo.*/,
-        `zenodo.${parseFromZenodoResponse(newVersionResponse, 'latest_draft')
-            .split('/')
-            .slice(-1)[0]}`
-    );
-    console.log('Linking new version to Zotero.')
-    linkZotZen(
-        itemKey,
-        doi,
-        groupId,
-        getZoteroSelectLinkV1(userId || groupId, itemKey, !!groupId)
-    );
-
+    //const newVersionResponse = runCommand(`newversion ${doi}`, false);
+    let linkrequest = {
+        key: args.key,
+        group_id: args.group_id,
+        library_type: args.group_type,
+        debug: false,
+        show: false,
+        link: false
+    }
+    let result = await zotzenLink(linkrequest)
+    // console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+    if (result.status != 0) {
+        console.log("The items provided are not linked")
+        process.exit(1)
+    }
+    if (!result.originaldata.zenodo) {
+        console.log("TEMPORARY="+JSON.stringify(      result      ,null,2))         
+        console.log("LIBRARY-ERROR: Zenodo item was not retrieved.")
+        process.exit(1)
+    }
+    const zenodorecord = result.originaldata.zenodo
+    //console.log("TEMPORARY=" + JSON.stringify(zenodorecord, null, 2))
+    /* if (zenodorecord.state === "unsubmitted") {
+        console.log("The Zenodo item had pending changes. Cannot create new version.")
+        process.exit(1)
+    }  */   
+    if (!zenodorecord.submitted) {
+        console.log("The Zenodo item is unsubmitted. You do not have to create a new version.")
+        process.exit(1)
+    }
+    // Let's make a new version of the Zenodo record.
+    console.log("Proceeding to create a new version.")
+    const res = await zenodo.newversion({
+        id: [zenodorecord.id]
+    })
+    //console.log("TEMPORARY=" + JSON.stringify(res, null, 2))
+    // ^^^ The new record is automatically linked to the Zotero item.
+    // However, for the Zotero item, we need to update the DOI.
+    const res2 = await zotero.update_doi({ key: args.key, group: args.group_id, doi: res.doi })
+    return {
+        status: 0,
+        zenodo: res,
+        zotero: res2
+    }
 }
 
 /*

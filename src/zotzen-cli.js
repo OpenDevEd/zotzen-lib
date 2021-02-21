@@ -137,6 +137,9 @@ function getArguments() {
   /* sync */
   zotzenlib.sync({ getInterface: true }, subparsers)
 
+  /* sync */
+  zotzenlib.newversion({ getInterface: true }, subparsers)
+
   return parser.parse_args();
 }
 
