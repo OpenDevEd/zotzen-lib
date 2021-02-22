@@ -30,6 +30,28 @@ const zenodoLibCreate_Args = {
     json: "Zenodo template file"
 }
 
+
+export function as_value(value) {
+    if (Array.isArray(value)) {
+      value = value[0]
+    } else {
+    }
+    return value
+  }
+  
+  export function as_array(value) {
+    let out = []
+    if (value) {
+      if (!Array.isArray(value)) {
+        out = [value]
+      } else {
+        out = value
+      }
+    }
+    return out
+  }
+  
+
 //const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
 const zenodo = require("zenodo-lib");
@@ -239,6 +261,7 @@ async function zoteroCreate(args) {
     // Zotero item - attach links ... to Google Doc
     if (args.googledoc) {
         // Attach link to google doc, if there is one:
+        args.googledoc = as_value(args.googledoc)
         const res = await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "📝View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] })
         decorations.push(res)
     }
