@@ -31,7 +31,7 @@ const zenodoLibCreate_Args = {
 }
 
 
-export function as_value(value) {
+ function as_value(value) {
     if (Array.isArray(value)) {
       value = value[0]
     } else {
@@ -39,7 +39,7 @@ export function as_value(value) {
     return value
   }
   
-  export function as_array(value) {
+   function as_array(value) {
     let out = []
     if (value) {
       if (!Array.isArray(value)) {
@@ -1100,17 +1100,21 @@ async function zotzenSyncOne(args) {
 
 async function newversion(args, subparsers) {
     if (args.getInterface && subparsers) {
-        const parser_sync = subparsers.add_parser(
+        const parser_newversion = subparsers.add_parser(
             "newversion", {
             "help": "Generate a new version of the Zenodo record linked to the same Zotero item."
         });
-        parser_sync.set_defaults({ "func": newversion });
-        parser_sync.add_argument(
+        parser_newversion.set_defaults({ "func": newversion });
+        parser_newversion.add_argument(
             "--key", {
             "nargs": 1,
             "help": "One Zotero key for updating."
         });
-
+        parser_newversion.add_argument(
+            '--deletefiles', {
+            action: 'store_true',
+            help: 'Remove files from the newly created version.'
+        });
         return { status: 0, message: "success" }
     }
     if (!args.key) return null
