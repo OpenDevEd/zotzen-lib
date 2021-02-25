@@ -31,26 +31,26 @@ const zenodoLibCreate_Args = {
 }
 
 
- function as_value(value) {
+function as_value(value) {
     if (Array.isArray(value)) {
-      value = value[0]
+        value = value[0]
     } else {
     }
     return value
-  }
-  
-   function as_array(value) {
+}
+
+function as_array(value) {
     let out = []
     if (value) {
-      if (!Array.isArray(value)) {
-        out = [value]
-      } else {
-        out = value
-      }
+        if (!Array.isArray(value)) {
+            out = [value]
+        } else {
+            out = value
+        }
     }
     return out
-  }
-  
+}
+
 
 //const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
@@ -443,6 +443,10 @@ async function zotzenCreate(args, subparsers) {
             "nargs": 1,
             help: 'Provide a google doc as a source for your document (Zotero only)',
         })
+        parser_create.add_argument("--enclose", {
+            "action": "store_true",
+            "help": "Enclose the new item in a collection and create sub-collections for references, etc. The sub-collections are created in the first collection provided under --collections."
+        })
         // Not needed, as we're creating this. 
         /* parser_create.add_argument("--zotero-link", {
           "action": "store",
@@ -492,6 +496,14 @@ async function zotzenCreate(args, subparsers) {
         //console.log(JSON.stringify(zenodoRecord2, null, 2))
     }
     const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : ""
+    let enclose = null
+    if (args.enclose && args.collections) {
+        enclose = await zotero.enclose_item_in_collection({
+            key: zoteroRecord.key,
+            group_id: zoteroRecordGroup,
+            collection: args.collections[0]
+        })
+    }
     const record = {
         status: 0,
         message: "success",
@@ -510,7 +522,8 @@ async function zotzenCreate(args, subparsers) {
         },
         zenodo: {
             data: zenodoRecord2.metadata
-        }
+        },
+        enclose: enclose
     }
     console.log('Zotero/Zenodo records successfully created.');
     return record
@@ -1136,7 +1149,7 @@ async function newversion(args, subparsers) {
         process.exit(1)
     }
     if (!result.originaldata.zenodo) {
-        console.log("TEMPORARY="+JSON.stringify(      result      ,null,2))         
+        console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
         console.log("LIBRARY-ERROR: Zenodo item was not retrieved.")
         process.exit(1)
     }
@@ -1145,7 +1158,7 @@ async function newversion(args, subparsers) {
     /* if (zenodorecord.state === "unsubmitted") {
         console.log("The Zenodo item had pending changes. Cannot create new version.")
         process.exit(1)
-    }  */   
+    }  */
     if (!zenodorecord.submitted) {
         console.log("The Zenodo item is unsubmitted. You do not have to create a new version.")
         process.exit(1)
@@ -1153,12 +1166,13 @@ async function newversion(args, subparsers) {
     // Let's make a new version of the Zenodo record.
     console.log("Proceeding to create a new version.")
     const res = await zenodo.newversion({
-        id: [zenodorecord.id]
+        id: [zenodorecord.id],
+        deletefiles: true
     })
-    //console.log("TEMPORARY=" + JSON.stringify(res, null, 2))
+    console.log("TEMPORARY=" + JSON.stringify(res, null, 2))
     // ^^^ The new record is automatically linked to the Zotero item.
     // However, for the Zotero item, we need to update the DOI.
-    const res2 = await zotero.update_doi({ key: args.key, group: args.group_id, doi: res.doi })
+    const res2 = await zotero.update_doi({ key: args.key, group: args.group_id, doi: res.response.doi })
     return {
         status: 0,
         zenodo: res,

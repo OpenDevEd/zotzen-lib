@@ -50,6 +50,7 @@ async function main() {
     kerko_url: "https://docs.edtechhub.org/lib/",
     tags: ["_r:AddedByZotZen"],
     description: "An output of the EdTech Hub, https://edtechhub.org",
+    enclose: true
   })
  }
 main();
