@@ -571,6 +571,12 @@ async function zotzenSync(args, subparsers) {
             help: 'Type of the attachments to be pushed.',
             default: 'all'
         });
+        parser_sync.add_argument(
+            '--tag', {
+            nargs: 1,
+            action: 'store',
+            help: 'Only synchronise attachments with the tag given.'
+        });
         parser_sync.add_argument('--publish', {
             action: 'store_true',
             help: 'Publish zenodo record.'
@@ -1066,14 +1072,16 @@ async function zotzenSyncOne(args) {
     } else {
         console.log("metadata sync was not requested")
     }
-    console.log("Attachments")
+    console.log("Attachments.")
+    let attachments
     if (args.attachments) {
+        console.log("Attachments...")
         // get information about attachments
-        let myargs = { ...args, children: true, savefiles: true }
+        let myargs = { ...args, children: true }
         //console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))          
         const children = await zotero.item(myargs)
         // Select file attachments
-        let attachments = children.filter(
+        attachments = children.filter(
             (c) => c.data.itemType === 'attachment' &&
                 c.data.linkMode === 'imported_file'
         )
@@ -1085,12 +1093,30 @@ async function zotzenSyncOne(args) {
                 );
             }
         }
-        //    console.log("TEMPORARY="+JSON.stringify(   attachments         ,null,2))
+        if ('tag' in args) {
+            const tag = as_value(args.tag)
+            attachments = attachments.filter(
+                a => {
+                    // .log(">>>" + a.data.filename)
+                    //console.log("TEMPORARY=" + JSON.stringify(a.data.tags.map(element => { return element.tag }), null, 2))
+                    //console.log(args.tag)
+                    //const arr = a.data.tags.map(element => { return element.tag })
+                    //console.log(arr.includes(tag))
+                    return a.data.tags.map(element => { return element.tag }).includes(tag)
+                }
+            )
+        }
+        //console.log("ATTACHMENTS_TEMPORARY="+JSON.stringify(   attachments         ,null,2))
         // TODO: We should remove existing draft attachments in the Zenodo record
         if (!attachments.length) {
             // TODO: If the Zotern item has too many attachments (>25?) they don't all get picked up. Need to fix that above.
             console.log('No attachments found.');
         } else {
+            for (const element of attachments) {
+                console.log(`${element.data.key}->${element.data.filename}, ${element.data.tags[0].tag}`)
+                const file = await zotero.attachment({ key: element.data.key, save: element.data.filename })
+                //console.log("TEMPORARY=" + JSON.stringify(file, null, 2))
+            };
             updateDoc.files = attachments.map((attachment) => {
                 return attachment.data.filename
             });
@@ -1100,10 +1126,25 @@ async function zotzenSyncOne(args) {
     } else {
         console.log("attachment sync was not requested")
     }
-    //console.log("TEMPORARY="+JSON.stringify(   updateDoc     ,null,2))
+    // console.log("updateDoc=" + JSON.stringify(updateDoc, null, 2))
     // make sure we get the file links:
     updateDoc.strict = true
     const updated = await zenodo.update(updateDoc)
+    // Attach outgoing tag:
+    if (args.publish) {
+        if (updated.submitted) {
+            for (const element of attachments) {
+                const file = await zotero.item({ key: element.data.key, addtags: ["_zenodoETH"] })
+                console.log("ATTACHMENT TAG=" + JSON.stringify(file, null, 2))
+
+            }
+            const x = await zotero.item({ key: args.key, addtags: ["_zenodoETH"] })
+            console.log("TEMPORARY=" + JSON.stringify(x, null, 2))
+        } else {
+            console.log("Record unsubmitted")
+        }
+    }
+    process.exit(1)
     // TODOMD5
     // TODO: updated has the md5 sums for the files. They should be compared the md5 sums from Zotero.
     // TODO - this should report on what was done: List the metadata and the files.

@@ -43,6 +43,9 @@ async function main() {
     key: data.zoteroItemKey,
     group_id: data.zoteroGroup,
     id: syncresult[0].id,
+    metadata: true,
+    attachment: true,
+    tag: "publishPDF",
     publish: true
     //verbose: true,
     //debug: true,
@@ -153,6 +156,11 @@ async function getNewItem() {
     })
     children = children.filter(item => item.data.itemType === 'attachment' && item.data.linkMode === "imported_file")
     console.log("FIles: " + JSON.stringify(children, null, 2))
+    // attach tag
+    const result3 = await zotero.item({
+      key: children[0].data.key,
+      addtags: ["publishPDF"]
+    })
   }
 
   // Now we have a Zotero item with a file (and new title) and a Zenodo record that is out of date.
