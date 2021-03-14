@@ -7,7 +7,7 @@ async function main() {
   const Zotero = require('zotero-lib')
   var zotero = new Zotero({ verbose: true, "group-id": 2259720 })
   let collections = await zotero.collections({
-      key: "HP6NALR4",
+      key: "QANLXBUW",
       terse: true
   })
   /*
