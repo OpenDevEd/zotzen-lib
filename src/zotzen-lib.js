@@ -1083,7 +1083,7 @@ async function zotzenSyncOne(args) {
         // Select file attachments
         attachments = children.filter(
             (c) => c.data.itemType === 'attachment' &&
-                c.data.linkMode === 'imported_file'
+                ( c.data.linkMode === 'imported_file' || c.data.linkMode === 'imported_url')
         )
         if ('type' in args && args.type) {
             const attachmentType = args.type.toLowerCase();

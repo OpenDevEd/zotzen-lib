@@ -32,15 +32,15 @@ async function main() {
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
     // FROM FORM
-    title: "Item title (via from)",
+    title: "Item title (via from) - testing with folders",
     // For authors, split the form field on ; and then submit as array. affiliation is not filled in
     authors: ["First Second Last; affiliation","First2 Last2; affiliation2"],
     reportNumber: "100-from-form",               
     reportType: "Some report type - from form",  
     date: "2021-01-01",                          // NOTE: This has to be a valid date, otherwise Zenodo.create fails
     googledoc: "https://url_to_google_doc-from_form",
-    collections: collections, // We're adding the item to all three collections, but could also do e.g. 
-    // collections: [ collections[0] ],
+    // collections: collections, // We're adding the item to all three collections, but could also do e.g. 
+    collections: [ collections[0] ],
     team: "some team - will be added to note. Take this form form field for 'team'.",
     note: "Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.",
     // Leave as defaults (for now)
