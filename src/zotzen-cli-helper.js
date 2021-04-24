@@ -1,8 +1,8 @@
 const fs = require('fs');
 const os = require('os');
 const prompt = require('prompt');
-const logger = require('./logger');
 const path = require('path');
+const logger = require('./logger');
 
 // const childProcess = require('child_process');
 // const opn = require('opn');
@@ -11,6 +11,7 @@ async function zotzenInit(args) {
   if (args.debug) {
     console.log('DEBUG: zotzenInit');
   }
+
   console.log(JSON.stringify(args, null, 2));
   const schema = {
     properties: {
