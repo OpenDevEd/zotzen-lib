@@ -84,16 +84,18 @@ async function zotzenInit(args) {
         let zotConfig = '';
 
         if (zotKey) {
-          zotConfig += `api-key="${zotKey}"\n`;
+          zotConfig += `api-key = "${zotKey}"\n`;
         }
 
         if (zotUid) {
-          zotConfig += `user-id="${zotUid}"\n`;
+          zotConfig += `user-id = "${zotUid}"\n`;
         }
 
         if (zotGid) {
-          zotConfig += `group-id="${zotGid}"\n`;
+          zotConfig += `group-id = ${zotGid}\n`;
         }
+        zotConfig += 'library-type = "group"\n';
+        zotConfig += 'indent = 4\n';
 
         const zotConfigFilePath = path.join(
           zotConfigDirPath,
