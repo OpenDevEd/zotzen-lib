@@ -782,8 +782,8 @@ async function zotzenLink(args, subparsers) {
     zoteroGroup = zoteroParseGroup(args.key);
   }
 
-  //FIXME: kludge for group
-  zoteroGroup = '2259720';
+  // FIXME: kludge for group
+  // zoteroGroup = '2259720';
 
   if (!zoteroGroup) {
     logger.info('unable to extract group');
