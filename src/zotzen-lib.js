@@ -56,14 +56,14 @@ function as_array(value) {
 // PRODUCTION: Load library
 const zenodo = require('zenodo-lib');
 const Zotero = require('zotero-lib');
-const logger = require('../../zenodo-lib/build/logger');
+const logger = require('./logger');
 
 // TODO - TESTING: Load locally for testing:
 // const zenodo = require("../zenodo-lib/build/zenodo-lib.js")
 // const Zotero = require("../zotero-lib/build/zotero-lib.js")
 // ^^^ This requires for zotzen-lib, zenodo-lib and zotero-lib to be in the same directory.
 
-var zotero = new Zotero({});
+let zotero = new Zotero({});
 
 // var fs = require('fs');
 function dummycreate(args) {
@@ -721,6 +721,7 @@ function zoteroParseGroup(str) {
 
 // TODO: complete
 function zenodoParseIDFromZoteroRecord(item) {
+  logger.info('item = %O', item);
   const extra = item.extra.split('\n');
   let doi = '';
   let id = '';
@@ -765,38 +766,64 @@ async function zotzenLink(args, subparsers) {
   // Get the Zotero item [if one was specified]
   let zenodoIDFromZotero = null;
   const zoteroKey = args.key ? zoteroParseKey(args.key) : null;
+  /*
+  if command accepts only one zotero key (via --key):
+  zotzen --group-id 123 command --key ABC
+  zotzen command --key zotero://select/groups/123/items/ABC
 
-  // TODO: Parse zoteroGroup from key if poss
-  //   const zoteroGroup = args.group_id
-  //     ? args.group_id
-  //     : args.key
-  //     ? zoteroParseGroup(args.key)
-  //     : null;
+  if command can accept several keys (no --key):
+  zotzen --group-id 123 sync ABC
+  zotzen sync zotero://select/groups/123/items/ABC
+  */
 
+  // Check whether a zoteroGroup has been provided via arguments
+  logger.info('going to check for group id args = %O', args);
   let zoteroGroup = null;
   if (args.group_id) {
+    // Group has been provided directly
     logger.info('getting group_id from args');
     zoteroGroup = args.group_id;
   } else if (args.key) {
+    // Group may have been provided via zotero://select-style link
+    // zotero://select/groups/2259720/items/KWVWM288
     logger.info('parsing group_id from args key');
-    zoteroGroup = zoteroParseGroup(args.key);
+    logger.info(`key for parsing: ${args.key}`);
+    const parsedGroup = zoteroParseGroup(args.key);
+    logger.info(`parsed group: ${parsedGroup}.`);
+    if (parsedGroup) {
+      zoteroGroup = parsedGroup;
+    }
   }
 
-  // FIXME: kludge for group
-  // zoteroGroup = '2259720';
-
-  if (!zoteroGroup) {
-    logger.info('unable to extract group');
-    return null;
-  } else {
+  if (zoteroGroup) {
+    // If a group has been provided, we place the information into the standard location:
     args.group_id = zoteroGroup;
+  } else {
+    args.group_id = zotero.config.group_id;
+    logger.info(
+      'No group provided via arguments - falling back to config %s',
+      args.group_id
+    );
   }
+
+  // Now that we have extract the group (if possibe), we now set the zotero key
+  if (zoteroKey) {
+    args.key = zoteroKey;
+  } else {
+    logger.error('No key provided in call to zotzenLink');
+    return {
+      status: 1,
+      message: 'No key provided in call to zotzenLink',
+      data: args,
+    };
+  }
+
   let zoteroItem = null;
-  args.key = zoteroKey;
   if (zoteroKey) {
     // There's a key, so we can get the item.
     debug(args, 'zoteroItem: call', args);
     zoteroItem = await zotero.item(args);
+    // TODO: What is the zoteroItem==null ? Exit with error.
     debug(args, 'zotzenCreate: result:', zoteroItem);
     // zoteroRecord.extras -> DOI -> zenodo
     // return zoteroRecord
@@ -804,7 +831,7 @@ async function zotzenLink(args, subparsers) {
     // TODO - this will not work for Zotero recordTypes other the 'record'
     zenodoIDFromZotero = zenodoParseIDFromZoteroRecord(zoteroItem);
   } else {
-    console.log("You did not provided a 'key' (for a zotero item)", args);
+    logger.warn("You did not provided a 'key' (for a zotero item):\n%O", args);
   }
   // -- Zenodo Record [if one was specified]
   let zoteroKeyFromZenodo = null;
@@ -852,7 +879,7 @@ async function zotzenLink(args, subparsers) {
     //    console.log("The zenodo record does not link back to the zotero item - use 'link'")
     // }
   } else {
-    console.log("You did not provided an 'id' (for a zenodo item)", args);
+    logger.warn("You did not provided an 'id' (for a zenodo item) = %O", args);
   }
   // We now have all potential keys and links:
   // TODO - these values are not set correctly...
@@ -999,6 +1026,7 @@ async function checkZotZenLink(args, k, data) {
           'Zotero key provided, and it links to Zenodo ID, but no Zenodo ID provided. Going to check this pair.'
         );
         args.id = k.zenodoIDFromZotero;
+
         return await zotzenLink(args);
       } else {
         if (args.link) {
