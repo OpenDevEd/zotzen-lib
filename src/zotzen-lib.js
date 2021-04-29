@@ -1245,9 +1245,9 @@ async function zotzenSyncOne(args) {
     );
   }
   verbose(args, 'zz=', zz);
-  console.log('TEMPORARY syncone=' + JSON.stringify(zz.data, null, 2));
-  /* TODO:
-   Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
+  console.log(`TEMPORARY syncone=${JSON.stringify(zz.data, null, 2)}`);
+  /* TODO: Need to check whether the zenodo record is editable - otehrwise either abort or
+   (with option 'newversion' given)
    produce a new version
     */
   const zenodoID = zz.data.zenodoID;
@@ -1283,14 +1283,15 @@ async function zotzenSyncOne(args) {
   } else {
     console.log('metadata sync was not requested');
   }
-  console.log('Attachments.');
+  logger.info('checking Attachments.');
   let attachments;
   if (args.attachments) {
-    console.log('Attachments...');
+    logger.info('Attachments arg provided via cli...');
     // get information about attachments
-    let myargs = { ...args, children: true };
+    const myargs = { ...args, children: true };
     // console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))
     const children = await zotero.item(myargs);
+    logger.info('children %O', children);
     // Select file attachments
     attachments = children.filter(
       (c) =>
@@ -1298,16 +1299,30 @@ async function zotzenSyncOne(args) {
         (c.data.linkMode === 'imported_file' ||
           c.data.linkMode === 'imported_url')
     );
+
+    logger.info('selected file attachment count: %s', attachments.length);
+
     if ('type' in args && args.type) {
+      logger.info('filtering attachments by type');
       const attachmentType = args.type.toLowerCase();
       if (attachmentType !== 'all') {
         attachments = attachments.filter((a) =>
           a.data.filename.endsWith(attachmentType)
         );
       }
+      logger.info(
+        'attachment count after filter by arg: %s',
+        attachments.length
+      );
     }
-    if ('tag' in args) {
+
+    if ('tag' in args && args.tag) {
       const tag = as_value(args.tag);
+
+      logger.info(
+        'count before filtering attachments by tag: %s',
+        attachments.length
+      );
       attachments = attachments.filter((a) => {
         // .log(">>>" + a.data.filename)
         // console.log("TEMPORARY=" + JSON.stringify(a.data.tags.map(element => { return element.tag }), null, 2))
@@ -1320,16 +1335,20 @@ async function zotzenSyncOne(args) {
           })
           .includes(tag);
       });
+      logger.info(
+        'count after filtering attachments by tag: %s',
+        attachments.length
+      );
     }
     // console.log("ATTACHMENTS_TEMPORARY="+JSON.stringify(   attachments         ,null,2))
     // TODO: We should remove existing draft attachments in the Zenodo record
-    if (!attachments.length) {
+    if (attachments.length === 0) {
       // TODO: If the Zotern item has too many attachments (>25?) they don't all get picked up. Need to fix that above.
       console.log('No attachments found.');
     } else {
       for (const element of attachments) {
         console.log(
-          `${element.data.key}->${element.data.filename}, ${element.data.tags[0].tag}`
+          `${element.data.key}->${element.data.filename}, ${element.data.tags}`
         );
         const file = await zotero.attachment({
           key: element.data.key,
