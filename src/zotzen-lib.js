@@ -1347,8 +1347,9 @@ async function zotzenSyncOne(args) {
       console.log('No attachments found.');
     } else {
       for (const element of attachments) {
-        console.log(
-          `${element.data.key}->${element.data.filename}, ${element.data.tags}`
+        logger.info(
+          `${element.data.key}->${element.data.filename}, %O`,
+          element.data.tags
         );
         const file = await zotero.attachment({
           key: element.data.key,
@@ -1372,12 +1373,14 @@ async function zotzenSyncOne(args) {
   // Attach outgoing tag:
   if (args.publish) {
     if (updated.submitted) {
-      for (const element of attachments) {
-        const file = await zotero.item({
-          key: element.data.key,
-          addtags: ['_zenodoETH'],
-        });
-        console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
+      if (Array.isArray(attachments)) {
+        for (const element of attachments) {
+          const file = await zotero.item({
+            key: element.data.key,
+            addtags: ['_zenodoETH'],
+          });
+          console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
+        }
       }
       const x = await zotero.item({ key: args.key, addtags: ['_zenodoETH'] });
       console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
