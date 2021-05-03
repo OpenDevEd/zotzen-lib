@@ -1,11 +1,3 @@
-module.exports.sync = zotzenSync;
-module.exports.create = zotzenCreate;
-module.exports.link = zotzenLink;
-module.exports.zenodoCreate = zenodoCreate;
-module.exports.zoteroCreate = zoteroCreate;
-module.exports.zotzenSyncOne = zotzenSyncOne;
-module.exports.newversion = newversion;
-
 // TODO: At the moment, the links produces are not 'sandbox aware'.
 // It's only a minor issue for production, but would be nice for testing.
 // Similarly, check for string '......./zenodo.'
@@ -56,14 +48,14 @@ function as_array(value) {
 // PRODUCTION: Load library
 const zenodo = require('zenodo-lib');
 const Zotero = require('zotero-lib');
-const logger = require('../../zenodo-lib/build/logger');
+const logger = require('./logger');
 
 // TODO - TESTING: Load locally for testing:
 // const zenodo = require("../zenodo-lib/build/zenodo-lib.js")
 // const Zotero = require("../zotero-lib/build/zotero-lib.js")
 // ^^^ This requires for zotzen-lib, zenodo-lib and zotero-lib to be in the same directory.
 
-var zotero = new Zotero({});
+let zotero = new Zotero({});
 
 // var fs = require('fs');
 function dummycreate(args) {
@@ -721,6 +713,7 @@ function zoteroParseGroup(str) {
 
 // TODO: complete
 function zenodoParseIDFromZoteroRecord(item) {
+  logger.info('item = %O', item);
   const extra = item.extra.split('\n');
   let doi = '';
   let id = '';
@@ -765,38 +758,64 @@ async function zotzenLink(args, subparsers) {
   // Get the Zotero item [if one was specified]
   let zenodoIDFromZotero = null;
   const zoteroKey = args.key ? zoteroParseKey(args.key) : null;
+  /*
+  if command accepts only one zotero key (via --key):
+  zotzen --group-id 123 command --key ABC
+  zotzen command --key zotero://select/groups/123/items/ABC
 
-  // TODO: Parse zoteroGroup from key if poss
-  //   const zoteroGroup = args.group_id
-  //     ? args.group_id
-  //     : args.key
-  //     ? zoteroParseGroup(args.key)
-  //     : null;
+  if command can accept several keys (no --key):
+  zotzen --group-id 123 sync ABC
+  zotzen sync zotero://select/groups/123/items/ABC
+  */
 
+  // Check whether a zoteroGroup has been provided via arguments
+  logger.info('going to check for group id args = %O', { ...args });
   let zoteroGroup = null;
   if (args.group_id) {
+    // Group has been provided directly
     logger.info('getting group_id from args');
     zoteroGroup = args.group_id;
   } else if (args.key) {
+    // Group may have been provided via zotero://select-style link
+    // zotero://select/groups/2259720/items/KWVWM288
     logger.info('parsing group_id from args key');
-    zoteroGroup = zoteroParseGroup(args.key);
+    logger.info(`key for parsing: ${args.key}`);
+    const parsedGroup = zoteroParseGroup(args.key);
+    logger.info(`parsed group: ${parsedGroup}.`);
+    if (parsedGroup) {
+      zoteroGroup = parsedGroup;
+    }
   }
 
-  //FIXME: kludge for group
-  zoteroGroup = '2259720';
-
-  if (!zoteroGroup) {
-    logger.info('unable to extract group');
-    return null;
-  } else {
+  if (zoteroGroup) {
+    // If a group has been provided, we place the information into the standard location:
     args.group_id = zoteroGroup;
+  } else {
+    args.group_id = zotero.config.group_id;
+    logger.info(
+      'No group provided via arguments - falling back to config %s',
+      args.group_id
+    );
   }
+
+  // Now that we have extract the group (if possibe), we now set the zotero key
+  if (zoteroKey) {
+    args.key = zoteroKey;
+  } else {
+    logger.error('No key provided in call to zotzenLink');
+    return {
+      status: 1,
+      message: 'No key provided in call to zotzenLink',
+      data: args,
+    };
+  }
+
   let zoteroItem = null;
-  args.key = zoteroKey;
   if (zoteroKey) {
     // There's a key, so we can get the item.
     debug(args, 'zoteroItem: call', args);
     zoteroItem = await zotero.item(args);
+    // TODO: What is the zoteroItem==null ? Exit with error.
     debug(args, 'zotzenCreate: result:', zoteroItem);
     // zoteroRecord.extras -> DOI -> zenodo
     // return zoteroRecord
@@ -804,7 +823,7 @@ async function zotzenLink(args, subparsers) {
     // TODO - this will not work for Zotero recordTypes other the 'record'
     zenodoIDFromZotero = zenodoParseIDFromZoteroRecord(zoteroItem);
   } else {
-    console.log("You did not provided a 'key' (for a zotero item)", args);
+    logger.warn("You did not provided a 'key' (for a zotero item):\n%O", args);
   }
   // -- Zenodo Record [if one was specified]
   let zoteroKeyFromZenodo = null;
@@ -820,8 +839,16 @@ async function zotzenLink(args, subparsers) {
 
     const zenodoID = args.id ? zenodoParseID(args.id) : null;
     try {
+      // FIXME: this is probably making unwanted publish request
+      // which is causing record state in progress
+
+      // TODO: discuss we'd' follow CQS (command query separation) pattern
       console.log('zotzen-lib: calls zenodo.getRecord');
-      zenodoRecord = await zenodo.getRecord(args);
+
+      logger.info(`publish = ${args.publish}`);
+      logger.info(`allArgs = ${JSON.stringify({ ...args }, null, 2)}`);
+
+      zenodoRecord = await zenodo.getRecord({ ...args });
       console.log('zotzen-lib: zenodo.getRecord returns');
     } catch (e) {
       debug(args, 'zotzenCreate: error=', e);
@@ -852,7 +879,7 @@ async function zotzenLink(args, subparsers) {
     //    console.log("The zenodo record does not link back to the zotero item - use 'link'")
     // }
   } else {
-    console.log("You did not provided an 'id' (for a zenodo item)", args);
+    logger.warn("You did not provided an 'id' (for a zenodo item) = %O", args);
   }
   // We now have all potential keys and links:
   // TODO - these values are not set correctly...
@@ -999,6 +1026,7 @@ async function checkZotZenLink(args, k, data) {
           'Zotero key provided, and it links to Zenodo ID, but no Zenodo ID provided. Going to check this pair.'
         );
         args.id = k.zenodoIDFromZotero;
+
         return await zotzenLink(args);
       } else {
         if (args.link) {
@@ -1217,9 +1245,9 @@ async function zotzenSyncOne(args) {
     );
   }
   verbose(args, 'zz=', zz);
-  console.log('TEMPORARY syncone=' + JSON.stringify(zz.data, null, 2));
-  /* TODO:
-   Need to check whether the zenodo record is editable - otehrwise either abort or (with option 'newversion' given)
+  console.log(`TEMPORARY syncone=${JSON.stringify(zz.data, null, 2)}`);
+  /* TODO: Need to check whether the zenodo record is editable - otehrwise either abort or
+   (with option 'newversion' given)
    produce a new version
     */
   const zenodoID = zz.data.zenodoID;
@@ -1255,14 +1283,15 @@ async function zotzenSyncOne(args) {
   } else {
     console.log('metadata sync was not requested');
   }
-  console.log('Attachments.');
+  logger.info('checking Attachments.');
   let attachments;
   if (args.attachments) {
-    console.log('Attachments...');
+    logger.info('Attachments arg provided via cli...');
     // get information about attachments
-    let myargs = { ...args, children: true };
+    const myargs = { ...args, children: true };
     // console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))
     const children = await zotero.item(myargs);
+    logger.info('children %O', children);
     // Select file attachments
     attachments = children.filter(
       (c) =>
@@ -1270,16 +1299,30 @@ async function zotzenSyncOne(args) {
         (c.data.linkMode === 'imported_file' ||
           c.data.linkMode === 'imported_url')
     );
+
+    logger.info('selected file attachment count: %s', attachments.length);
+
     if ('type' in args && args.type) {
+      logger.info('filtering attachments by type');
       const attachmentType = args.type.toLowerCase();
       if (attachmentType !== 'all') {
         attachments = attachments.filter((a) =>
           a.data.filename.endsWith(attachmentType)
         );
       }
+      logger.info(
+        'attachment count after filter by arg: %s',
+        attachments.length
+      );
     }
-    if ('tag' in args) {
+
+    if ('tag' in args && args.tag) {
       const tag = as_value(args.tag);
+
+      logger.info(
+        'count before filtering attachments by tag: %s',
+        attachments.length
+      );
       attachments = attachments.filter((a) => {
         // .log(">>>" + a.data.filename)
         // console.log("TEMPORARY=" + JSON.stringify(a.data.tags.map(element => { return element.tag }), null, 2))
@@ -1292,16 +1335,21 @@ async function zotzenSyncOne(args) {
           })
           .includes(tag);
       });
+      logger.info(
+        'count after filtering attachments by tag: %s',
+        attachments.length
+      );
     }
     // console.log("ATTACHMENTS_TEMPORARY="+JSON.stringify(   attachments         ,null,2))
     // TODO: We should remove existing draft attachments in the Zenodo record
-    if (!attachments.length) {
+    if (attachments.length === 0) {
       // TODO: If the Zotern item has too many attachments (>25?) they don't all get picked up. Need to fix that above.
       console.log('No attachments found.');
     } else {
       for (const element of attachments) {
-        console.log(
-          `${element.data.key}->${element.data.filename}, ${element.data.tags[0].tag}`
+        logger.info(
+          `${element.data.key}->${element.data.filename}, %O`,
+          element.data.tags
         );
         const file = await zotero.attachment({
           key: element.data.key,
@@ -1321,16 +1369,20 @@ async function zotzenSyncOne(args) {
   // console.log("updateDoc=" + JSON.stringify(updateDoc, null, 2))
   // make sure we get the file links:
   updateDoc.strict = true;
+  logger.info('updating zenodo record');
   const updated = await zenodo.update(updateDoc);
+  logger.info('updated zenodo record = %O', updated);
   // Attach outgoing tag:
   if (args.publish) {
     if (updated.submitted) {
-      for (const element of attachments) {
-        const file = await zotero.item({
-          key: element.data.key,
-          addtags: ['_zenodoETH'],
-        });
-        console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
+      if (Array.isArray(attachments)) {
+        for (const element of attachments) {
+          const file = await zotero.item({
+            key: element.data.key,
+            addtags: ['_zenodoETH'],
+          });
+          console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
+        }
       }
       const x = await zotero.item({ key: args.key, addtags: ['_zenodoETH'] });
       console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
@@ -1883,3 +1935,11 @@ async function finalActions(zoteroItem, zenodoResponse) {
     }
   }
 }
+
+module.exports.sync = zotzenSync;
+module.exports.create = zotzenCreate;
+module.exports.link = zotzenLink;
+module.exports.zenodoCreate = zenodoCreate;
+module.exports.zoteroCreate = zoteroCreate;
+module.exports.zotzenSyncOne = zotzenSyncOne;
+module.exports.newversion = newversion;
