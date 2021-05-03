@@ -120,8 +120,8 @@ function getArguments() {
 }
 
 async function main() {
-  console.log('main: arguments');
   const args = getArguments();
+  console.log('main: arguments', { ...args });
   console.log('main: api calls');
   if (args.version) {
     getVersion();

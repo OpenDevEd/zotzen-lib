@@ -1,11 +1,3 @@
-module.exports.sync = zotzenSync;
-module.exports.create = zotzenCreate;
-module.exports.link = zotzenLink;
-module.exports.zenodoCreate = zenodoCreate;
-module.exports.zoteroCreate = zoteroCreate;
-module.exports.zotzenSyncOne = zotzenSyncOne;
-module.exports.newversion = newversion;
-
 // TODO: At the moment, the links produces are not 'sandbox aware'.
 // It's only a minor issue for production, but would be nice for testing.
 // Similarly, check for string '......./zenodo.'
@@ -777,7 +769,7 @@ async function zotzenLink(args, subparsers) {
   */
 
   // Check whether a zoteroGroup has been provided via arguments
-  logger.info('going to check for group id args = %O', args);
+  logger.info('going to check for group id args = %O', { ...args });
   let zoteroGroup = null;
   if (args.group_id) {
     // Group has been provided directly
@@ -847,8 +839,16 @@ async function zotzenLink(args, subparsers) {
 
     const zenodoID = args.id ? zenodoParseID(args.id) : null;
     try {
+      // FIXME: this is probably making unwanted publish request
+      // which is causing record state in progress
+
+      // TODO: discuss we'd' follow CQS (command query separation) pattern
       console.log('zotzen-lib: calls zenodo.getRecord');
-      zenodoRecord = await zenodo.getRecord(args);
+
+      logger.info(`publish = ${args.publish}`);
+      logger.info(`allArgs = ${JSON.stringify({ ...args }, null, 2)}`);
+
+      zenodoRecord = await zenodo.getRecord({ ...args });
       console.log('zotzen-lib: zenodo.getRecord returns');
     } catch (e) {
       debug(args, 'zotzenCreate: error=', e);
@@ -1369,7 +1369,9 @@ async function zotzenSyncOne(args) {
   // console.log("updateDoc=" + JSON.stringify(updateDoc, null, 2))
   // make sure we get the file links:
   updateDoc.strict = true;
+  logger.info('updating zenodo record');
   const updated = await zenodo.update(updateDoc);
+  logger.info('updated zenodo record = %O', updated);
   // Attach outgoing tag:
   if (args.publish) {
     if (updated.submitted) {
@@ -1933,3 +1935,11 @@ async function finalActions(zoteroItem, zenodoResponse) {
     }
   }
 }
+
+module.exports.sync = zotzenSync;
+module.exports.create = zotzenCreate;
+module.exports.link = zotzenLink;
+module.exports.zenodoCreate = zenodoCreate;
+module.exports.zoteroCreate = zoteroCreate;
+module.exports.zotzenSyncOne = zotzenSyncOne;
+module.exports.newversion = newversion;
