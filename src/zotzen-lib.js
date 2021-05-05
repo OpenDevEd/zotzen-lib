@@ -280,6 +280,7 @@ async function zoteroCreate(args) {
     decorations.push(res);
   }
 
+  console.log("[zotzenCreate] "+zoteroRecord.key)
   // Zotero item - attach links ... to Google Doc
   if (args.googledoc) {
     // Attach link to google doc, if there is one:
@@ -296,6 +297,7 @@ async function zoteroCreate(args) {
   }
 
   // Zotero item - attach note
+  console.log("[zotzenCreate] "+zoteroRecord.key)
   const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : '';
   const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : '';
   const content = `${team} ${note}`;
@@ -309,19 +311,21 @@ async function zoteroCreate(args) {
   newZoteroRecord = zoteroRecord;
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
   if (kerko_url != '') {
-    console.log('updating...');
+    console.log('[zotzen] updating... with kerko url');
     const zoteroUpdate = {
       key: zoteroRecord.key,
       version: zoteroRecordVersion,
-      update: { url: kerko_url },
+      json: { url: kerko_url },
       fullresponse: false,
     };
     const status = await zotero.update_item(zoteroUpdate);
+    console.log("[zotzen] status="+JSON.stringify( status           ,null,2))     
     // update_item doesn't return the item, but only a status - we should check the status at this point.
     newZoteroRecord = await zotero.item({
       key: zoteroRecord.key,
       fullresponse: false,
     });
+    console.log("[zotzen] amended record="+JSON.stringify( newZoteroRecord           ,null,2))     
     // Attach link to kerko
     const res = await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, {
       title: '👀View item in Evidence Library',
@@ -406,7 +410,7 @@ async function zoteroCreateCollections(
   collectionKey = '',
   groupID,
   isgroup = true
-) {}
+) { }
 
 /*
 TOP-LEVEL FUNCTION 
@@ -533,7 +537,7 @@ async function zotzenCreate(args, subparsers) {
     console.log('The zotero record is in a user library.');
     return this.message(1, 'ERROR: group-type=user not implemented');
   }
-  // console.log(`key=${zoteroRecord.key}`)
+  console.log(`[zotzenCreate] key=${zoteroRecord.key}`)
   // process.exit(1)
   // Now update the zenodo record with the ZoteroId.
   let zenodoRecord2;
@@ -550,9 +554,8 @@ async function zotzenCreate(args, subparsers) {
     args.zotero_link = zoteroSelectLink;
     args.id = zenodoRecord.id;
     if (args.kerko_url) {
-      args.description += `<p>Available from <a href="${
-        args.kerko_url + DOI
-      }">${args.kerko_url + DOI}</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+      args.description += `<p>Available from <a href="${args.kerko_url + DOI
+        }">${args.kerko_url + DOI}</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
     }
     zenodoRecord2 = await zenodo.update(args);
     // console.log(JSON.stringify(zenodoRecord2, null, 2))
@@ -560,6 +563,7 @@ async function zotzenCreate(args, subparsers) {
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
   let enclose = null;
   if (args.enclose && args.collections) {
+    console.log("[zotzenCreate] enclosing ${zoteroRecord.key}")
     enclose = await zotero.enclose_item_in_collection({
       key: zoteroRecord.key,
       group_id: zoteroRecordGroup,
@@ -1371,26 +1375,42 @@ async function zotzenSyncOne(args) {
   updateDoc.strict = true;
   logger.info('updating zenodo record');
   const updated = await zenodo.update(updateDoc);
-  logger.info('updated zenodo record = %O', updated);
-  // Attach outgoing tag:
-  if (args.publish) {
-    if (updated.submitted) {
-      if (Array.isArray(attachments)) {
+  // handle error if the update wasn't successful. Requires changing zenodo.update to return the status.
+  // if (updated.status != 0) {    
+  if (1 != 1) {
+    // error handling
+  } else {
+    logger.info('updated zenodo record = %O', updated);
+    // The update was successful -- If attachments sync was requested, now mark the same files on zotero
+    if (args.attachments) {
+      if (attachments.length === 0) {
+      } else {
+        // Attach a tag to the attachments
         for (const element of attachments) {
+          logger.info(
+            `${element.data.key}->${element.data.filename}, %O`,
+            element.data.tags
+          );
           const file = await zotero.item({
             key: element.data.key,
-            addtags: ['_zenodoETH'],
+            addtags: ['_zenodoETH', '_zenodoETH:uploaded'],
           });
           console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
         }
       }
-      const x = await zotero.item({ key: args.key, addtags: ['_zenodoETH'] });
-      console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
-    } else {
-      console.log('Record unsubmitted');
+    }
+    // Attach outgoing tag:
+    if (args.publish) {
+      logger.info('Publishing...');
+      if (updated.submitted) {
+        const x = await zotero.item({ key: args.key, addtags: ['_zenodoETH', '_zenodoETH:submitted'] });
+        console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
+      } else {
+        console.log('Record unsubmitted');
+      }
     }
   }
-  process.exit(1);
+  // process.exit(1);
   // TODOMD5
   // TODO: updated has the md5 sums for the files. They should be compared the md5 sums from Zotero.
   // TODO - this should report on what was done: List the metadata and the files.
@@ -1506,9 +1526,8 @@ async function pushAttachment(itemKey, attachmentkey, fileName, doi, groupId, us
 */
 
 function getZoteroSelectLinkV1(group_id, key, group = false) {
-  return `zotero://select/${
-    group ? 'groups' : 'users'
-  }/${group_id}/items/${key}`;
+  return `zotero://select/${group ? 'groups' : 'users'
+    }/${group_id}/items/${key}`;
 }
 function getZoteroSelectLink(
   item_key,
@@ -1516,9 +1535,8 @@ function getZoteroSelectLink(
   isgroup = true,
   isitem = true
 ) {
-  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${
-    isitem ? 'items' : 'collections'
-  }/${item_key}`;
+  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'
+    }/${item_key}`;
 }
 // zotero://select/groups/2259720/collections/HP6NALR4
 // zotero://select/groups/2259720/items/Q6FADQE3
@@ -1527,7 +1545,7 @@ function getZoteroSelectLink(
 Replace runCommand with two functions:
 - zenodoAPI
 - zoteroAPI
-
+ 
 */
 /*
 function runCommandWithJsonFileInput(command, json, zotero = true) {
@@ -1597,7 +1615,7 @@ function zoteroCreate(args) {
             )
         );
     }
-
+ 
     const zoteroCreateItemTemplate = runCommand(
         'create-item --template report',
         true
@@ -1706,7 +1724,7 @@ async function zotzenGet(args) {
     if (args.debug) {
         console.log('DEBUG: zotzenGet');
     }
-
+ 
     await Promise.all(
         args.zot.map(async (zot) => {
             let groupId = null;
@@ -1729,7 +1747,7 @@ async function zotzenGet(args) {
             } else {
                 itemKey = zot;
             }
-
+ 
             const zoteroItem = zoteroGet(groupId, userId, itemKey);
             let doi = null;
             if (zoteroItem.data.DOI) {
@@ -1743,13 +1761,13 @@ async function zotzenGet(args) {
                     }
                 }
             }
-
+ 
             const zoteroSelectLink = getZoteroSelectLinkV1(
                 groupId || userId,
                 itemKey,
                 !!groupId
             );
-
+ 
             let zenodoRawItem = doi && zenodoGetRaw(doi);
             if (args.newdoi) {
                 if (args.debug) {
@@ -1834,13 +1852,13 @@ async function zotzenGet(args) {
                     }
                 }
             }
-
+ 
             let zenodoItem = null;
             if (doi) {
                 zenodoItem = zenodoGet(doi);
                 zenodoRawItem = zenodoGetRaw(doi);
             }
-
+ 
             if (!zoteroItem.data.title) {
                 console.log('Zotero item does not have title. Exiting...');
                 return;
@@ -1887,7 +1905,7 @@ async function zotzenGet(args) {
                 }
             }
         }
-
+ 
         )
     );
 }
