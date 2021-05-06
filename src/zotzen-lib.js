@@ -762,6 +762,7 @@ async function zotzenLink(args, subparsers) {
   // Get the Zotero item [if one was specified]
   let zenodoIDFromZotero = null;
   const zoteroKey = args.key ? zoteroParseKey(args.key) : null;
+
   /*
   if command accepts only one zotero key (via --key):
   zotzen --group-id 123 command --key ABC
@@ -782,10 +783,8 @@ async function zotzenLink(args, subparsers) {
   } else if (args.key) {
     // Group may have been provided via zotero://select-style link
     // zotero://select/groups/2259720/items/KWVWM288
-    logger.info('parsing group_id from args key');
-    logger.info(`key for parsing: ${args.key}`);
     const parsedGroup = zoteroParseGroup(args.key);
-    logger.info(`parsed group: ${parsedGroup}.`);
+    logger.info(`parsed group: ${parsedGroup} from key: ${args.key}`);
     if (parsedGroup) {
       zoteroGroup = parsedGroup;
     }
@@ -797,7 +796,7 @@ async function zotzenLink(args, subparsers) {
   } else {
     args.group_id = zotero.config.group_id;
     logger.info(
-      'No group provided via arguments - falling back to config %s',
+      'No group provided via arguments - falling back to config group id = %s',
       args.group_id
     );
   }
@@ -1121,7 +1120,7 @@ async function update_doi_and_link(k) {
 
 async function linkZotZen(args, k, data) {
   // TODO: The keySet should have zoteroGroup as well, adn this shoudl be checked...
-  /*const keySet = {
+  /* const keySet = {
         zoteroKey: zoteroKey,
         zenodoID: zenodoID,
         zoteroGroup: zoteroGroup,
@@ -1262,6 +1261,9 @@ async function zotzenSyncOne(args) {
     console.log('metadata');
     if (zz.originaldata && zz.originaldata.zotero) {
       const zoteroItem = zz.originaldata.zotero;
+      logger.info(`zoteroItem = ${JSON.stringify(zoteroItem, null, 2)}`, {
+        func: 'zotzenSyncOne',
+      });
       // Sync metadata
       updateDoc = {
         ...updateDoc,
