@@ -10,8 +10,16 @@
     "ecmaVersion": 12
   },
   "rules": {
-    "prettier/prettier": ["error", { "singleQuote": true }],
     "comma-dangle": "off",
-    "no-console": "off"
+    "no-console": "off",
+    "prettier/prettier": [
+      "error",
+      { "singleQuote": true, "trailingComma": "es5" }
+    ],
+    "import/extensions": "off",
+    "import/no-unresolved": [2, { "commonjs": true }],
+    "camelcase": "warn",
+    "operator-linebreak": "off",
+    "no-underscore-dangle": "off"
   }
 }
