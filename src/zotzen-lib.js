@@ -3,45 +3,11 @@
 // Similarly, check for string '......./zenodo.'
 // where we need to enter missing parts of DOIs properly
 
-const zenodoLibCreate_Args = {
-  title: 'string',
-  date: 'date string',
-  description: 'string',
-  authors: ['First Second Last; affiliation', 'First2 Last2; affiliation2'],
-  communities: 'file to communities',
-  zotero_link: 'string (zotero://...)',
-  reportNumber: 'Zotero only',
-  reportType: 'Zotero only',
-  institution: 'EdTech Hub',
-  language: 'en',
-  rights: 'Creative Commons Attribution 4.0',
-  googledoc: 'url to google doc - not working yet',
-  kerko_url: 'https://docs.edtechhub.org/lib/',
-  tags: ['AddedByZotZen'],
-  collections: ['IY4IS3FU'],
-  team: 'neither',
-  group_id: 2259720,
-  json: 'Zenodo template file',
-};
-
 function as_value(value) {
   if (Array.isArray(value)) {
     value = value[0];
-  } else {
   }
   return value;
-}
-
-function as_array(value) {
-  let out = [];
-  if (value) {
-    if (!Array.isArray(value)) {
-      out = [value];
-    } else {
-      out = value;
-    }
-  }
-  return out;
 }
 
 // const { delete } = require("request-promise-native");
@@ -55,7 +21,7 @@ const logger = require('./logger');
 // const Zotero = require("../zotero-lib/build/zotero-lib.js")
 // ^^^ This requires for zotzen-lib, zenodo-lib and zotero-lib to be in the same directory.
 
-let zotero = new Zotero({});
+const zotero = new Zotero({});
 
 // var fs = require('fs');
 function dummycreate(args) {
@@ -95,6 +61,7 @@ async function zenodoCreate(args) {
 
   console.log('zenodoCreate, args=' + JSON.stringify(args, null, 2));
 
+  let zenodoRecord;
   try {
     console.log('zotzen-lib: calls zenodo.create');
     zenodoRecord = await zenodo.create(args);
@@ -111,8 +78,8 @@ async function zenodoCreate(args) {
   // const zoteroRecord = zoteroAPI(zoteroArgs);
   if (
     !zenodoRecord ||
-    !zenodoRecord['metadata'] ||
-    !zenodoRecord['metadata']['prereserve_doi']
+    !zenodoRecord.metadata ||
+    !zenodoRecord.metadata.prereserve_doi
   ) {
     console.log('ERROR in ZenodoRecord creation.');
     process.exit(1);
