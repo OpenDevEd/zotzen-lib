@@ -31,14 +31,10 @@
   "dependencies": {
     "argparse": "^2.0.1",
     "axios": "^0.21.1",
-    "json": "^10.0.0",
     "opn": "^6.0.0",
-    "pathlib": "^0.1.2",
     "prompt": "^1.0.0",
     "request": "^2.34",
     "request-promise-native": "^1.0.9",
-    "requests": "^0.3.0",
-    "sys": "0.0.1",
     "winston": "^3.3.3",
     "zenodo-lib": "^1.0.68",
     "zotero-lib": "^1.0.58"
