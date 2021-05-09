@@ -382,7 +382,7 @@ async function zoteroCreateCollections(
 ) {}
 
 /*
-TOP-LEVEL FUNCTION 
+TOP-LEVEL FUNCTION
 */
 async function zotzenCreate(args, subparsers) {
   // TODO - we have to fix the communities for Zenodo.
@@ -1190,7 +1190,7 @@ function linkZotZen(zoteroKey, zenodoDoi, group, zoteroLink = null) {
             extra: `DOI: ${zenodoDoi}`,
         }
     );
- 
+
     if (zoteroLink) {
         runCommand(`update ${zenodoDoi} --zotero-link ${zoteroLink}`, false);
     }
