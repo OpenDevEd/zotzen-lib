@@ -1,18 +1,6 @@
 const { createLogger, format, transports } = require('winston');
 
-const { ArgumentParser } = require('argparse');
-
-const parser = new ArgumentParser({
-  add_help: true,
-  description: 'Custom Logs Level CLI',
-});
-parser.add_argument('-v', '--verbose', {
-  help: 'verbose output',
-  action: 'count',
-});
-const args = parser.parse_args();
-
-function getLogingLevel(config) {
+function getLogingLevel(config = {}) {
   let level = 'error';
 
   const verbose = config.verbose || false;
@@ -27,7 +15,7 @@ function getLogingLevel(config) {
 // Configure the Winston logger. For the complete documentation see https://github.com/winstonjs/winston
 const logger = createLogger({
   // To see more detailed errors, change this to 'debug'
-  level: getLogingLevel(args),
+  level: getLogingLevel(),
   format: format.combine(format.splat(), format.simple()),
   transports: [
     //
