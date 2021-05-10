@@ -1241,7 +1241,7 @@ async function zotzenSyncOne(args) {
         description: zoteroItem.abstractNote,
         // TODO title and description works, but creators doesn't...
         // new authors in zotero dont make it to zenodo
-        creators: zoteroItem.creators.map((c) => ({
+        authors: zoteroItem.creators.map((c) => ({
           name: c.name ? c.name : `${c.firstName} ${c.lastName}`,
         })),
       };
@@ -1344,7 +1344,9 @@ async function zotzenSyncOne(args) {
   // console.log("updateDoc=" + JSON.stringify(updateDoc, null, 2))
   // make sure we get the file links:
   updateDoc.strict = true;
-  logger.info('updating zenodo record');
+  logger.info(
+    `updating zenodo record, data = ${JSON.stringify(updateDoc, null, 2)}`
+  );
   const updated = await zenodo.update(updateDoc);
   // handle error if the update wasn't successful. Requires changing zenodo.update to return the status.
   // if (updated.status != 0) {
