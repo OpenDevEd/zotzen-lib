@@ -1,7 +1,7 @@
 const { createLogger, format, transports } = require('winston');
 
 function getLogingLevel(config = {}) {
-  let level = 'error';
+  let level = 'info';
 
   const verbose = config.verbose || false;
 
