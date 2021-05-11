@@ -23,13 +23,6 @@ const logger = require('./logger');
 
 const zotero = new Zotero({});
 
-// var fs = require('fs');
-function dummycreate(args) {
-  var create_data = require('./data.json');
-  create_data['args'] = args;
-  return create_data;
-}
-
 function debug(args, msg, data) {
   if (
     args &&
@@ -111,7 +104,7 @@ async function zoteroCreate(args) {
     }
   }
   const doistr = args.doi ? 'DOI: ' + args.doi : '';
-  let tagsarr = zotero.objectifyTags(args.tags);
+  const tagsarr = zotero.objectifyTags(args.tags);
   let authorsarr = [];
   if (args.authors) {
     args.authors.forEach((myauth) => {
@@ -269,13 +262,13 @@ async function zoteroCreate(args) {
   const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : '';
   const content = `${team} ${note}`;
   const res = await zotero.attachNoteToItem(zoteroRecord.key, {
-    content: content,
+    content,
     tags: ['_r:noteViaForm', '_r:zotzen'],
   });
   decorations.push(res);
 
   // Attach kerko url to Zotero record (as url)
-  newZoteroRecord = zoteroRecord;
+  let newZoteroRecord = zoteroRecord;
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
   if (kerko_url != '') {
     console.log('[zotzen] updating... with kerko url');
@@ -373,13 +366,6 @@ async function zoteroCreate(args) {
     decorations,
   ];
 }
-
-async function zoteroCreateCollections(
-  itemKey,
-  collectionKey = '',
-  groupID,
-  isgroup = true
-) { }
 
 /*
 TOP-LEVEL FUNCTION
@@ -523,8 +509,9 @@ async function zotzenCreate(args, subparsers) {
     args.zotero_link = zoteroSelectLink;
     args.id = zenodoRecord.id;
     if (args.kerko_url) {
-      args.description += `<p>Available from <a href="${args.kerko_url + DOI
-        }">${args.kerko_url + DOI}</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+      args.description += `<p>Available from <a href="${
+        args.kerko_url + DOI
+      }">${args.kerko_url + DOI}</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
     }
     zenodoRecord2 = await zenodo.update(args);
     // console.log(JSON.stringify(zenodoRecord2, null, 2))
@@ -546,19 +533,19 @@ async function zotzenCreate(args, subparsers) {
       zenodoRecordID: zenodoRecord.id,
       zoteroItemKey: zoteroRecord.key,
       zoteroGroup: zoteroRecordGroup,
-      zoteroSelectLink: zoteroSelectLink,
-      zoteroRecordVersion: zoteroRecordVersion,
-      DOI: DOI,
-      kerko_url: kerko_url,
+      zoteroSelectLink,
+      zoteroRecordVersion,
+      DOI,
+      kerko_url,
     },
     zotero: {
       data: zoteroRecord,
-      decorations: decorations,
+      decorations,
     },
     zenodo: {
       data: zenodoRecord2.metadata,
     },
-    enclose: enclose,
+    enclose,
   };
   console.log('Zotero/Zenodo records successfully created.');
   return record;
@@ -630,7 +617,7 @@ function message(stat = 0, msg = 'None', data = null) {
   return {
     status: stat,
     message: msg,
-    data: data,
+    data,
   };
 }
 
@@ -864,15 +851,15 @@ async function zotzenLink(args, subparsers) {
       `zotzenLink:: state: ${zenodoState} = ${zenodoRecord.state}; submitted: ${zenodoSubmitted}=${zenodoRecord.submitted}`
     );
   const keySet = {
-    zoteroKey: zoteroKey,
-    zenodoID: zenodoID,
-    zoteroGroup: zoteroGroup,
-    zenodoIDFromZotero: zenodoIDFromZotero,
-    zoteroKeyFromZenodo: zoteroKeyFromZenodo,
-    zoteroGroupFromZenodo: zoteroGroupFromZenodo,
+    zoteroKey,
+    zenodoID,
+    zoteroGroup,
+    zenodoIDFromZotero,
+    zoteroKeyFromZenodo,
+    zoteroGroupFromZenodo,
     doi: '[...]/zenodo.' + zenodoID,
-    zenodoState: zenodoState,
-    zenodoSubmitted: zenodoSubmitted,
+    zenodoState,
+    zenodoSubmitted,
   };
   const data = {
     zotero: zoteroItem,
@@ -1172,10 +1159,10 @@ async function linkZotZen(args, k, data) {
     );
   }
   return {
-    args: args,
+    args,
     keySet: k,
     data_in: data,
-    data_out: data_out,
+    data_out,
   };
 }
 /*
@@ -1238,8 +1225,6 @@ async function zotzenSyncOne(args) {
         ...updateDoc,
         title: zoteroItem.title,
         description: zoteroItem.abstractNote,
-        // TODO title and description works, but creators doesn't...
-        // new authors in zotero dont make it to zenodo
         authors: zoteroItem.creators.map((c) => ({
           name: c.name ? c.name : `${c.firstName} ${c.lastName}`,
         })),
@@ -1485,8 +1470,9 @@ function getZoteroSelectLink(
   isgroup = true,
   isitem = true
 ) {
-  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'
-    }/${item_key}`;
+  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${
+    isitem ? 'items' : 'collections'
+  }/${item_key}`;
 }
 
 module.exports.sync = zotzenSync;
