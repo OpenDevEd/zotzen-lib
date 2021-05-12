@@ -782,7 +782,9 @@ async function zotzenLink(args, subparsers) {
     // TODO - this will not work for Zotero recordTypes other the 'record'
     zenodoIDFromZotero = zenodoParseIDFromZoteroRecord(zoteroItem);
   } else {
-    logger.warn("You did not provided a 'key' (for a zotero item):\n%O", args);
+    logger.warn("You did not provided a 'key' (for a zotero item):\n%O", {
+      ...args,
+    });
   }
   // -- Zenodo Record [if one was specified]
   let zoteroKeyFromZenodo = null;
@@ -838,7 +840,9 @@ async function zotzenLink(args, subparsers) {
     //    console.log("The zenodo record does not link back to the zotero item - use 'link'")
     // }
   } else {
-    logger.warn("You did not provided an 'id' (for a zenodo item) = %O", args);
+    logger.warn("You did not provided an 'id' (for a zenodo item) = %O", {
+      ...args,
+    });
   }
   // We now have all potential keys and links:
   // TODO - these values are not set correctly...
@@ -1225,13 +1229,19 @@ async function zotzenSyncOne(args) {
         ...updateDoc,
         title: zoteroItem.title,
         description: zoteroItem.abstractNote,
-        authors: zoteroItem.creators.map((c) => ({
-          name: c.name ? c.name : `${c.firstName} ${c.lastName}`,
-        })),
       };
+
+      if (Array.isArray(zoteroItem.creators) && zoteroItem.creators.length) {
+        logger.info('adding name from zotero');
+        updateDoc.authors = zoteroItem.creators.map((c) => ({
+          name: c.name ? c.name : `${c.firstName} ${c.lastName}`,
+        }));
+      }
+
       if (zoteroItem.date) {
         updateDoc.publication_date = zoteroItem.date;
       }
+
       // console.log("TEMPORARY="+JSON.stringify( updateDoc           ,null,2))
       // TODO: capture this output
       console.log('metadata done');
@@ -1333,6 +1343,7 @@ async function zotzenSyncOne(args) {
   // console.log("updateDoc=" + JSON.stringify(updateDoc, null, 2))
   // make sure we get the file links:
   updateDoc.strict = true;
+  updateDoc.publish = args.publish;
   logger.info(
     `updating zenodo record, data = ${JSON.stringify(updateDoc, null, 2)}`
   );
