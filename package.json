@@ -10,6 +10,7 @@
     "test_zoterocreate": "node tests/test_zoterocreate.js",
     "test_create": "node tests/test_create.js",
     "cli": "node src/zotzen-cli.js",
+    "dev": "node src/zotzen-cli.js",
     "prepare": "echo \"prepare\"",
     "version:old": "git add -A src",
     "postversion": "git push && git push --tags",

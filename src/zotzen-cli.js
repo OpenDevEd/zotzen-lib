@@ -9,6 +9,8 @@ const { zotzenInit } = require('./zotzen-cli-helper');
 // This only works when running package from directory.
 // const version = process.env.npm_package_version
 // Read package.json, and extract version.
+// TODO: convert this to process.env.npm_package
+// TODO: add scripts to run zotzen with npm run script-name
 const pjson = require('../package.json');
 const { getVersion } = require('./getVersion');
 const logger = require('./logger');
@@ -16,6 +18,8 @@ const logger = require('./logger');
 if (pjson.version) logger.info('zotzen version=%s', pjson.version);
 
 function getArguments() {
+  // TODO: extract parsers to separate shared file
+
   const parser = new ArgumentParser({
     description:
       'Zotzen command line utility. Move data and files from Zotero to Zenodo.',
@@ -150,4 +154,3 @@ async function main() {
 console.log('Start.');
 main();
 console.log('End.');
-//process.exit(0)
