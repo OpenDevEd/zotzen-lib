@@ -1,0 +1,1431 @@
+info: args = Namespace(zotero_config='zotero-cli.toml', zenodo_config='config.json', zotero_config_json=undefined, zenodo_config_json=undefined, zotero_api_key=undefined, zenodo_access_token=undefined, zenodo_sandbox=false, verbose=false, debug=false, show=false, open=false, oapp=false, dump=false, dryrun=false, version=false, group_id=[ '2259720' ], json=undefined, title='My title - CLI', authors=[ 'LAST, FIRST; LAST2, FIRST2' ], authordata=undefined, date='2021', description=undefined, communities=undefined, add_communities=undefined, collections=undefined, kerko_url=[ 'https://docs.edtechhub.org/lib/' ], googledoc=undefined, enclose=false, func=[AsyncFunction: zotzenCreate])
+info: zotzen version=1.0.63
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  group_id: [ '2259720' ],
+  json: undefined,
+  title: 'My title - CLI',
+  authors: [ 'LAST, FIRST; LAST2, FIRST2' ],
+  authordata: undefined,
+  date: '2021',
+  description: undefined,
+  communities: undefined,
+  add_communities: undefined,
+  collections: undefined,
+  kerko_url: [ 'https://docs.edtechhub.org/lib/' ],
+  googledoc: undefined,
+  enclose: false,
+  func: [AsyncFunction: zotzenCreate] }
+info: not publishing in finalactions2
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators: [ { affiliation: 'LAST2, FIRST2', name: 'LAST, FIRST' } ],
+  description: 'No description available.',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.822118', recid: 822118 },
+  publication_date: '2021-05-14',
+  publication_type: 'report',
+  title: 'My title - CLI',
+  upload_type: 'publication' }
+info: args = Namespace(zotero_config='zotero-cli.toml', zenodo_config='config.json', zotero_config_json='', zenodo_config_json='', zotero_api_key='', zenodo_access_token='', zenodo_sandbox='', verbose='', debug='', show='', open='', oapp='', dump='', dryrun='', version='', group_id=[ '2259720' ], json='', title='My title - CLI', authors=[ 'LAST, FIRST; LAST2, FIRST2' ], authordata='', date='2021', description='<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.822118">https://docs.edtechhub.org/lib/10.5072/zenodo.822118</a></p>', communities='', add_communities='', collections=[], kerko_url=[ 'https://docs.edtechhub.org/lib/' ], googledoc='', enclose='', func=[AsyncFunction: zotzenCreate], id=822118, doi='10.5072/zenodo.822118', base='sandbox', zotero_link='zotero://select/groups/2259720/items/59X7BQB6')
+info: finalactions called in update
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: '',
+  zenodo_config_json: '',
+  zotero_api_key: '',
+  zenodo_access_token: '',
+  zenodo_sandbox: '',
+  verbose: '',
+  debug: '',
+  show: '',
+  open: '',
+  oapp: '',
+  dump: '',
+  dryrun: '',
+  version: '',
+  group_id: [ '2259720' ],
+  json: '',
+  title: 'My title - CLI',
+  authors: [ 'LAST, FIRST; LAST2, FIRST2' ],
+  authordata: '',
+  date: '2021',
+  description:
+   '<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.822118">https://docs.edtechhub.org/lib/10.5072/zenodo.822118</a></p>',
+  communities: '',
+  add_communities: '',
+  collections: [],
+  kerko_url: [ 'https://docs.edtechhub.org/lib/' ],
+  googledoc: '',
+  enclose: '',
+  func: [AsyncFunction: zotzenCreate],
+  id: 822118,
+  doi: '10.5072/zenodo.822118',
+  base: 'sandbox',
+  zotero_link: 'zotero://select/groups/2259720/items/59X7BQB6' }
+info: not publishing in finalactions2
+info: args = Namespace(zotero_config='zotero-cli.toml', zenodo_config='config.json', zotero_config_json=undefined, zenodo_config_json=undefined, zotero_api_key=undefined, zenodo_access_token=undefined, zenodo_sandbox=false, verbose=false, debug=false, show=false, open=false, oapp=false, dump=false, dryrun=false, version=false, group_id=[ '2259720' ], json=undefined, title='My title - CLI', authors=[ 'LAST, FIRST; LAST2, FIRST2' ], authordata=undefined, date='2021', description=undefined, communities=undefined, add_communities=undefined, collections=undefined, kerko_url=[ 'https://docs.edtechhub.org/lib/' ], googledoc=[ 'https://some.google.doc' ], enclose=true, func=[AsyncFunction: zotzenCreate])
+info: zotzen version=1.0.63
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  group_id: [ '2259720' ],
+  json: undefined,
+  title: 'My title - CLI',
+  authors: [ 'LAST, FIRST; LAST2, FIRST2' ],
+  authordata: undefined,
+  date: '2021',
+  description: undefined,
+  communities: undefined,
+  add_communities: undefined,
+  collections: undefined,
+  kerko_url: [ 'https://docs.edtechhub.org/lib/' ],
+  googledoc: [ 'https://some.google.doc' ],
+  enclose: true,
+  func: [AsyncFunction: zotzenCreate] }
+info: not publishing in finalactions2
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators: [ { affiliation: 'LAST2, FIRST2', name: 'LAST, FIRST' } ],
+  description: 'No description available.',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.822122', recid: 822122 },
+  publication_date: '2021-05-14',
+  publication_type: 'report',
+  title: 'My title - CLI',
+  upload_type: 'publication' }
+info: args = Namespace(zotero_config='zotero-cli.toml', zenodo_config='config.json', zotero_config_json='', zenodo_config_json='', zotero_api_key='', zenodo_access_token='', zenodo_sandbox='', verbose='', debug='', show='', open='', oapp='', dump='', dryrun='', version='', group_id=[ '2259720' ], json='', title='My title - CLI', authors=[ 'LAST, FIRST; LAST2, FIRST2' ], authordata='', date='2021', description='<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.822122">https://docs.edtechhub.org/lib/10.5072/zenodo.822122</a></p>', communities='', add_communities='', collections=[], kerko_url=[ 'https://docs.edtechhub.org/lib/' ], googledoc='https://some.google.doc', enclose=true, func=[AsyncFunction: zotzenCreate], id=822122, doi='10.5072/zenodo.822122', base='sandbox', zotero_link='zotero://select/groups/2259720/items/IEDHNGRP')
+info: finalactions called in update
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: '',
+  zenodo_config_json: '',
+  zotero_api_key: '',
+  zenodo_access_token: '',
+  zenodo_sandbox: '',
+  verbose: '',
+  debug: '',
+  show: '',
+  open: '',
+  oapp: '',
+  dump: '',
+  dryrun: '',
+  version: '',
+  group_id: [ '2259720' ],
+  json: '',
+  title: 'My title - CLI',
+  authors: [ 'LAST, FIRST; LAST2, FIRST2' ],
+  authordata: '',
+  date: '2021',
+  description:
+   '<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.822122">https://docs.edtechhub.org/lib/10.5072/zenodo.822122</a></p>',
+  communities: '',
+  add_communities: '',
+  collections: [],
+  kerko_url: [ 'https://docs.edtechhub.org/lib/' ],
+  googledoc: 'https://some.google.doc',
+  enclose: true,
+  func: [AsyncFunction: zotzenCreate],
+  id: 822122,
+  doi: '10.5072/zenodo.822122',
+  base: 'sandbox',
+  zotero_link: 'zotero://select/groups/2259720/items/IEDHNGRP' }
+info: not publishing in finalactions2
+info: zotzen version=1.0.63
+info: going to check for group id args = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: 'zotero://select/groups/2259720/items/6DCTFQPZ' }
+info: parsed group: 2259720 from key: zotero://select/groups/2259720/items/6DCTFQPZ
+info: item = { key: '6DCTFQPZ',
+  version: 7192,
+  itemType: 'report',
+  title: 'Item title (via from)',
+  creators:
+   [ { creatorType: 'author', firstName: 'NEW2', lastName: 'NEW' },
+     { creatorType: 'author', firstName: 'YYY', lastName: 'XXx' },
+     { creatorType: 'author',
+       firstName: 'else',
+       lastName: 'Somebody' } ],
+  abstractNote: 'An output of the EdTech Hub, https://edtechhub.org',
+  reportNumber: '51',
+  reportType: 'Helpdesk Request',
+  seriesTitle: '',
+  place: '',
+  institution: 'EdTech Hub',
+  date: '2021-03-31',
+  pages: '',
+  language: 'en',
+  shortTitle: '',
+  url: '',
+  accessDate: '',
+  archive: '',
+  archiveLocation: '',
+  libraryCatalog: '',
+  callNumber: '',
+  rights: 'Creative Commons Attribution 4.0',
+  extra: 'DOI: 10.5072/zenodo.811914',
+  tags: [ { tag: '_r:AddedByZotZen' } ],
+  collections: [ '5MDH7SKC', 'QANLXBUW' ],
+  relations: {},
+  dateAdded: '2021-05-05T22:33:30Z',
+  dateModified: '2021-05-06T08:52:23Z' }
+warn: You did not provided an 'id' (for a zenodo item) = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: null }
+info: going to check for group id args = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: '811914' }
+info: getting group_id from args
+info: item = { key: '6DCTFQPZ',
+  version: 7192,
+  itemType: 'report',
+  title: 'Item title (via from)',
+  creators:
+   [ { creatorType: 'author', firstName: 'NEW2', lastName: 'NEW' },
+     { creatorType: 'author', firstName: 'YYY', lastName: 'XXx' },
+     { creatorType: 'author',
+       firstName: 'else',
+       lastName: 'Somebody' } ],
+  abstractNote: 'An output of the EdTech Hub, https://edtechhub.org',
+  reportNumber: '51',
+  reportType: 'Helpdesk Request',
+  seriesTitle: '',
+  place: '',
+  institution: 'EdTech Hub',
+  date: '2021-03-31',
+  pages: '',
+  language: 'en',
+  shortTitle: '',
+  url: '',
+  accessDate: '',
+  archive: '',
+  archiveLocation: '',
+  libraryCatalog: '',
+  callNumber: '',
+  rights: 'Creative Commons Attribution 4.0',
+  extra: 'DOI: 10.5072/zenodo.811914',
+  tags: [ { tag: '_r:AddedByZotZen' } ],
+  collections: [ '5MDH7SKC', 'QANLXBUW' ],
+  relations: {},
+  dateAdded: '2021-05-05T22:33:30Z',
+  dateModified: '2021-05-06T08:52:23Z' }
+info: publish = false
+info: allArgs = {
+  "zotero_config": "zotero-cli.toml",
+  "zenodo_config": "config.json",
+  "zenodo_sandbox": false,
+  "verbose": false,
+  "debug": false,
+  "show": false,
+  "open": false,
+  "oapp": false,
+  "dump": false,
+  "dryrun": false,
+  "version": false,
+  "metadata": true,
+  "attachments": false,
+  "type": "all",
+  "publish": false,
+  "key": "6DCTFQPZ",
+  "group_id": "2259720",
+  "id": 811914
+}
+info: outputDir not exist, creating
+info: zoteroItem = {
+  "key": "6DCTFQPZ",
+  "version": 7192,
+  "itemType": "report",
+  "title": "Item title (via from)",
+  "creators": [
+    {
+      "creatorType": "author",
+      "firstName": "NEW2",
+      "lastName": "NEW"
+    },
+    {
+      "creatorType": "author",
+      "firstName": "YYY",
+      "lastName": "XXx"
+    },
+    {
+      "creatorType": "author",
+      "firstName": "else",
+      "lastName": "Somebody"
+    }
+  ],
+  "abstractNote": "An output of the EdTech Hub, https://edtechhub.org",
+  "reportNumber": "51",
+  "reportType": "Helpdesk Request",
+  "seriesTitle": "",
+  "place": "",
+  "institution": "EdTech Hub",
+  "date": "2021-03-31",
+  "pages": "",
+  "language": "en",
+  "shortTitle": "",
+  "url": "",
+  "accessDate": "",
+  "archive": "",
+  "archiveLocation": "",
+  "libraryCatalog": "",
+  "callNumber": "",
+  "rights": "Creative Commons Attribution 4.0",
+  "extra": "DOI: 10.5072/zenodo.811914",
+  "tags": [
+    {
+      "tag": "_r:AddedByZotZen"
+    }
+  ],
+  "collections": [
+    "5MDH7SKC",
+    "QANLXBUW"
+  ],
+  "relations": {},
+  "dateAdded": "2021-05-05T22:33:30Z",
+  "dateModified": "2021-05-06T08:52:23Z"
+} {"func":"zotzenSyncOne"}
+info: outputDir not exist, created
+info: saving output to file data/811914.json
+info: finalactions called in getRecord
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: 811914,
+  strict: true }
+info: not publishing in finalactions2
+info: adding name from zotero
+info: checking Attachments.
+info: updating zenodo record, data = {
+  "id": "811914",
+  "title": "Item title (via from)",
+  "description": "An output of the EdTech Hub, https://edtechhub.org",
+  "authors": [
+    {
+      "name": "NEW2 NEW"
+    },
+    {
+      "name": "YYY XXx"
+    },
+    {
+      "name": "else Somebody"
+    }
+  ],
+  "publication_date": "2021-03-31",
+  "strict": true,
+  "publish": false
+}
+info: wrote the file successfully data/811914.json
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators:
+   [ { affiliation: 'affiliation', name: 'First Second Last' },
+     { affiliation: 'affiliation2', name: 'First2 Last2' } ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.811914', recid: 811914 },
+  publication_date: '2021-03-31',
+  publication_type: 'report',
+  related_identifiers:
+   [ { identifier: 'zotero://select/groups/2259720/items/6DCTFQPZ',
+       relation: 'isAlternateIdentifier',
+       resource_type: 'other',
+       scheme: 'url' } ],
+  title: 'Item title (via from)',
+  upload_type: 'publication' }
+info: args = { id: '811914',
+  title: 'Item title (via from)',
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  authors:
+   [ { name: 'NEW2 NEW' },
+     { name: 'YYY XXx' },
+     { name: 'else Somebody' } ],
+  publication_date: '2021-03-31',
+  strict: true,
+  publish: false }
+info: finalactions called in update
+info: args in finalactions2 = { id: '811914',
+  title: 'Item title (via from)',
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  authors:
+   [ { name: 'NEW2 NEW' },
+     { name: 'YYY XXx' },
+     { name: 'else Somebody' } ],
+  publication_date: '2021-03-31',
+  strict: true,
+  publish: false }
+info: not publishing in finalactions2
+info: updated zenodo record = { conceptrecid: '811913',
+  created: '2021-05-05T22:33:29.473552+00:00',
+  doi: '',
+  doi_url: 'https://doi.org/',
+  files: [],
+  id: 811914,
+  links:
+   { bucket:
+      'https://sandbox.zenodo.org/api/files/71d13d23-4758-4f62-96e6-138b260d4436',
+     discard:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/discard',
+     edit:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/edit',
+     files:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/files',
+     html: 'https://sandbox.zenodo.org/deposit/811914',
+     latest_draft: 'https://sandbox.zenodo.org/api/deposit/depositions/811914',
+     latest_draft_html: 'https://sandbox.zenodo.org/deposit/811914',
+     newversion:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/newversion',
+     publish:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/publish',
+     registerconceptdoi:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/registerconceptdoi',
+     self: 'https://sandbox.zenodo.org/api/deposit/depositions/811914' },
+  metadata:
+   { access_right: 'open',
+     communities: [ [Object] ],
+     creators: [ [Object], [Object], [Object] ],
+     description: 'An output of the EdTech Hub, https://edtechhub.org',
+     doi: '',
+     license: 'CC-BY-4.0',
+     prereserve_doi: { doi: '10.5072/zenodo.811914', recid: 811914 },
+     publication_date: '2021-03-31',
+     publication_type: 'report',
+     related_identifiers: [ [Object] ],
+     title: 'Item title (via from)',
+     upload_type: 'publication' },
+  modified: '2021-05-14T13:16:55.118041+00:00',
+  owner: 53367,
+  record_id: 811914,
+  state: 'unsubmitted',
+  submitted: false,
+  title: 'Item title (via from)' }
+info: saving output to file data/811914.json
+info: finalactions called in getRecord
+info: args in finalactions2 = { config: 'config.json',
+  config_json: undefined,
+  access_token: undefined,
+  sandbox: false,
+  verbose: false,
+  debug: false,
+  dryrun: false,
+  allowconceptids: false,
+  version: false,
+  id: [ '811914' ],
+  strict: false,
+  publish: false,
+  open: false,
+  show: false,
+  dump: false,
+  func: [AsyncFunction: getRecord] }
+info: not publishing in finalactions2
+info: [
+  {
+    "conceptrecid": "811913",
+    "created": "2021-05-05T22:33:29.473552",
+    "doi": "",
+    "doi_url": "https://doi.org/",
+    "id": 811914,
+    "links": {
+      "discard": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/discard",
+      "edit": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/edit",
+      "files": "https://sandbox.zenodo.org/api/deposit/depositions/811914/files",
+      "html": "https://sandbox.zenodo.org/deposit/811914",
+      "latest_draft": "https://sandbox.zenodo.org/api/deposit/depositions/811914",
+      "latest_draft_html": "https://sandbox.zenodo.org/deposit/811914",
+      "publish": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/publish",
+      "self": "https://sandbox.zenodo.org/api/deposit/depositions/811914"
+    },
+    "metadata": {
+      "access_right": "open",
+      "communities": [
+        {
+          "identifier": "zenodo"
+        }
+      ],
+      "creators": [
+        {
+          "name": "NEW2 NEW"
+        },
+        {
+          "name": "YYY XXx"
+        },
+        {
+          "name": "else Somebody"
+        }
+      ],
+      "description": "An output of the EdTech Hub, https://edtechhub.org",
+      "doi": "",
+      "license": "CC-BY-4.0",
+      "prereserve_doi": {
+        "doi": "10.5072/zenodo.811914",
+        "recid": 811914
+      },
+      "publication_date": "2021-03-31",
+      "publication_type": "report",
+      "related_identifiers": [
+        {
+          "identifier": "zotero://select/groups/2259720/items/6DCTFQPZ",
+          "relation": "isAlternateIdentifier",
+          "resource_type": "other",
+          "scheme": "url"
+        }
+      ],
+      "title": "Item title (via from)",
+      "upload_type": "publication"
+    },
+    "modified": "2021-05-14T13:16:55.118041",
+    "owner": 53367,
+    "record_id": 811914,
+    "state": "unsubmitted",
+    "submitted": false,
+    "title": "Item title (via from)"
+  }
+]
+info: wrote the file successfully data/811914.json
+info: zotzen version=1.0.63
+info: going to check for group id args = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: 'zotero://select/groups/2259720/items/6DCTFQPZ' }
+info: parsed group: 2259720 from key: zotero://select/groups/2259720/items/6DCTFQPZ
+info: item = { key: '6DCTFQPZ',
+  version: 7726,
+  itemType: 'report',
+  title: 'Item title (via from)',
+  creators:
+   [ { creatorType: 'author', firstName: 'NEW3', lastName: 'NEW' },
+     { creatorType: 'author', firstName: 'YYY3', lastName: 'XXx' },
+     { creatorType: 'author',
+       firstName: 'else3',
+       lastName: 'Somebody' } ],
+  abstractNote: 'An output of the EdTech Hub, https://edtechhub.org',
+  reportNumber: '51',
+  reportType: 'Helpdesk Request',
+  seriesTitle: '',
+  place: '',
+  institution: 'EdTech Hub',
+  date: '2021-03-31',
+  pages: '',
+  language: 'en',
+  shortTitle: '',
+  url: '',
+  accessDate: '',
+  archive: '',
+  archiveLocation: '',
+  libraryCatalog: '',
+  callNumber: '',
+  rights: 'Creative Commons Attribution 4.0',
+  extra: 'DOI: 10.5072/zenodo.811914',
+  tags: [ { tag: '_r:AddedByZotZen' } ],
+  collections: [ '5MDH7SKC', 'QANLXBUW' ],
+  relations: {},
+  dateAdded: '2021-05-05T22:33:30Z',
+  dateModified: '2021-05-14T13:17:47Z' }
+warn: You did not provided an 'id' (for a zenodo item) = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: null }
+info: going to check for group id args = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: '811914' }
+info: getting group_id from args
+info: item = { key: '6DCTFQPZ',
+  version: 7726,
+  itemType: 'report',
+  title: 'Item title (via from)',
+  creators:
+   [ { creatorType: 'author', firstName: 'NEW3', lastName: 'NEW' },
+     { creatorType: 'author', firstName: 'YYY3', lastName: 'XXx' },
+     { creatorType: 'author',
+       firstName: 'else3',
+       lastName: 'Somebody' } ],
+  abstractNote: 'An output of the EdTech Hub, https://edtechhub.org',
+  reportNumber: '51',
+  reportType: 'Helpdesk Request',
+  seriesTitle: '',
+  place: '',
+  institution: 'EdTech Hub',
+  date: '2021-03-31',
+  pages: '',
+  language: 'en',
+  shortTitle: '',
+  url: '',
+  accessDate: '',
+  archive: '',
+  archiveLocation: '',
+  libraryCatalog: '',
+  callNumber: '',
+  rights: 'Creative Commons Attribution 4.0',
+  extra: 'DOI: 10.5072/zenodo.811914',
+  tags: [ { tag: '_r:AddedByZotZen' } ],
+  collections: [ '5MDH7SKC', 'QANLXBUW' ],
+  relations: {},
+  dateAdded: '2021-05-05T22:33:30Z',
+  dateModified: '2021-05-14T13:17:47Z' }
+info: publish = false
+info: allArgs = {
+  "zotero_config": "zotero-cli.toml",
+  "zenodo_config": "config.json",
+  "zenodo_sandbox": false,
+  "verbose": false,
+  "debug": false,
+  "show": false,
+  "open": false,
+  "oapp": false,
+  "dump": false,
+  "dryrun": false,
+  "version": false,
+  "metadata": true,
+  "attachments": false,
+  "type": "all",
+  "publish": false,
+  "key": "6DCTFQPZ",
+  "group_id": "2259720",
+  "id": 811914
+}
+info: saving output to file data/811914.json
+info: zoteroItem = {
+  "key": "6DCTFQPZ",
+  "version": 7726,
+  "itemType": "report",
+  "title": "Item title (via from)",
+  "creators": [
+    {
+      "creatorType": "author",
+      "firstName": "NEW3",
+      "lastName": "NEW"
+    },
+    {
+      "creatorType": "author",
+      "firstName": "YYY3",
+      "lastName": "XXx"
+    },
+    {
+      "creatorType": "author",
+      "firstName": "else3",
+      "lastName": "Somebody"
+    }
+  ],
+  "abstractNote": "An output of the EdTech Hub, https://edtechhub.org",
+  "reportNumber": "51",
+  "reportType": "Helpdesk Request",
+  "seriesTitle": "",
+  "place": "",
+  "institution": "EdTech Hub",
+  "date": "2021-03-31",
+  "pages": "",
+  "language": "en",
+  "shortTitle": "",
+  "url": "",
+  "accessDate": "",
+  "archive": "",
+  "archiveLocation": "",
+  "libraryCatalog": "",
+  "callNumber": "",
+  "rights": "Creative Commons Attribution 4.0",
+  "extra": "DOI: 10.5072/zenodo.811914",
+  "tags": [
+    {
+      "tag": "_r:AddedByZotZen"
+    }
+  ],
+  "collections": [
+    "5MDH7SKC",
+    "QANLXBUW"
+  ],
+  "relations": {},
+  "dateAdded": "2021-05-05T22:33:30Z",
+  "dateModified": "2021-05-14T13:17:47Z"
+} {"func":"zotzenSyncOne"}
+info: finalactions called in getRecord
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: 811914,
+  strict: true }
+info: not publishing in finalactions2
+info: adding name from zotero
+info: checking Attachments.
+info: updating zenodo record, data = {
+  "id": "811914",
+  "title": "Item title (via from)",
+  "description": "An output of the EdTech Hub, https://edtechhub.org",
+  "authors": [
+    {
+      "name": "NEW3 NEW"
+    },
+    {
+      "name": "YYY3 XXx"
+    },
+    {
+      "name": "else3 Somebody"
+    }
+  ],
+  "publication_date": "2021-03-31",
+  "strict": true,
+  "publish": false
+}
+info: wrote the file successfully data/811914.json
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators:
+   [ { name: 'NEW2 NEW' },
+     { name: 'YYY XXx' },
+     { name: 'else Somebody' } ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.811914', recid: 811914 },
+  publication_date: '2021-03-31',
+  publication_type: 'report',
+  related_identifiers:
+   [ { identifier: 'zotero://select/groups/2259720/items/6DCTFQPZ',
+       relation: 'isAlternateIdentifier',
+       resource_type: 'other',
+       scheme: 'url' } ],
+  title: 'Item title (via from)',
+  upload_type: 'publication' }
+info: args = { id: '811914',
+  title: 'Item title (via from)',
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  authors:
+   [ { name: 'NEW3 NEW' },
+     { name: 'YYY3 XXx' },
+     { name: 'else3 Somebody' } ],
+  publication_date: '2021-03-31',
+  strict: true,
+  publish: false }
+info: finalactions called in update
+info: args in finalactions2 = { id: '811914',
+  title: 'Item title (via from)',
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  authors:
+   [ { name: 'NEW3 NEW' },
+     { name: 'YYY3 XXx' },
+     { name: 'else3 Somebody' } ],
+  publication_date: '2021-03-31',
+  strict: true,
+  publish: false }
+info: not publishing in finalactions2
+info: updated zenodo record = { conceptrecid: '811913',
+  created: '2021-05-05T22:33:29.473552+00:00',
+  doi: '',
+  doi_url: 'https://doi.org/',
+  files: [],
+  id: 811914,
+  links:
+   { bucket:
+      'https://sandbox.zenodo.org/api/files/71d13d23-4758-4f62-96e6-138b260d4436',
+     discard:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/discard',
+     edit:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/edit',
+     files:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/files',
+     html: 'https://sandbox.zenodo.org/deposit/811914',
+     latest_draft: 'https://sandbox.zenodo.org/api/deposit/depositions/811914',
+     latest_draft_html: 'https://sandbox.zenodo.org/deposit/811914',
+     newversion:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/newversion',
+     publish:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/publish',
+     registerconceptdoi:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/registerconceptdoi',
+     self: 'https://sandbox.zenodo.org/api/deposit/depositions/811914' },
+  metadata:
+   { access_right: 'open',
+     communities: [ [Object] ],
+     creators: [ [Object], [Object], [Object] ],
+     description: 'An output of the EdTech Hub, https://edtechhub.org',
+     doi: '',
+     license: 'CC-BY-4.0',
+     prereserve_doi: { doi: '10.5072/zenodo.811914', recid: 811914 },
+     publication_date: '2021-03-31',
+     publication_type: 'report',
+     related_identifiers: [ [Object] ],
+     title: 'Item title (via from)',
+     upload_type: 'publication' },
+  modified: '2021-05-14T13:17:59.180203+00:00',
+  owner: 53367,
+  record_id: 811914,
+  state: 'unsubmitted',
+  submitted: false,
+  title: 'Item title (via from)' }
+info: saving output to file data/811914.json
+info: finalactions called in getRecord
+info: args in finalactions2 = { config: 'config.json',
+  config_json: undefined,
+  access_token: undefined,
+  sandbox: false,
+  verbose: false,
+  debug: false,
+  dryrun: false,
+  allowconceptids: false,
+  version: false,
+  id: [ '811914' ],
+  strict: false,
+  publish: false,
+  open: false,
+  show: false,
+  dump: false,
+  func: [AsyncFunction: getRecord] }
+info: not publishing in finalactions2
+info: [
+  {
+    "conceptrecid": "811913",
+    "created": "2021-05-05T22:33:29.473552",
+    "doi": "",
+    "doi_url": "https://doi.org/",
+    "id": 811914,
+    "links": {
+      "discard": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/discard",
+      "edit": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/edit",
+      "files": "https://sandbox.zenodo.org/api/deposit/depositions/811914/files",
+      "html": "https://sandbox.zenodo.org/deposit/811914",
+      "latest_draft": "https://sandbox.zenodo.org/api/deposit/depositions/811914",
+      "latest_draft_html": "https://sandbox.zenodo.org/deposit/811914",
+      "publish": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/publish",
+      "self": "https://sandbox.zenodo.org/api/deposit/depositions/811914"
+    },
+    "metadata": {
+      "access_right": "open",
+      "communities": [
+        {
+          "identifier": "zenodo"
+        }
+      ],
+      "creators": [
+        {
+          "name": "NEW3 NEW"
+        },
+        {
+          "name": "YYY3 XXx"
+        },
+        {
+          "name": "else3 Somebody"
+        }
+      ],
+      "description": "An output of the EdTech Hub, https://edtechhub.org",
+      "doi": "",
+      "license": "CC-BY-4.0",
+      "prereserve_doi": {
+        "doi": "10.5072/zenodo.811914",
+        "recid": 811914
+      },
+      "publication_date": "2021-03-31",
+      "publication_type": "report",
+      "related_identifiers": [
+        {
+          "identifier": "zotero://select/groups/2259720/items/6DCTFQPZ",
+          "relation": "isAlternateIdentifier",
+          "resource_type": "other",
+          "scheme": "url"
+        }
+      ],
+      "title": "Item title (via from)",
+      "upload_type": "publication"
+    },
+    "modified": "2021-05-14T13:17:59.180203",
+    "owner": 53367,
+    "record_id": 811914,
+    "state": "unsubmitted",
+    "submitted": false,
+    "title": "Item title (via from)"
+  }
+]
+info: wrote the file successfully data/811914.json
+info: zotzen version=1.0.63
+info: going to check for group id args = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: 'zotero://select/groups/2259720/items/6DCTFQPZ' }
+info: parsed group: 2259720 from key: zotero://select/groups/2259720/items/6DCTFQPZ
+info: item = { key: '6DCTFQPZ',
+  version: 7727,
+  itemType: 'report',
+  title: 'Item title (via from)',
+  creators:
+   [ { creatorType: 'author', firstName: 'NEW3', lastName: 'NEW' },
+     { creatorType: 'author', firstName: 'YYY3', lastName: 'XXx' } ],
+  abstractNote: 'An output of the EdTech Hub, https://edtechhub.org',
+  reportNumber: '51',
+  reportType: 'Helpdesk Request',
+  seriesTitle: '',
+  place: '',
+  institution: 'EdTech Hub',
+  date: '2021-03-31',
+  pages: '',
+  language: 'en',
+  shortTitle: '',
+  url: '',
+  accessDate: '',
+  archive: '',
+  archiveLocation: '',
+  libraryCatalog: '',
+  callNumber: '',
+  rights: 'Creative Commons Attribution 4.0',
+  extra: 'DOI: 10.5072/zenodo.811914',
+  tags: [ { tag: '_r:AddedByZotZen' } ],
+  collections: [ '5MDH7SKC', 'QANLXBUW' ],
+  relations: {},
+  dateAdded: '2021-05-05T22:33:30Z',
+  dateModified: '2021-05-14T13:18:18Z' }
+warn: You did not provided an 'id' (for a zenodo item) = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: null }
+info: going to check for group id args = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: '811914' }
+info: getting group_id from args
+info: item = { key: '6DCTFQPZ',
+  version: 7727,
+  itemType: 'report',
+  title: 'Item title (via from)',
+  creators:
+   [ { creatorType: 'author', firstName: 'NEW3', lastName: 'NEW' },
+     { creatorType: 'author', firstName: 'YYY3', lastName: 'XXx' } ],
+  abstractNote: 'An output of the EdTech Hub, https://edtechhub.org',
+  reportNumber: '51',
+  reportType: 'Helpdesk Request',
+  seriesTitle: '',
+  place: '',
+  institution: 'EdTech Hub',
+  date: '2021-03-31',
+  pages: '',
+  language: 'en',
+  shortTitle: '',
+  url: '',
+  accessDate: '',
+  archive: '',
+  archiveLocation: '',
+  libraryCatalog: '',
+  callNumber: '',
+  rights: 'Creative Commons Attribution 4.0',
+  extra: 'DOI: 10.5072/zenodo.811914',
+  tags: [ { tag: '_r:AddedByZotZen' } ],
+  collections: [ '5MDH7SKC', 'QANLXBUW' ],
+  relations: {},
+  dateAdded: '2021-05-05T22:33:30Z',
+  dateModified: '2021-05-14T13:18:18Z' }
+info: publish = false
+info: allArgs = {
+  "zotero_config": "zotero-cli.toml",
+  "zenodo_config": "config.json",
+  "zenodo_sandbox": false,
+  "verbose": false,
+  "debug": false,
+  "show": false,
+  "open": false,
+  "oapp": false,
+  "dump": false,
+  "dryrun": false,
+  "version": false,
+  "metadata": true,
+  "attachments": false,
+  "type": "all",
+  "publish": false,
+  "key": "6DCTFQPZ",
+  "group_id": "2259720",
+  "id": 811914
+}
+info: saving output to file data/811914.json
+info: zoteroItem = {
+  "key": "6DCTFQPZ",
+  "version": 7727,
+  "itemType": "report",
+  "title": "Item title (via from)",
+  "creators": [
+    {
+      "creatorType": "author",
+      "firstName": "NEW3",
+      "lastName": "NEW"
+    },
+    {
+      "creatorType": "author",
+      "firstName": "YYY3",
+      "lastName": "XXx"
+    }
+  ],
+  "abstractNote": "An output of the EdTech Hub, https://edtechhub.org",
+  "reportNumber": "51",
+  "reportType": "Helpdesk Request",
+  "seriesTitle": "",
+  "place": "",
+  "institution": "EdTech Hub",
+  "date": "2021-03-31",
+  "pages": "",
+  "language": "en",
+  "shortTitle": "",
+  "url": "",
+  "accessDate": "",
+  "archive": "",
+  "archiveLocation": "",
+  "libraryCatalog": "",
+  "callNumber": "",
+  "rights": "Creative Commons Attribution 4.0",
+  "extra": "DOI: 10.5072/zenodo.811914",
+  "tags": [
+    {
+      "tag": "_r:AddedByZotZen"
+    }
+  ],
+  "collections": [
+    "5MDH7SKC",
+    "QANLXBUW"
+  ],
+  "relations": {},
+  "dateAdded": "2021-05-05T22:33:30Z",
+  "dateModified": "2021-05-14T13:18:18Z"
+} {"func":"zotzenSyncOne"}
+info: finalactions called in getRecord
+info: args in finalactions2 = { zotero_config: 'zotero-cli.toml',
+  zenodo_config: 'config.json',
+  zotero_config_json: undefined,
+  zenodo_config_json: undefined,
+  zotero_api_key: undefined,
+  zenodo_access_token: undefined,
+  zenodo_sandbox: false,
+  verbose: false,
+  debug: false,
+  show: false,
+  open: false,
+  oapp: false,
+  dump: false,
+  dryrun: false,
+  version: false,
+  metadata: true,
+  attachments: false,
+  type: 'all',
+  tag: undefined,
+  publish: false,
+  func: [AsyncFunction: zotzenSync],
+  key: '6DCTFQPZ',
+  group_id: '2259720',
+  id: 811914,
+  strict: true }
+info: not publishing in finalactions2
+info: adding name from zotero
+info: checking Attachments.
+info: updating zenodo record, data = {
+  "id": "811914",
+  "title": "Item title (via from)",
+  "description": "An output of the EdTech Hub, https://edtechhub.org",
+  "authors": [
+    {
+      "name": "NEW3 NEW"
+    },
+    {
+      "name": "YYY3 XXx"
+    }
+  ],
+  "publication_date": "2021-03-31",
+  "strict": true,
+  "publish": false
+}
+info: wrote the file successfully data/811914.json
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators:
+   [ { name: 'NEW3 NEW' },
+     { name: 'YYY3 XXx' },
+     { name: 'else3 Somebody' } ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.811914', recid: 811914 },
+  publication_date: '2021-03-31',
+  publication_type: 'report',
+  related_identifiers:
+   [ { identifier: 'zotero://select/groups/2259720/items/6DCTFQPZ',
+       relation: 'isAlternateIdentifier',
+       resource_type: 'other',
+       scheme: 'url' } ],
+  title: 'Item title (via from)',
+  upload_type: 'publication' }
+info: args = { id: '811914',
+  title: 'Item title (via from)',
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  authors: [ { name: 'NEW3 NEW' }, { name: 'YYY3 XXx' } ],
+  publication_date: '2021-03-31',
+  strict: true,
+  publish: false }
+info: finalactions called in update
+info: args in finalactions2 = { id: '811914',
+  title: 'Item title (via from)',
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  authors: [ { name: 'NEW3 NEW' }, { name: 'YYY3 XXx' } ],
+  publication_date: '2021-03-31',
+  strict: true,
+  publish: false }
+info: not publishing in finalactions2
+info: updated zenodo record = { conceptrecid: '811913',
+  created: '2021-05-05T22:33:29.473552+00:00',
+  doi: '',
+  doi_url: 'https://doi.org/',
+  files: [],
+  id: 811914,
+  links:
+   { bucket:
+      'https://sandbox.zenodo.org/api/files/71d13d23-4758-4f62-96e6-138b260d4436',
+     discard:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/discard',
+     edit:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/edit',
+     files:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/files',
+     html: 'https://sandbox.zenodo.org/deposit/811914',
+     latest_draft: 'https://sandbox.zenodo.org/api/deposit/depositions/811914',
+     latest_draft_html: 'https://sandbox.zenodo.org/deposit/811914',
+     newversion:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/newversion',
+     publish:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/publish',
+     registerconceptdoi:
+      'https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/registerconceptdoi',
+     self: 'https://sandbox.zenodo.org/api/deposit/depositions/811914' },
+  metadata:
+   { access_right: 'open',
+     communities: [ [Object] ],
+     creators: [ [Object], [Object] ],
+     description: 'An output of the EdTech Hub, https://edtechhub.org',
+     doi: '',
+     license: 'CC-BY-4.0',
+     prereserve_doi: { doi: '10.5072/zenodo.811914', recid: 811914 },
+     publication_date: '2021-03-31',
+     publication_type: 'report',
+     related_identifiers: [ [Object] ],
+     title: 'Item title (via from)',
+     upload_type: 'publication' },
+  modified: '2021-05-14T13:18:29.779583+00:00',
+  owner: 53367,
+  record_id: 811914,
+  state: 'unsubmitted',
+  submitted: false,
+  title: 'Item title (via from)' }
+info: saving output to file data/811914.json
+info: finalactions called in getRecord
+info: args in finalactions2 = { config: 'config.json',
+  config_json: undefined,
+  access_token: undefined,
+  sandbox: false,
+  verbose: false,
+  debug: false,
+  dryrun: false,
+  allowconceptids: false,
+  version: false,
+  id: [ '811914' ],
+  strict: false,
+  publish: false,
+  open: false,
+  show: false,
+  dump: false,
+  func: [AsyncFunction: getRecord] }
+info: not publishing in finalactions2
+info: [
+  {
+    "conceptrecid": "811913",
+    "created": "2021-05-05T22:33:29.473552",
+    "doi": "",
+    "doi_url": "https://doi.org/",
+    "id": 811914,
+    "links": {
+      "discard": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/discard",
+      "edit": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/edit",
+      "files": "https://sandbox.zenodo.org/api/deposit/depositions/811914/files",
+      "html": "https://sandbox.zenodo.org/deposit/811914",
+      "latest_draft": "https://sandbox.zenodo.org/api/deposit/depositions/811914",
+      "latest_draft_html": "https://sandbox.zenodo.org/deposit/811914",
+      "publish": "https://sandbox.zenodo.org/api/deposit/depositions/811914/actions/publish",
+      "self": "https://sandbox.zenodo.org/api/deposit/depositions/811914"
+    },
+    "metadata": {
+      "access_right": "open",
+      "communities": [
+        {
+          "identifier": "zenodo"
+        }
+      ],
+      "creators": [
+        {
+          "name": "NEW3 NEW"
+        },
+        {
+          "name": "YYY3 XXx"
+        }
+      ],
+      "description": "An output of the EdTech Hub, https://edtechhub.org",
+      "doi": "",
+      "license": "CC-BY-4.0",
+      "prereserve_doi": {
+        "doi": "10.5072/zenodo.811914",
+        "recid": 811914
+      },
+      "publication_date": "2021-03-31",
+      "publication_type": "report",
+      "related_identifiers": [
+        {
+          "identifier": "zotero://select/groups/2259720/items/6DCTFQPZ",
+          "relation": "isAlternateIdentifier",
+          "resource_type": "other",
+          "scheme": "url"
+        }
+      ],
+      "title": "Item title (via from)",
+      "upload_type": "publication"
+    },
+    "modified": "2021-05-14T13:18:29.779583",
+    "owner": 53367,
+    "record_id": 811914,
+    "state": "unsubmitted",
+    "submitted": false,
+    "title": "Item title (via from)"
+  }
+]
+info: wrote the file successfully data/811914.json
