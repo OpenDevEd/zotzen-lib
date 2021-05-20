@@ -112,7 +112,7 @@ async function zoteroCreate(args) {
 
       if (name.length === 1) {
         console.warn(
-          'Ambigious format for name, please use format "last, first"'
+          `Ambigious format for name "${author}", please use format "last, first"`
         );
         name = author.split(' ');
       }
