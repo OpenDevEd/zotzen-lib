@@ -105,23 +105,34 @@ async function zoteroCreate(args) {
   }
   const doistr = args.doi ? 'DOI: ' + args.doi : '';
   const tagsarr = zotero.objectifyTags(args.tags);
-  let authorsarr = [];
+  let creators = [];
   if (args.authors) {
-    args.authors.forEach((myauth) => {
-      myauth = myauth.replace(/\;.*$/, '');
-      const firstlast = myauth.split(/ +/);
-      // console.log("X-- "+firstlast.slice(0, 1).join(" "))
-      // console.log("X-- "+firstlast.slice(0, firstlast.length - 1).join(" "))
-      const first =
-        firstlast.length > 1
-          ? firstlast.slice(0, firstlast.length - 1).join(' ')
-          : '';
-      const last = firstlast[firstlast.length - 1];
-      authorsarr.push({
+    creators = args.authors.map((author) => {
+      let name = author.split(',');
+
+      if (name.length === 1) {
+        console.warn(
+          'Ambigious format for name, please use format "last, first"'
+        );
+        name = author.split(' ');
+      }
+      name = name.map((s) => s.trim()).filter((s) => s.length !== 0);
+
+      let first;
+      let last;
+
+      if (name.length >= 2) {
+        [last] = name.splice(-1, 1);
+        first = name.join(' ');
+      } else {
+        first = name.join(' ');
+      }
+
+      return {
         creatorType: 'author',
         firstName: first,
         lastName: last,
-      });
+      };
     });
   }
   // const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
@@ -129,7 +140,7 @@ async function zoteroCreate(args) {
   const report = {
     itemType: 'report',
     title: args.title,
-    creators: authorsarr,
+    creators,
     abstractNote: args.description,
     reportNumber: args.reportNumber,
     reportType: args.reportType,
