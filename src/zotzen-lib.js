@@ -1385,7 +1385,7 @@ async function zotzenSyncOne(args) {
           */
           const file = await zotero.item({
             key: element.data.key,
-            addtags: ['_zenodoETH', '_zenodoETH:uploaded'],
+            addtags: ['_DOILIVE', '_zenodo:uploaded'],
           });
           console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
         }
@@ -1397,7 +1397,7 @@ async function zotzenSyncOne(args) {
       if (updated.submitted) {
         const x = await zotero.item({
           key: args.key,
-          addtags: ['_zenodoETH', '_zenodoETH:submitted'],
+          addtags: ['_DOILIVE', '_zenodo:submitted'],
         });
         console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
       } else {
