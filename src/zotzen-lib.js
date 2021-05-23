@@ -506,27 +506,25 @@ async function zotzenCreate(args, subparsers) {
   console.log(`[zotzenCreate] key=${zoteroRecord.key}`);
   // process.exit(1)
   // Now update the zenodo record with the ZoteroId.
-  let zenodoRecord2;
   const zoteroSelectLink = getZoteroSelectLink(
     zoteroRecord.key,
     zoteroRecordGroup,
     true
   );
-  promiseall: {
-    // The creation of the first Zotero/Zenodo record needs to be sequences.
-    // However, the items below could be done through a 'Promise all' as they can run in parallel.
 
-    // Attach idenfier to zenodo record.
-    args.zotero_link = zoteroSelectLink;
-    args.id = zenodoRecord.id;
-    if (args.kerko_url) {
-      args.description += `<p>Available from <a href="${
-        args.kerko_url + DOI
-      }">${args.kerko_url + DOI}</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
-    }
-    zenodoRecord2 = await zenodo.update(args);
-    // console.log(JSON.stringify(zenodoRecord2, null, 2))
+  // The creation of the first Zotero/Zenodo record needs to be sequences.
+  // However, the items below could be done through a 'Promise all' as they can run in parallel.
+
+  // Attach idenfier to zenodo record.
+  args.zotero_link = zoteroSelectLink;
+  args.id = zenodoRecord.id;
+  if (args.kerko_url) {
+    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${
+      args.kerko_url + DOI
+    }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
   }
+  const zenodoRecord2 = await zenodo.update(args);
+  // console.log(JSON.stringify(zenodoRecord2, null, 2))
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
   let enclose = null;
   if (args.enclose && args.collections) {
