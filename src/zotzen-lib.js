@@ -569,6 +569,112 @@ async function zotzenLink(args) {
 
 } */
 
+async function zotzenReorderExtraField(args, subparsers) {
+  if (args.getInterface && subparsers) {
+    const parser_reorderExtraField = subparsers.add_parser(
+      'reorderExtraField',
+      {
+        help:
+          'reorder extra field, will move DOI field top and mark older DOI as previousDOI',
+      }
+    );
+
+    parser_reorderExtraField.set_defaults({ func: zotzenReorderExtraField });
+    parser_reorderExtraField.add_argument('key', {
+      nargs: '+',
+      help: 'One or more Zotero keys for synchronisation.',
+    });
+
+    return { status: 0, message: 'success' };
+  }
+
+  const { key: zoteroKeys = [] } = args;
+
+  console.log('args = ', { ...args });
+  console.log('reordering zotero items with keys: ', zoteroKeys);
+
+  function processExtraField(input = '') {
+    let result = '';
+
+    const lines = input.split('\n');
+
+    let doiLines = lines.filter((line) => line.includes('DOI:'));
+    if (doiLines.length > 2) {
+      // sort dois
+      doiLines.sort((a, b) => {
+        const [, , aLast] = a.split('.');
+        const [, , bLast] = b.split('.');
+
+        return bLast - aLast;
+      });
+      // prefix older DOIs with previous
+      doiLines = doiLines.map((doi, index) => {
+        if (index === 0) {
+          const [, lastPart] = doi.split(' ');
+          return 'DOI: ' + lastPart;
+        }
+        if (index > 0 && !doi.startsWith('previous')) {
+          return 'previous' + doi;
+        }
+        return doi;
+      });
+    }
+    let nonDOILines = lines.filter(
+      (line) => !(line.startsWith('DOI: ') || line.startsWith('previousDOI: '))
+    );
+
+    const kerkoLinePrefix = 'KerkoCite.ItemAlsoKnownAs:';
+    let kerkoLine = nonDOILines.find((line) =>
+      line.startsWith(kerkoLinePrefix)
+    );
+
+    nonDOILines = nonDOILines.filter(
+      (line) => !line.startsWith(kerkoLinePrefix)
+    );
+    // if line not exist add it
+    if (!kerkoLine) {
+      kerkoLine = kerkoLinePrefix;
+    }
+    // split with " " and ingore first element which will be prefix
+    let [, ...kerkoItems] = kerkoLine.split(' ');
+
+    // add sorted doi
+    kerkoItems = [
+      ...new Set(
+        doiLines
+          .map((line) => {
+            const [, doi] = line.split(' ');
+            return doi;
+          })
+          .concat(kerkoItems)
+      ),
+    ];
+
+    kerkoLine = '';
+    if (kerkoItems.length > 0) {
+      kerkoItems = [kerkoLinePrefix, ...kerkoItems];
+      kerkoLine = kerkoItems.join(' ');
+    }
+
+    // combine doi + kerkoLine + anything else as result separate by newline
+    result = [...doiLines, kerkoLine, ...nonDOILines].join('\n');
+    return result;
+  }
+
+  return Promise.all(
+    zoteroKeys.map((key) =>
+      zotero.item({ ...args, key }).then((item) => {
+        const extra = processExtraField(item.extra);
+        // update zotero item
+
+        return zotero
+          .update_item({ json: { extra }, key })
+          .then(() => zotero.item({ ...args, key }));
+      })
+    )
+  );
+}
+
 /*
 Top Level function
 */
@@ -1502,3 +1608,4 @@ module.exports.zenodoCreate = zenodoCreate;
 module.exports.zoteroCreate = zoteroCreate;
 module.exports.zotzenSyncOne = zotzenSyncOne;
 module.exports.newversion = newversion;
+module.exports.reorderExtraField = zotzenReorderExtraField;

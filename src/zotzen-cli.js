@@ -120,17 +120,20 @@ function getArguments() {
   /* newversion */
   zotzenlib.newversion({ getInterface: true }, subparsers);
 
+  zotzenlib.reorderExtraField({ getInterface: true }, subparsers);
+
   return parser.parse_args();
 }
 
 async function main() {
   const args = getArguments();
-  console.log('main: arguments', { ...args });
-  console.log('main: api calls');
+  // console.log('main: arguments', { ...args });
+  // console.log('main: api calls');
   if (args.version) {
     getVersion();
     process.exit(0);
   }
+
   if (args.func) {
     console.log('Action: ' + args.func.name);
     if (args.dryrun) {
