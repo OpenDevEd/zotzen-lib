@@ -10,13 +10,13 @@ async function main() {
     // Test-group (replace with Evi Lib group in deployment)
     group_id: 2259720,
     // FROM FORM
-    title: "Item title (via from)",
+    title: "Item title (via test_create)",
     // For authors, split the form field on ; and then submit as array. affiliation is not filled in
-    authors: ["First Second Last; affiliation","First2 Last2; affiliation2"],
-    reportNumber: "51",               
+    authors: ["First Second Last; affiliation","First2 Last2; affiliation2", "LAST3, FIRST3;affiliation3"],
+    reportNumber: "100",               
     reportType: "Helpdesk Request",  
     collections: ["QANLXBUW","5MDH7SKC"],  // Will need to be adapted in deployment
-    date: "2021-03-31",                          // NOTE: This has to be a valid date, otherwise Zenodo.create fails
+    date: "2021-06-30",                    // NOTE: This has to be a valid date, otherwise Zenodo.create fails
     googledoc: "https://url_to_google_doc-from_form",
     team: "some team - will be added to note. Take this form form field for 'team'.",
     note: "Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.",
