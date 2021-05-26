@@ -519,21 +519,28 @@ async function zotzenCreate(args, subparsers) {
   args.zotero_link = zoteroSelectLink;
   args.id = zenodoRecord.id;
   if (args.kerko_url) {
-    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${
-      args.kerko_url + DOI
-    }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${args.kerko_url + DOI
+      }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
   }
   const zenodoRecord2 = await zenodo.update(args);
   // console.log(JSON.stringify(zenodoRecord2, null, 2))
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
   let enclose = null;
-  if (args.enclose && args.collections) {
-    console.log('[zotzenCreate] enclosing ${zoteroRecord.key}');
-    enclose = await zotero.enclose_item_in_collection({
-      key: zoteroRecord.key,
-      group_id: zoteroRecordGroup,
-      collection: args.collections[0],
-    });
+  if (args.enclose) {
+    if (args.collections) {
+      console.log('[zotzenCreate] enclosing ${zoteroRecord.key} WITH COLLECTION');
+      enclose = await zotero.enclose_item_in_collection({
+        key: zoteroRecord.key,
+        group_id: zoteroRecordGroup,
+        collection: args.collections[0],
+      });
+    } else {
+      console.log('[zotzenCreate] enclosing ${zoteroRecord.key} WITHOUT COLLECTION');
+      enclose = await zotero.enclose_item_in_collection({
+        key: zoteroRecord.key,
+        group_id: zoteroRecordGroup,
+      });
+    }
   }
   const record = {
     status: 0,
@@ -1596,9 +1603,8 @@ function getZoteroSelectLink(
   isgroup = true,
   isitem = true
 ) {
-  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${
-    isitem ? 'items' : 'collections'
-  }/${item_key}`;
+  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'
+    }/${item_key}`;
 }
 
 module.exports.sync = zotzenSync;
