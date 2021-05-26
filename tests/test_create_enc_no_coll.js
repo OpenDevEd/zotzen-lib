@@ -13,9 +13,10 @@ async function main() {
     title: "Item title (via test_create)",
     // For authors, split the form field on ; and then submit as array. affiliation is not filled in
     authors: ["First Second Last; affiliation","First2 Last2; affiliation2", "LAST3, FIRST3;affiliation3"],
-    reportNumber: "101",               
+    reportNumber: "102",               
     reportType: "Helpdesk Request",  
-    // collections: ["QANLXBUW","5MDH7SKC"],  // Will need to be adapted in deployment
+    // This example work with collections provided and without
+    // collections: ["W6QTZGDW"],  // Will need to be adapted in deployment
     date: "2021-06-30",                    // NOTE: This has to be a valid date, otherwise Zenodo.create fails
     googledoc: "https://url_to_google_doc-from_form",
     team: "some team - will be added to note. Take this form form field for 'team'.",

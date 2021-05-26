@@ -1174,3 +1174,356 @@ info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/
   collections: [],
   zotero_link: 'zotero://select/groups/2259720/items/GJFF976M' }
 info: not publishing in finalactions2
+info: args = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '101',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  enclose: true }
+info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '101',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  enclose: true }
+info: not publishing in finalactions2
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators:
+   [ { affiliation: 'affiliation', name: 'First Second Last' },
+     { affiliation: 'affiliation2', name: 'First2 Last2' },
+     { affiliation: 'affiliation3', name: 'LAST3, FIRST3' } ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.838356', recid: 838356 },
+  publication_date: '2021-06-30',
+  publication_type: 'report',
+  title: 'Item title (via test_create)',
+  upload_type: 'publication' }
+info: args = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '101',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description:
+   'An output of the EdTech Hub, https://edtechhub.org<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.838356">https://docs.edtechhub.org/lib/10.5072/zenodo.838356</a></p>',
+  enclose: true,
+  id: 838356,
+  doi: '10.5072/zenodo.838356',
+  base: 'sandbox',
+  collections: [],
+  zotero_link: 'zotero://select/groups/2259720/items/TWDRV4X2' }
+info: finalactions called in update
+info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '101',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description:
+   'An output of the EdTech Hub, https://edtechhub.org<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.838356">https://docs.edtechhub.org/lib/10.5072/zenodo.838356</a></p>',
+  enclose: true,
+  id: 838356,
+  doi: '10.5072/zenodo.838356',
+  base: 'sandbox',
+  collections: [],
+  zotero_link: 'zotero://select/groups/2259720/items/TWDRV4X2' }
+info: not publishing in finalactions2
+info: args = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  enclose: true }
+info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  enclose: true }
+info: not publishing in finalactions2
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators:
+   [ { affiliation: 'affiliation', name: 'First Second Last' },
+     { affiliation: 'affiliation2', name: 'First2 Last2' },
+     { affiliation: 'affiliation3', name: 'LAST3, FIRST3' } ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.838358', recid: 838358 },
+  publication_date: '2021-06-30',
+  publication_type: 'report',
+  title: 'Item title (via test_create)',
+  upload_type: 'publication' }
+info: args = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description:
+   'An output of the EdTech Hub, https://edtechhub.org<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.838358">https://docs.edtechhub.org/lib/10.5072/zenodo.838358</a></p>',
+  enclose: true,
+  id: 838358,
+  doi: '10.5072/zenodo.838358',
+  base: 'sandbox',
+  collections: [],
+  zotero_link: 'zotero://select/groups/2259720/items/CUWV43R4' }
+info: finalactions called in update
+info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description:
+   'An output of the EdTech Hub, https://edtechhub.org<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.838358">https://docs.edtechhub.org/lib/10.5072/zenodo.838358</a></p>',
+  enclose: true,
+  id: 838358,
+  doi: '10.5072/zenodo.838358',
+  base: 'sandbox',
+  collections: [],
+  zotero_link: 'zotero://select/groups/2259720/items/CUWV43R4' }
+info: not publishing in finalactions2
+info: args = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  collections: [ 'W6QTZGDW' ],
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  enclose: true }
+info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  collections: [ 'W6QTZGDW' ],
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  enclose: true }
+info: not publishing in finalactions2
+info: zenodoUpdate metadata = { access_right: 'open',
+  communities: [ { identifier: 'zenodo' } ],
+  creators:
+   [ { affiliation: 'affiliation', name: 'First Second Last' },
+     { affiliation: 'affiliation2', name: 'First2 Last2' },
+     { affiliation: 'affiliation3', name: 'LAST3, FIRST3' } ],
+  description: 'An output of the EdTech Hub, https://edtechhub.org',
+  doi: '',
+  license: 'CC-BY-4.0',
+  prereserve_doi: { doi: '10.5072/zenodo.838362', recid: 838362 },
+  publication_date: '2021-06-30',
+  publication_type: 'report',
+  title: 'Item title (via test_create)',
+  upload_type: 'publication' }
+info: args = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  collections: [ 'W6QTZGDW' ],
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description:
+   'An output of the EdTech Hub, https://edtechhub.org<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.838362">https://docs.edtechhub.org/lib/10.5072/zenodo.838362</a></p>',
+  enclose: true,
+  id: 838362,
+  doi: '10.5072/zenodo.838362',
+  base: 'sandbox',
+  zotero_link: 'zotero://select/groups/2259720/items/HVFSGXBK' }
+info: finalactions called in update
+info: args in finalactions2 = { zenodo_config: '/home/bjohas/.config/zenodo-cli/config.sandbox.json',
+  group_id: 2259720,
+  title: 'Item title (via test_create)',
+  authors:
+   [ 'First Second Last; affiliation',
+     'First2 Last2; affiliation2',
+     'LAST3, FIRST3;affiliation3' ],
+  reportNumber: '102',
+  reportType: 'Helpdesk Request',
+  collections: [ 'W6QTZGDW' ],
+  date: '2021-06-30',
+  googledoc: 'https://url_to_google_doc-from_form',
+  team:
+   'some team - will be added to note. Take this form form field for \'team\'.',
+  note:
+   'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  institution: 'EdTech Hub',
+  language: 'en',
+  rights: 'Creative Commons Attribution 4.0',
+  kerko_url: 'https://docs.edtechhub.org/lib/',
+  tags: [ '_r:AddedByZotZen' ],
+  description:
+   'An output of the EdTech Hub, https://edtechhub.org<p>Available from <a href="https://docs.edtechhub.org/lib/10.5072/zenodo.838362">https://docs.edtechhub.org/lib/10.5072/zenodo.838362</a></p>',
+  enclose: true,
+  id: 838362,
+  doi: '10.5072/zenodo.838362',
+  base: 'sandbox',
+  zotero_link: 'zotero://select/groups/2259720/items/HVFSGXBK' }
+info: not publishing in finalactions2
