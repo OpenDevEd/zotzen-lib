@@ -45,12 +45,46 @@ function verbose(args, msg, data) {
 }
 
 //--
-async function zenodoCreate(args) {
+async function zenodoCreate(argsIn) {
+  let args = { ...argsIn };
   // TODO: What if this is a user lib?
   if (!args.zotero_link && args.key && args.group_id) {
     console.log('Adding args.zotero_link from key/group_id provided');
     args.zotero_link = getZoteroSelectLink(args.key, args.group_id, true);
   }
+
+  console.log('args = here *** ', args);
+  args.authors = args.authors.map((author) => {
+    const [namePart, affiliation] = author.split(';');
+    let name = namePart.split(',');
+
+    if (name.length === 1) {
+      console.warn(
+        `Ambigious format for name "${author}", please use format "last, first"`
+      );
+      name = namePart.split(' ');
+    }
+    name = name.map((s) => s.trim()).filter((s) => s.length !== 0);
+
+    let first;
+    let last;
+
+    if (name.length >= 2) {
+      [last] = name.splice(-1, 1);
+      first = name.join(' ');
+    } else {
+      first = name.join(' ');
+    }
+
+    const result = {
+      name: `${first} ${last}`,
+      affiliation,
+    };
+
+    console.log(`converted author ${author} to: `, result);
+
+    return result;
+  });
 
   console.log('zenodoCreate, args=' + JSON.stringify(args, null, 2));
 
@@ -84,7 +118,8 @@ async function zenodoCreate(args) {
   // [zenodoRecord, DOI] = zenodoCreate(args)
 }
 
-async function zoteroCreate(args) {
+async function zoteroCreate(argsIn) {
+  let args = { ...argsIn };
   // complement the set of args provided according to zenodoLibCreate_Args
   Object.keys(args).forEach((mykey) => {
     if (!args[mykey]) {
@@ -106,15 +141,17 @@ async function zoteroCreate(args) {
   const doistr = args.doi ? 'DOI: ' + args.doi : '';
   const tagsarr = zotero.objectifyTags(args.tags);
   let creators = [];
+
   if (args.authors) {
     creators = args.authors.map((author) => {
-      let name = author.split(',');
+      const [namePart, affiliation] = author.split(';');
+      let name = namePart.split(',');
 
       if (name.length === 1) {
         console.warn(
           `Ambigious format for name "${author}", please use format "last, first"`
         );
-        name = author.split(' ');
+        name = namePart.split(' ');
       }
       name = name.map((s) => s.trim()).filter((s) => s.length !== 0);
 
@@ -128,11 +165,15 @@ async function zoteroCreate(args) {
         first = name.join(' ');
       }
 
-      return {
+      const result = {
         creatorType: 'author',
         firstName: first,
         lastName: last,
       };
+
+      console.log(`converted author ${author} to: `, result);
+
+      return result;
     });
   }
   // const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
@@ -519,8 +560,9 @@ async function zotzenCreate(args, subparsers) {
   args.zotero_link = zoteroSelectLink;
   args.id = zenodoRecord.id;
   if (args.kerko_url) {
-    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${args.kerko_url + DOI
-      }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${
+      args.kerko_url + DOI
+    }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
   }
   const zenodoRecord2 = await zenodo.update(args);
   // console.log(JSON.stringify(zenodoRecord2, null, 2))
@@ -528,14 +570,18 @@ async function zotzenCreate(args, subparsers) {
   let enclose = null;
   if (args.enclose) {
     if (args.collections) {
-      console.log('[zotzenCreate] enclosing ${zoteroRecord.key} WITH COLLECTION');
+      console.log(
+        '[zotzenCreate] enclosing ${zoteroRecord.key} WITH COLLECTION'
+      );
       enclose = await zotero.enclose_item_in_collection({
         key: zoteroRecord.key,
         group_id: zoteroRecordGroup,
         collection: args.collections[0],
       });
     } else {
-      console.log('[zotzenCreate] enclosing ${zoteroRecord.key} WITHOUT COLLECTION');
+      console.log(
+        '[zotzenCreate] enclosing ${zoteroRecord.key} WITHOUT COLLECTION'
+      );
       enclose = await zotero.enclose_item_in_collection({
         key: zoteroRecord.key,
         group_id: zoteroRecordGroup,
@@ -1603,8 +1649,9 @@ function getZoteroSelectLink(
   isgroup = true,
   isitem = true
 ) {
-  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'
-    }/${item_key}`;
+  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${
+    isitem ? 'items' : 'collections'
+  }/${item_key}`;
 }
 
 module.exports.sync = zotzenSync;
