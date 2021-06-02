@@ -16,6 +16,8 @@ const zenodo = require('zenodo-lib');
 const Zotero = require('zotero-lib');
 const logger = require('./logger');
 
+const processExtraField = require('./utils/processExtraField');
+
 // TODO - TESTING: Load locally for testing:
 // const zenodo = require("../zenodo-lib/build/zenodo-lib.js")
 // const Zotero = require("../zotero-lib/build/zotero-lib.js")
@@ -136,7 +138,10 @@ async function zoteroCreate(args) {
     });
   }
   // const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
-  const extrastr = doistr;
+  let extrastr = doistr;
+  // processExtraField
+  extrastr = processExtraField(doistr);
+
   const report = {
     itemType: 'report',
     title: args.title,
@@ -519,8 +524,9 @@ async function zotzenCreate(args, subparsers) {
   args.zotero_link = zoteroSelectLink;
   args.id = zenodoRecord.id;
   if (args.kerko_url) {
-    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${args.kerko_url + DOI
-      }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${
+      args.kerko_url + DOI
+    }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
   }
   const zenodoRecord2 = await zenodo.update(args);
   // console.log(JSON.stringify(zenodoRecord2, null, 2))
@@ -528,14 +534,18 @@ async function zotzenCreate(args, subparsers) {
   let enclose = null;
   if (args.enclose) {
     if (args.collections) {
-      console.log('[zotzenCreate] enclosing ${zoteroRecord.key} WITH COLLECTION');
+      console.log(
+        '[zotzenCreate] enclosing ${zoteroRecord.key} WITH COLLECTION'
+      );
       enclose = await zotero.enclose_item_in_collection({
         key: zoteroRecord.key,
         group_id: zoteroRecordGroup,
         collection: args.collections[0],
       });
     } else {
-      console.log('[zotzenCreate] enclosing ${zoteroRecord.key} WITHOUT COLLECTION');
+      console.log(
+        '[zotzenCreate] enclosing ${zoteroRecord.key} WITHOUT COLLECTION'
+      );
       enclose = await zotero.enclose_item_in_collection({
         key: zoteroRecord.key,
         group_id: zoteroRecordGroup,
@@ -599,74 +609,6 @@ async function zotzenReorderExtraField(args, subparsers) {
 
   console.log('args = ', { ...args });
   console.log('reordering zotero items with keys: ', zoteroKeys);
-
-  function processExtraField(input = '') {
-    let result = '';
-
-    const lines = input.split('\n');
-
-    let doiLines = lines.filter((line) => line.includes('DOI:'));
-    if (doiLines.length > 2) {
-      // sort dois
-      doiLines.sort((a, b) => {
-        const [, , aLast] = a.split('.');
-        const [, , bLast] = b.split('.');
-
-        return bLast - aLast;
-      });
-      // prefix older DOIs with previous
-      doiLines = doiLines.map((doi, index) => {
-        if (index === 0) {
-          const [, lastPart] = doi.split(' ');
-          return 'DOI: ' + lastPart;
-        }
-        if (index > 0 && !doi.startsWith('previous')) {
-          return 'previous' + doi;
-        }
-        return doi;
-      });
-    }
-    let nonDOILines = lines.filter(
-      (line) => !(line.startsWith('DOI: ') || line.startsWith('previousDOI: '))
-    );
-
-    const kerkoLinePrefix = 'KerkoCite.ItemAlsoKnownAs:';
-    let kerkoLine = nonDOILines.find((line) =>
-      line.startsWith(kerkoLinePrefix)
-    );
-
-    nonDOILines = nonDOILines.filter(
-      (line) => !line.startsWith(kerkoLinePrefix)
-    );
-    // if line not exist add it
-    if (!kerkoLine) {
-      kerkoLine = kerkoLinePrefix;
-    }
-    // split with " " and ingore first element which will be prefix
-    let [, ...kerkoItems] = kerkoLine.split(' ');
-
-    // add sorted doi
-    kerkoItems = [
-      ...new Set(
-        doiLines
-          .map((line) => {
-            const [, doi] = line.split(' ');
-            return doi;
-          })
-          .concat(kerkoItems)
-      ),
-    ];
-
-    kerkoLine = '';
-    if (kerkoItems.length > 0) {
-      kerkoItems = [kerkoLinePrefix, ...kerkoItems];
-      kerkoLine = kerkoItems.join(' ');
-    }
-
-    // combine doi + kerkoLine + anything else as result separate by newline
-    result = [...doiLines, kerkoLine, ...nonDOILines].join('\n');
-    return result;
-  }
 
   return Promise.all(
     zoteroKeys.map((key) =>
@@ -1603,8 +1545,9 @@ function getZoteroSelectLink(
   isgroup = true,
   isitem = true
 ) {
-  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'
-    }/${item_key}`;
+  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${
+    isitem ? 'items' : 'collections'
+  }/${item_key}`;
 }
 
 module.exports.sync = zotzenSync;
