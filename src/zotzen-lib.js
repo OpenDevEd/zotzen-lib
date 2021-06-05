@@ -1353,7 +1353,7 @@ async function zotzenSyncOne(args) {
     console.log('metadata sync was not requested');
   }
   logger.info('checking Attachments.');
-  //noattachmentsfound
+  // noattachmentsfound
   /*
   The following code requests download of attachments from Zotero and upload to Zenodo.
   It may or may not run. If it does not run, attachments is null.
@@ -1496,9 +1496,9 @@ async function zotzenSyncOne(args) {
     }
   }
 
-  console.log('reorder extra field');
-
-  await zotero.item({
+  console.log('reorder extra field in sync');
+  await zotero.update_item({
+    ...args,
     key: args.key,
     reorderExtraField: true,
   });
@@ -1576,6 +1576,15 @@ async function newversion(args, subparsers) {
     group: args.group_id,
     doi: res.response.doi,
   });
+
+  // reorder extra field
+  console.log('reorder Extra field in newversion');
+  await zotero.update_item({
+    key: args.key,
+    group: args.group_id,
+    reorderExtraField: true,
+  });
+
   return {
     status: 0,
     zenodo: res,
