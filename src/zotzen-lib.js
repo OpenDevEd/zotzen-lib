@@ -47,12 +47,19 @@ function verbose(args, msg, data) {
 }
 
 //--
-async function zenodoCreate(args) {
+async function zenodoCreate(argsIn) {
+  let args = { ...argsIn };
   // TODO: What if this is a user lib?
   if (!args.zotero_link && args.key && args.group_id) {
     console.log('Adding args.zotero_link from key/group_id provided');
     args.zotero_link = getZoteroSelectLink(args.key, args.group_id, true);
   }
+
+  console.log('args = here *** ', args);
+  args.authors = args.authors.map(({ firstName, lastName, affiliation }) => ({
+    name: `${firstName} ${lastName}`,
+    affiliation,
+  }));
 
   console.log('zenodoCreate, args=' + JSON.stringify(args, null, 2));
 
@@ -86,7 +93,8 @@ async function zenodoCreate(args) {
   // [zenodoRecord, DOI] = zenodoCreate(args)
 }
 
-async function zoteroCreate(args) {
+async function zoteroCreate(argsIn) {
+  let args = { ...argsIn };
   // complement the set of args provided according to zenodoLibCreate_Args
   Object.keys(args).forEach((mykey) => {
     if (!args[mykey]) {
@@ -108,34 +116,13 @@ async function zoteroCreate(args) {
   const doistr = args.doi ? 'DOI: ' + args.doi : '';
   const tagsarr = zotero.objectifyTags(args.tags);
   let creators = [];
+
   if (args.authors) {
-    creators = args.authors.map((author) => {
-      let name = author.split(',');
-
-      if (name.length === 1) {
-        console.warn(
-          `Ambigious format for name "${author}", please use format "last, first"`
-        );
-        name = author.split(' ');
-      }
-      name = name.map((s) => s.trim()).filter((s) => s.length !== 0);
-
-      let first;
-      let last;
-
-      if (name.length >= 2) {
-        [last] = name.splice(-1, 1);
-        first = name.join(' ');
-      } else {
-        first = name.join(' ');
-      }
-
-      return {
-        creatorType: 'author',
-        firstName: first,
-        lastName: last,
-      };
-    });
+    creators = args.authors.map(({ firstName, lastName, creatorType }) => ({
+      firstName,
+      lastName,
+      creatorType,
+    }));
   }
   // const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
   let extrastr = doistr;
@@ -487,12 +474,57 @@ async function zotzenCreate(args, subparsers) {
 
   verbose(args, 'zotzenlib.zotzenCreate -> zenodo', args);
   // let result = dummycreate(args)
+  let authors;
+
+  if (Array.isArray(args.authors) && args.authors.length > 0) {
+    authors = args.authors.map((author) => {
+      const [namePart = '', affiliation = ''] = author.split(';');
+      let name = namePart.split(',');
+
+      let first;
+      let last;
+
+      if (name.length === 2) {
+        [last, first] = name;
+      } else {
+        console.warn(
+          `Ambigious format for name "${author}", please use format "last, first"`
+        );
+        console.log('splitting by space');
+        name = namePart.split(' ');
+        name = name.map((s) => s.trim()).filter((s) => s.length !== 0);
+        console.log('by space: ', name);
+
+        if (name.length > 1) {
+          [last] = name.splice(-1, 1);
+          first = name.join(' ');
+        } else {
+          first = name.join(' ');
+        }
+      }
+
+      const result = {
+        creatorType: 'author',
+        firstName: (first || '').trim(),
+        lastName: (last || '').trim(),
+        affiliation,
+      };
+
+      console.log(`converted author ${author} to: `, result);
+
+      return result;
+    });
+  }
+
+  args.authors = [...authors];
   // Create zenodo record
   const [zenodoRecord, DOI, base] = await zenodoCreate(args);
   // console.log("TEMPORARYXXX="+JSON.stringify(   base         ,null,2))
   args.id = zenodoRecord.id;
   args.doi = DOI;
   args.base = base;
+
+  args.authors = [...authors];
   verbose(args, 'zotzenlib.zotzenCreate -> zotero', args);
   const [
     zoteroRecord,
