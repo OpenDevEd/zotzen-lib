@@ -48,18 +48,22 @@ function verbose(args, msg, data) {
 
 //--
 async function zenodoCreate(argsIn) {
-  let args = { ...argsIn };
+  const args = { ...argsIn };
   // TODO: What if this is a user lib?
   if (!args.zotero_link && args.key && args.group_id) {
     console.log('Adding args.zotero_link from key/group_id provided');
     args.zotero_link = getZoteroSelectLink(args.key, args.group_id, true);
   }
 
-  console.log('args = here *** ', args);
-  args.authors = args.authors.map(({ firstName, lastName, affiliation }) => ({
+  // console.log('args = here *** ', args);
+  args.creators = args.authors.map(({ firstName, lastName, affiliation }) => ({
     name: `${firstName} ${lastName}`,
     affiliation,
   }));
+
+  if (args.creators.length === 0) {
+    delete args.creators;
+  }
 
   console.log('zenodoCreate, args=' + JSON.stringify(args, null, 2));
 
@@ -474,7 +478,7 @@ async function zotzenCreate(args, subparsers) {
 
   verbose(args, 'zotzenlib.zotzenCreate -> zenodo', args);
   // let result = dummycreate(args)
-  let authors;
+  let authors = [];
 
   if (Array.isArray(args.authors) && args.authors.length > 0) {
     authors = args.authors.map((author) => {
@@ -1476,6 +1480,7 @@ async function zotzenSyncOne(args) {
         }
       }
     }
+
     // Attach outgoing tag:
     if (args.publish) {
       logger.info('Publishing...');
@@ -1490,6 +1495,13 @@ async function zotzenSyncOne(args) {
       }
     }
   }
+
+  console.log('reorder extra field');
+
+  await zotero.item({
+    key: args.key,
+    reorderExtraField: true,
+  });
   // process.exit(1);
   // TODOMD5
   // TODO: updated has the md5 sums for the files. They should be compared the md5 sums from Zotero.
