@@ -10,7 +10,6 @@ function as_value(value) {
   return value;
 }
 
-// const { delete } = require("request-promise-native");
 // PRODUCTION: Load library
 const zenodo = require('zenodo-lib');
 const Zotero = require('zotero-lib');
