@@ -55,13 +55,16 @@ async function zenodoCreate(argsIn) {
   }
 
   // console.log('args = here *** ', args);
-  args.creators = args.authors.map(({ firstName, lastName, affiliation }) => ({
-    name: `${firstName} ${lastName}`,
-    affiliation,
-  }));
-
-  if (args.creators.length === 0) {
-    delete args.creators;
+  if (Array.isArray(args.authors) && args.authors.length) {
+    args.creators = args.authors.map(
+      ({ firstName, lastName, affiliation }) => ({
+        name: `${firstName} ${lastName}`,
+        affiliation,
+      })
+    );
+    if (args.creators.length === 0) {
+      delete args.creators;
+    }
   }
 
   console.log('zenodoCreate, args=' + JSON.stringify(args, null, 2));
