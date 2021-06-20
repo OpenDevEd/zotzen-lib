@@ -4,24 +4,12 @@
     "es2021": true,
     "node": true
   },
-  "extends": ["prettier", "airbnb-base"],
+  "extends": ["eslint:recommended", "prettier"],
   "plugins": ["prettier"],
   "parserOptions": {
     "ecmaVersion": 12
   },
   "rules": {
-    "comma-dangle": "off",
-    "no-console": "off",
-    "prettier/prettier": [
-      "error",
-      { "singleQuote": true, "trailingComma": "es5" }
-    ],
-    "import/extensions": "off",
-    "import/no-unresolved": [2, { "commonjs": true }],
-    "camelcase": "off",
-    "operator-linebreak": "off",
-    "no-underscore-dangle": "off",
-    "prefer-template": "off",
-    "no-param-reassign": "off"
+    "prettier/prettier": ["error", {}, { "usePrettierrc": true }]
   }
 }

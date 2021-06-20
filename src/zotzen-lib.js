@@ -381,16 +381,16 @@ TOP-LEVEL FUNCTION
 */
 async function zotzenCreate(args, subparsers) {
   // TODO - we have to fix the communities for Zenodo.
-  const testargs = {
-    reportNumber: '100-from-form',
-    reportType: 'Some report type - from form',
-    note:
-      'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
-    institution: 'EdTech Hub',
-    language: 'en',
-    rights: 'Creative Commons Attribution 4.0',
-    tags: ['_r:AddedByZotZen'],
-  };
+  // const testargs = {
+  //   reportNumber: '100-from-form',
+  //   reportType: 'Some report type - from form',
+  //   note:
+  //     'Note content - will be added to note. Add additional information from form, e.g. user who submitted the form as well as date.',
+  //   institution: 'EdTech Hub',
+  //   language: 'en',
+  //   rights: 'Creative Commons Attribution 4.0',
+  //   tags: ['_r:AddedByZotZen'],
+  // };
   if (args.getInterface && subparsers) {
     const parser_create = subparsers.add_parser('create', {
       help:
@@ -764,7 +764,7 @@ function zoteroParseGroup(str) {
     zoteroGroup = a[1];
     console.log(`Got Zotero Group (/) = ${zoteroGroup}`);
   } else {
-    const a = str.match(/^(\d+)\:/s);
+    const a = str.match(/^(\d+):/s);
     if (a) {
       zoteroGroup = a[1];
       console.log(`Got Zotero Group (:) = ${zoteroGroup}`);
@@ -777,12 +777,12 @@ function zoteroParseGroup(str) {
 function zenodoParseIDFromZoteroRecord(item) {
   logger.info('item = %O', item);
   const extra = item.extra.split('\n');
-  let doi = '';
+  // let doi = '';
   let id = '';
   extra.forEach((element) => {
     let res = element.match(/^\s*doi:\s*(.*?(\d+))$/i);
     if (res) {
-      doi = res[1];
+      // doi = res[1];
       id = res[2];
     }
   });
@@ -900,7 +900,7 @@ async function zotzenLink(args, subparsers) {
       'Get the zenodo record, TEMPORARY=' + JSON.stringify(args, null, 2)
     );
 
-    const zenodoID = args.id ? zenodoParseID(args.id) : null;
+    // const zenodoID = args.id ? zenodoParseID(args.id) : null;
     try {
       // FIXME: this is probably making unwanted publish request
       // which is causing record state in progress
@@ -1208,12 +1208,12 @@ async function linkZotZen(args, k, data) {
           true
         );
         args.id = k.zenodoID;
-        zenodoRecord = await zenodo.update(args);
+        await zenodo.update(args);
       }
       if (!k.zenodoIDFromZotero) {
         // TODO: Testing
         console.log('Linking from Zotero to Zenodo (alters Zotero record)');
-        const status = await update_doi_and_link(k);
+        await update_doi_and_link(k);
       }
     }
   } else if (k.zoteroKey) {
@@ -1427,7 +1427,7 @@ async function zotzenSyncOne(args) {
           `${element.data.key}->${element.data.filename}, %O`,
           element.data.tags
         );
-        const file = await zotero.attachment({
+        await zotero.attachment({
           key: element.data.key,
           save: element.data.filename,
         });
@@ -1452,51 +1452,52 @@ async function zotzenSyncOne(args) {
   const updated = await zenodo.update(updateDoc);
   // handle error if the update wasn't successful. Requires changing zenodo.update to return the status.
   // if (updated.status != 0) {
-  if (1 != 1) {
-    // error handling
-  } else {
-    logger.info('updated zenodo record = %O', updated);
-    // The update was successful -- If attachments sync was requested, now mark the same files on zotero
-    if (args.attachments) {
-      if (attachments.length === 0) {
-      } else {
-        // Attach a tag to the attachments
-        for (const element of attachments) {
-          logger.info(
-            `${element.data.key}->${element.data.filename}, %O`,
-            element.data.tags
-          );
-          //noattachmentsfound
-          /*
+  // if (1 != 1) {
+  //   // error handling
+  // } else {
+  logger.info('updated zenodo record = %O', updated);
+  // The update was successful -- If attachments sync was requested, now mark the same files on zotero
+  if (args.attachments) {
+    if (attachments.length === 0) {
+      console.log('attachements length is zero');
+    } else {
+      // Attach a tag to the attachments
+      for (const element of attachments) {
+        logger.info(
+          `${element.data.key}->${element.data.filename}, %O`,
+          element.data.tags
+        );
+        //noattachmentsfound
+        /*
           The intention here is that anything that has been transferred from Zotero to Zenodo is now tagged.
           This may be where the error occurs?
           TypeError: attachments is not iterable
     at zotzenSyncOne (/usr/local/lib/node_modules/zotzen-lib/src/zotzen-lib.js:1136:35)
     at process._tickCallback (internal/process/next_tick.js:68:7)
           */
-          const file = await zotero.item({
-            key: element.data.key,
-            addtags: ['_DOILIVE', '_zenodo:uploaded'],
-          });
-          console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
-        }
-      }
-    }
-
-    // Attach outgoing tag:
-    if (args.publish) {
-      logger.info('Publishing...');
-      if (updated.submitted) {
-        const x = await zotero.item({
-          key: args.key,
-          addtags: ['_DOILIVE', '_zenodo:submitted'],
+        const file = await zotero.item({
+          key: element.data.key,
+          addtags: ['_DOILIVE', '_zenodo:uploaded'],
         });
-        console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
-      } else {
-        console.log('Record unsubmitted');
+        console.log('ATTACHMENT TAG=' + JSON.stringify(file, null, 2));
       }
     }
   }
+
+  // Attach outgoing tag:
+  if (args.publish) {
+    logger.info('Publishing...');
+    if (updated.submitted) {
+      const x = await zotero.item({
+        key: args.key,
+        addtags: ['_DOILIVE', '_zenodo:submitted'],
+      });
+      console.log('TEMPORARY=' + JSON.stringify(x, null, 2));
+    } else {
+      console.log('Record unsubmitted');
+    }
+  }
+  // }
 
   console.log('reorder extra field');
 
