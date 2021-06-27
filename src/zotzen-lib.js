@@ -1500,10 +1500,8 @@ async function zotzenSyncOne(args) {
   // }
 
   console.log('reorder extra field in sync');
-  await zotero.update_item({
-    ...args,
-    key: args.key,
-    reorderExtraField: true,
+  await zotzenReorderExtraField({
+    key: [args.key],
   });
   // process.exit(1);
   // TODOMD5
@@ -1582,10 +1580,8 @@ async function newversion(args, subparsers) {
 
   // reorder extra field
   console.log('reorder Extra field in newversion');
-  await zotero.update_item({
-    key: args.key,
-    group: args.group_id,
-    reorderExtraField: true,
+  await zotzenReorderExtraField({
+    key: [args.key],
   });
 
   return {
