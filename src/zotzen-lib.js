@@ -434,6 +434,11 @@ async function zotzenCreate(args, subparsers) {
       help:
         'The description (abstract) of the record. Overrides data provided via --json. (Zotero/Zenodo)',
     });
+    parser_create.add_argument('--doi', {
+      action: 'store',
+      help:
+        'DOI for zenodo record. Overrides data provided via --json. (ZZenodo only)',
+    });
     parser_create.add_argument('--communities', {
       action: 'store',
       help:
@@ -523,6 +528,7 @@ async function zotzenCreate(args, subparsers) {
   }
 
   args.authors = [...authors];
+  console.log('sending doi: ', args.doi);
   // Create zenodo record
   const [zenodoRecord, DOI, base] = await zenodoCreate(args);
   // console.log("TEMPORARYXXX="+JSON.stringify(   base         ,null,2))
@@ -786,6 +792,21 @@ function zenodoParseIDFromZoteroRecord(item) {
       id = res[2];
     }
   });
+
+  if (id.length === 0) {
+    console.log('not found id in doi, searching in archive');
+    const archiveLine = extra.find((line) =>
+      line.startsWith('Archive: https://zenodo.org/record/')
+    );
+
+    if (archiveLine) {
+      const parts = archiveLine.split('/');
+      id = parts[parts.length - 1];
+      console.log(`found id = ${id} from archiveLine ${archiveLine}`);
+    }
+  }
+
+  console.log('parsedIdFromZoteroRecord: ', id);
   return id;
 }
 
