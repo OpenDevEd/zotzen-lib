@@ -1,18 +1,28 @@
-const childProcess = require('child_process');
 const fs = require('fs');
-const opn = require('opn');
-const path = require('path');
+const os = require('os');
 const prompt = require('prompt');
+const path = require('path');
+const logger = require('./logger');
+
+// const childProcess = require('child_process');
+// const opn = require('opn');
 
 async function zotzenInit(args) {
   if (args.debug) {
     console.log('DEBUG: zotzenInit');
   }
+
   console.log(JSON.stringify(args, null, 2));
   const schema = {
     properties: {
       'Zenodo API Key': {
         message: 'Please enter you Zenodo API Key. (Enter to ignore)',
+      },
+      'Zenodo Env': {
+        pattern: /(sandbox|production)/,
+        default: 'sandbox',
+        message:
+          'Please enter you Zenodo Environment (sandbox|production). (Enter to ignore)',
       },
       'Zotero API Key': {
         message: 'Please enter your Zotero API Key. (Enter to ignore)',
@@ -31,34 +41,70 @@ async function zotzenInit(args) {
       console.err('Invalid input received');
     } else {
       const zenKey = result['Zenodo API Key'];
+      const zenEnv = result['Zenodo Env'];
+
+      const config = {
+        accessToken: zenKey,
+      };
+
+      if (zenEnv === 'sandbox') {
+        config.env = zenEnv;
+      }
+
       if (zenKey) {
-        fs.writeFileSync(
-          'zenodo-cli/config.json',
-          JSON.stringify({
-            accessToken: zenKey,
-          })
+        const zenConfigDirPath = path.join(
+          os.homedir(),
+          '.config',
+          'zenodo-cli'
         );
-        console.log(
-          'Zenodo config wrote successfully to zenodo-cli/config.json.'
-        );
+        if (!fs.existsSync(zenConfigDirPath)) {
+          logger.info('config path not exists, creating...');
+          fs.mkdirSync(zenConfigDirPath);
+        }
+        const zenConfigFilePath = path.join(zenConfigDirPath, 'config.json');
+        fs.writeFileSync(zenConfigFilePath, JSON.stringify(config));
+
+        logger.info(`Zenodo config wrote successfully to ${zenConfigFilePath}`);
       }
 
       const zotKey = result['Zotero API Key'];
       const zotUid = result['Zotero User ID'];
       const zotGid = result['Zotero Group ID'];
       if (zotKey || zotUid || zotGid) {
-        fs.writeFileSync(
-          'zotero-cli/zotero-cli.toml',
-          `${zotKey ? 'api-key="' + zotKey + '"\n' : ''}` +
-          `${zotUid ? 'user-id="' + zotUid + '"\n' : ''}` +
-          `${zotGid ? 'group-id="' + zotGid + '"\n' : ''}`
+        const zotConfigDirPath = path.join(
+          os.homedir(),
+          '.config',
+          'zotero-cli'
         );
-        console.log(
-          'Zotero config wrote successfully to zotero-cli/zotero-cli.toml'
+        if (!fs.existsSync(zotConfigDirPath)) {
+          logger.info('config path not exists, creating...');
+          fs.mkdirSync(zotConfigDirPath);
+        }
+
+        let zotConfig = '';
+
+        if (zotKey) {
+          zotConfig += `api-key = "${zotKey}"\n`;
+        }
+
+        if (zotUid) {
+          zotConfig += `user-id = "${zotUid}"\n`;
+        }
+
+        if (zotGid) {
+          zotConfig += `group-id = ${zotGid}\n`;
+        }
+        zotConfig += 'library-type = "group"\n';
+        zotConfig += 'indent = 4\n';
+
+        const zotConfigFilePath = path.join(
+          zotConfigDirPath,
+          'zotero-cli.toml'
         );
+        fs.writeFileSync(zotConfigFilePath, zotConfig);
+        logger.info(`Zotero config wrote successfully to ${zotConfigFilePath}`);
       }
     }
   });
 }
 exports.zotzenInit = zotzenInit;
-

@@ -11,7 +11,7 @@ async function main() {
       version: 5274
     }
   }
-  console.log("ITem to be sync'd=" + JSON.stringify(result.data, null, 2))
+  console.log("Item to be sync'd=" + JSON.stringify(result.data, null, 2))
   // ^^^ we now have an item we can operate on.
   data = result.data
 
@@ -76,6 +76,7 @@ submitted bool	True of deposition has been published, False otherwise.
 
 
 async function getNewItem() {
+  console.log("[test] getNewItem")
   // Set up an item-pair that can be synchronised.
   // 1. Create the pair
   const result = await zotzenlib.create({
@@ -96,9 +97,10 @@ async function getNewItem() {
     kerko_url: "https://docs.edtechhub.org/lib/",
     tags: ["_r:AddedByZotZen"],
     description: "An output of the EdTech Hub, https://edtechhub.org",
+    fullresponse: true
   })
 
-  console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+  console.log("[test] getNewItem=" + JSON.stringify(result, null, 2))
 
   const data = {
     "zoteroItemKey": result.data.zoteroItemKey,
@@ -117,7 +119,7 @@ async function getNewItem() {
       console.log(check.message);
       process.exit(1)
     } else {
-      console.log("records are linked - proceeding")
+      console.log("[test] records are linked - proceeding")
     }
     // console.log("result 0 = " + JSON.stringify(result, null, 2))
   }
@@ -128,17 +130,17 @@ async function getNewItem() {
     const args = {
       key: result.data.zoteroItemKey,
       version: result.data.version,
-      update: { title: "new title" },
-      fullresponse: false,
+      json: { title: "new title" },
+      fullresponse: true,
       show: true
     }
     const update = await zotero.update_item(args)
     if (update.statusCode == 204) {
-      console.log("update successfull - getting record")
+      console.log("[test] update successfull - getting record")
       const zoteroRecord = await zotero.item({ key: result.data.zoteroItemKey, show: true })
-      console.log("Result=" + JSON.stringify(zoteroRecord, null, 2))
+      console.log("[test] Result=" + JSON.stringify(zoteroRecord, null, 2))
     } else {
-      console.log("update failed")
+      console.log("[test] update failed")
       return 1
     }
   }
@@ -162,7 +164,7 @@ async function getNewItem() {
       addtags: ["publishPDF"]
     })
   }
-
+  console.log("[test] getNewItem: done.")
   // Now we have a Zotero item with a file (and new title) and a Zenodo record that is out of date.
   return result
 }
