@@ -35,8 +35,8 @@
     "opn": "^6.0.0",
     "prompt": "^1.0.0",
     "winston": "^3.3.3",
-    "zenodo-lib": "^1.0.68",
-    "zotero-lib": "^1.0.58"
+    "zenodo-lib": "^1.0.70",
+    "zotero-lib": "^1.0.59"
   },
   "files": [
     "build/*",
