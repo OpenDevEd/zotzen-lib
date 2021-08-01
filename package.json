@@ -1,6 +1,6 @@
 {
   "name": "zotzen-lib",
-  "version": "1.0.64",
+  "version": "1.0.65",
   "description": "This package facilitates data exchange between Zotero and Zenodo, using the respective APIs.",
   "main": "src/zotzen-lib.js",
   "bin": {
@@ -16,7 +16,13 @@
     "postversion": "git push && git push --tags",
     "publish:patch": "npm version patch; npm publish; git push --tags",
     "publish:minor": "npm version minor; npm publish; git push --tags",
-    "publish:major": "npm version major; npm publish; git push --tags"
+    "publish:major": "npm version major; npm publish; git push --tags",
+    "release": "standard-version"
+  },
+  "standard-version": {
+    "skip": {
+      "tag": true
+    }
   },
   "repository": {
     "type": "git",
@@ -34,13 +40,13 @@
     "axios": "^0.21.1",
     "opn": "^6.0.0",
     "prompt": "^1.0.0",
+    "standard-version": "^9.3.1",
     "winston": "^3.3.3",
     "zenodo-lib": "^1.0.70",
     "zotero-lib": "^1.0.59"
   },
   "files": [
-    "build/*",
-    "src/*.js",
+    "src/**/*.js",
     "data.json"
   ],
   "devDependencies": {
