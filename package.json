@@ -46,8 +46,7 @@
     "zotero-lib": "^1.0.59"
   },
   "files": [
-    "build/*",
-    "src/*.js",
+    "src/**/*.js",
     "data.json"
   ],
   "devDependencies": {
