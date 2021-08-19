@@ -562,7 +562,7 @@ async function zotzenCreate(args, subparsers) {
     zoteroRecordGroup,
     true
   );
-
+  verbose(args, 'after getZoteroSelectLink: ', zoteroRecordGroup);
   // The creation of the first Zotero/Zenodo record needs to be sequences.
   // However, the items below could be done through a 'Promise all' as they can run in parallel.
 
@@ -579,6 +579,7 @@ async function zotzenCreate(args, subparsers) {
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
   let enclose = null;
   if (args.enclose) {
+    verbose(args, 'start of args.enclose: ', zoteroRecordGroup);
     if (args.collections) {
       console.log(
         '[zotzenCreate] enclosing ${zoteroRecord.key} WITH COLLECTION'
