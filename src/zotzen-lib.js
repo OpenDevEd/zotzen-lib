@@ -539,6 +539,7 @@ async function zotzenCreate(args, subparsers) {
   args.authors = [...authors];
   verbose(args, 'zotzenlib.zotzenCreate -> zotero', args);
   const outarray = await zoteroCreate(args);
+  verbose(args, 'zotzenlib.zotzenCreate: returned by zotero: ', outarray);
   const [
     zoteroRecord,
     zoteroRecordGType,
