@@ -538,13 +538,14 @@ async function zotzenCreate(args, subparsers) {
 
   args.authors = [...authors];
   verbose(args, 'zotzenlib.zotzenCreate -> zotero', args);
+  const outarray = await zoteroCreate(args);
   const [
     zoteroRecord,
     zoteroRecordGType,
     zoteroRecordGroup,
     zoteroRecordVersion,
     decorations,
-  ] = await zoteroCreate(args);
+  ] = outarray
   // const zoteroGroup = args.group_id
   // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
   // Actually - as we are about the attach this to the Zenodo item - it will not work for user libs in any case...
