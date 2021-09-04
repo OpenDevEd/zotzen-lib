@@ -783,6 +783,7 @@ function zoteroParseGroup(str) {
 }
 
 // TODO: complete
+// For better version, see zotero-lib/src/utils/formatAsZenodoJson.ts
 function zenodoParseIDFromZoteroRecord(item) {
   logger.info('item = %O', item);
   const extra = item.extra.split('\n');
@@ -1340,6 +1341,7 @@ async function zotzenSyncOne(args) {
    produce a new version
     */
   const zenodoID = zz.data.zenodoID;
+  /* FROM HERE: Replace this with formatAsZenodoJson.ts */
   let updateDoc = {
     id: zenodoID,
   };
@@ -1363,10 +1365,15 @@ async function zotzenSyncOne(args) {
           name: c.name ? c.name : `${c.firstName} ${c.lastName}`,
         }));
       }
+      /*
+      This is too rudimentary: Really we should include the affiliations file here, supplement the author information with institution and orcid.
+      370755a6-0cfd-11ec-851b-77cdfd2128b9
+      */
 
       if (zoteroItem.date) {
         updateDoc.publication_date = zoteroItem.date;
       }
+      /* TO HERE */
 
       // console.log("TEMPORARY="+JSON.stringify( updateDoc           ,null,2))
       // TODO: capture this output
