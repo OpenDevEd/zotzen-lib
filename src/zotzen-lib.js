@@ -92,7 +92,7 @@ async function zenodoCreate(argsIn) {
     console.log('ERROR in ZenodoRecord creation.');
     process.exit(1);
   }
-  const DOI = zenodoRecord['metadata']['prereserve_doi']['doi'];
+  const DOI = args.doi ? args.doi : zenodoRecord['metadata']['prereserve_doi']['doi'];
   const base = zenodoRecord['links']['self'].search(/sandbox/) ? 'sandbox' : '';
   console.log(base);
   return [zenodoRecord, DOI, base];
@@ -132,8 +132,12 @@ async function zoteroCreate(argsIn) {
   }
   // const extrastr = args.team ? doistr + "\n" + "EdTechHubTeam: " + args.team : doistr
   let extrastr = doistr;
+  // const zenodoID = args.id ? args.id : "0000"
+  if (args.id) {
+    extrastr = extrastr + "\n" + "ZenodoArchiveID: " + args.id + "\n" + "ZenodoArchiveConcept: " + (args.id-1)
+  }
   // processExtraField
-  extrastr = processExtraField(doistr);
+  extrastr = processExtraField(extrastr);
 
   const report = {
     itemType: 'report',
@@ -570,9 +574,8 @@ async function zotzenCreate(args, subparsers) {
   args.zotero_link = zoteroSelectLink;
   args.id = zenodoRecord.id;
   if (args.kerko_url) {
-    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${
-      args.kerko_url + DOI
-    }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
+    args.description += `<p>Available from <a href="${args.kerko_url + DOI}">${args.kerko_url + DOI
+      }</a></p>`; // (need to use DOI here, as the link to the zoteroRecord.key is not necc. permanent)
   }
   const zenodoRecord2 = await zenodo.update(args);
   // console.log(JSON.stringify(zenodoRecord2, null, 2))
@@ -1628,9 +1631,8 @@ function getZoteroSelectLink(
   isgroup = true,
   isitem = true
 ) {
-  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${
-    isitem ? 'items' : 'collections'
-  }/${item_key}`;
+  return `zotero://select/${isgroup ? 'groups' : 'users'}/${group_id}/${isitem ? 'items' : 'collections'
+    }/${item_key}`;
 }
 
 module.exports.sync = zotzenSync;
