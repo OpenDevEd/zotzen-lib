@@ -134,7 +134,7 @@ async function zoteroCreate(argsIn) {
   let extrastr = doistr;
   // const zenodoID = args.id ? args.id : "0000"
   if (args.id) {
-    extrastr = extrastr + "\n" + "ZenodoArchiveID: " + args.id + "\n" + "ZenodoArchiveConcept: " + (args.id-1)
+    extrastr = extrastr + "\n" + "ZenodoArchiveID: " + args.id + "\n" + "ZenodoArchiveConcept: " + (args.id - 1)
   }
   // processExtraField
   extrastr = processExtraField(extrastr);
@@ -791,15 +791,24 @@ function zenodoParseIDFromZoteroRecord(item) {
   logger.info('item = %O', item);
   const extra = item.extra.split('\n');
   // let doi = '';
-  let id = '';
+  let id = '0';
+  let candidate = '';
   extra.forEach((element) => {
-    let res = element.match(/^\s*doi:\s*(.*?(\d+))$/i);
+    console.log(element);
+    let res = element.match(
+      /^\s*(doi:\s*10\.5281\/zenodo\.|previousDOI:\s*10\.5281\/zenodo\.|ZenodoArchiveID:\s*)(\d+)\s*$/i
+    );
     if (res) {
       // doi = res[1];
-      id = res[2];
+      candidate = res[2];
+      //console.log("?? " + candidate)
+      if (parseInt(id) < parseInt(candidate)) {
+        id = candidate;
+        //console.log("-- " + candidate)
+      }
     }
   });
-
+  //console.log("DONE " + id)
   if (id.length === 0) {
     console.log('not found id in doi, searching in archive');
     const archiveLine = extra.find((line) =>
