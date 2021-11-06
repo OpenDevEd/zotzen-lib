@@ -794,13 +794,23 @@ function zoteroParseGroup(str) {
 function zenodoParseIDFromZoteroRecord(item) {
   logger.info('item = %O', item);
   const extra = item.extra.split('\n');
-  // let doi = '';
   let id = '0';
+  // Possibility 1: Is the DOI field a Zenodo DOI?
+  if ('doi' in item) {
+    let res = item.doi.match(
+      /^\s*10\.5281\/zenodo\.(\d+)\s*$/i
+    );
+    if (res) {
+      id = res[1];
+    }
+  }
+  // let doi = '';
+  // Possibility 2: Is there a Zenodo DOI in the extra field; or is there a ZenodoArchiveID?
   let candidate = '';
   extra.forEach((element) => {
     console.log(element);
     let res = element.match(
-      /^\s*(doi:\s*10\.5281\/zenodo\.|previousDOI:\s*10\.5281\/zenodo\.|ZenodoArchiveID:\s*)(\d+)\s*$/i
+      /^\s*(doi:\s*10\.5281\/zenodo\.|previousDOI:\s*10\.5281\/zenodo\.|ZenodoArchiveID:\s*|Archive: https:\/\/zenodo.org\/record\/)(\d+)\s*$/i
     );
     if (res) {
       // doi = res[1];
@@ -812,6 +822,7 @@ function zenodoParseIDFromZoteroRecord(item) {
       }
     }
   });
+  /*
   //console.log("DONE " + id)
   if (id.length === 0) {
     console.log('not found id in doi, searching in archive');
@@ -825,7 +836,7 @@ function zenodoParseIDFromZoteroRecord(item) {
       console.log(`found id = ${id} from archiveLine ${archiveLine}`);
     }
   }
-
+*/
   console.log('parsedIdFromZoteroRecord: ', id);
   return id;
 }
@@ -1437,9 +1448,7 @@ async function zotzenSyncOne(args) {
           logger.warn(" - Sync and publish.");
         }
       }
-
     }
-    process.exit(1)
     return null
   }
   if (args.metadata) {
@@ -1704,18 +1713,27 @@ async function newversion(args, subparsers) {
   }
   // Let's make a new version of the Zenodo record.
   console.log('Proceeding to create a new version.');
+  // Need to determine the DOI from the zotero item
+  const currentDOI = zotero.get_doi_from_item(result.originaldata.zotero);
+  console.log(currentDOI);
+  process.exit(1);
   const res = await zenodo.newversion({
     id: [zenodorecord.id],
     deletefiles: true,
+    // doi: ...
   });
   console.log('TEMPORARY=' + JSON.stringify(res, null, 2));
   // ^^^ The new record is automatically linked to the Zotero item.
   // However, for the Zotero item, we need to update the DOI.
+
+  // if we got a new DOI
   const res2 = await zotero.update_doi({
     key: args.key,
     group: args.group_id,
     doi: res.response.doi,
   });
+  // if we did not get a new DOI.
+  // append ZoteroArchiveID: ...
 
   // reorder extra field
   console.log('reorder Extra field in newversion');
