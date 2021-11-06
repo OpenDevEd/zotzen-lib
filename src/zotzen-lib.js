@@ -935,6 +935,10 @@ async function zotzenLink(args, subparsers) {
     // "extra": "DOI: 10.5072/zenodo.716876",
     // TODO - this will not work for Zotero recordTypes other the 'record'
     zenodoIDFromZotero = zenodoParseIDFromZoteroRecord(zoteroItem);
+    const doi = zotero.get_doi_from_item(zoteroItem);
+    if (!doi.match(/zenodo/) && !('doi' in args)) {
+      args.doi = doi
+    }
   } else {
     logger.warn("You did not provided a 'key' (for a zotero item):\n%O", {
       ...args,
@@ -943,9 +947,14 @@ async function zotzenLink(args, subparsers) {
   // -- Zenodo Record [if one was specified]
   let zoteroKeyFromZenodo = null;
   let zoteroGroupFromZenodo = null;
-  const zenodoID = args.id ? zenodoParseID(args.id) : null;
+  let zenodoID = args.id ? zenodoParseID(args.id) : null;
+  if (zenodoID == 0) {
+    zenodoID = null;
+  }
   let zenodoRecord = null;
-  args.id = zenodoID;
+  if (zenodoID) {
+    args.id = zenodoID;
+  }
   if (zenodoID) {
     // -- Get the zenodo record
     console.log(
@@ -1139,7 +1148,7 @@ async function checkZotZenLink(args, k, data) {
       }
     } else {
       // We have Zotero, but no Zenodo
-      if (k.zenodoIDFromZotero) {
+      if (k.zenodoIDFromZotero && k.zenodoIDFromZotero != 0) {
         // However, we have a reference to a zenodo id.
         console.log(
           'Zotero key provided, and it links to Zenodo ID, but no Zenodo ID provided. Going to check this pair.'
@@ -1197,6 +1206,7 @@ async function update_doi_and_link(k) {
     key: k.zoteroKey,
     group: k.zoteroGroup,
     doi: k.doi,
+    zenodorecordid: k.zenodoID
   });
   // Zotero item - attach links ... to Zenodo
   await zotero.attachLinkToItem(
@@ -1716,24 +1726,25 @@ async function newversion(args, subparsers) {
   // Need to determine the DOI from the zotero item
   const currentDOI = zotero.get_doi_from_item(result.originaldata.zotero);
   console.log(currentDOI);
-  process.exit(1);
-  const res = await zenodo.newversion({
+  let newversionCMD = {
     id: [zenodorecord.id],
     deletefiles: true,
-    // doi: ...
-  });
-  console.log('TEMPORARY=' + JSON.stringify(res, null, 2));
+  };
+  if (!currentDOI.match(/zenodo/)) {
+    newversionCMD["doi"] = currentDOI;
+  }
+  // console.log('TEMPORARY=' + JSON.stringify(newversionCMD, null, 2));
+  const res = await zenodo.newversion(newversionCMD);
+  // console.log('TEMPORARY=' + JSON.stringify(res, null, 2));
   // ^^^ The new record is automatically linked to the Zotero item.
   // However, for the Zotero item, we need to update the DOI.
 
-  // if we got a new DOI
   const res2 = await zotero.update_doi({
     key: args.key,
     group: args.group_id,
     doi: res.response.doi,
+    zenodorecord: res.response.id
   });
-  // if we did not get a new DOI.
-  // append ZoteroArchiveID: ...
 
   // reorder extra field
   console.log('reorder Extra field in newversion');
@@ -1741,11 +1752,13 @@ async function newversion(args, subparsers) {
     key: [args.key],
   });
 
-  return {
+  const res3 = {
     status: 0,
     zenodo: res,
     zotero: res2,
   };
+  console.log("TEMPORARY XXX=" + JSON.stringify(res3, null, 2));
+  return res3
 }
 
 function getZoteroSelectLink(
