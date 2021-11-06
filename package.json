@@ -42,8 +42,8 @@
     "prompt": "^1.0.0",
     "standard-version": "^9.3.1",
     "winston": "^3.3.3",
-    "zenodo-lib": "^1.0.77",
-    "zotero-lib": "^1.0.78"
+    "zenodo-lib": "^1.0.78",
+    "zotero-lib": "^1.0.79"
   },
   "files": [
     "src/**/*.js",
