@@ -706,6 +706,10 @@ async function zotzenSync(args, subparsers) {
       action: 'store',
       help: 'Only synchronise attachments with the tag given.',
     });
+    parser_sync.add_argument('--check', {
+      action: 'store_true',
+      help: 'Check whether a sync is necessary.',
+    });
     parser_sync.add_argument('--publish', {
       action: 'store_true',
       help: 'Publish zenodo record.',
@@ -1011,11 +1015,13 @@ async function zotzenLink(args, subparsers) {
   // TODO: Fix the DOI above - either take it from the actual DOI or the pre-reserved DOI.
   let result = await checkZotZenLink(args, keySet, data);
   // console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
+  // console.log("TEMPORARY=" + JSON.stringify(data, null, 2))
   // Need to allow for one iteration
   if (result.originaldata) result.originaldata2 = data;
   else result.originaldata = data;
   if (result.originalkeyset) result.originalkeyset2 = keySet;
   else result.originalkeyset = keySet;
+  // process.exit(1)
   return result;
 }
 
@@ -1347,7 +1353,7 @@ async function zotzenSyncOne(args) {
     );
   }
   verbose(args, 'zz=', zz);
-  console.log(`TEMPORARY syncone=${JSON.stringify(zz.data, null, 2)}`);
+  // console.log(`TEMPORARY syncone=${JSON.stringify(zz.data, null, 2)}`);
   /* TODO: Need to check whether the zenodo record is editable - otehrwise either abort or
    (with option 'newversion' given)
    produce a new version
@@ -1357,6 +1363,85 @@ async function zotzenSyncOne(args) {
   let updateDoc = {
     id: zenodoID,
   };
+  if (args.check) {
+    let needSync = { metadata: false, attachments: false };
+    console.log("---------------");
+    const data = zz.originaldata;
+    if (data.zotero.title == data.zenodo.metadata.title) {
+      console.log("Title matches.");
+    } else {
+      console.log("Title DOES NOT match.");
+      needSync.metadata = true;
+    }
+    // TODO - compare creators
+    //data.zotero.creators == data.metadata.creators
+    //       needSync.metadata = true;
+    // console.log("TEMPORARY="+JSON.stringify(    data.zenodo        ,null,2))
+    // TODO - fix the data comparison, e.g. using sugar.js
+    if (data.zotero.date == data.zenodo.metadata.publication_date) {
+      console.log("Date matches.");
+    } else {
+      console.log(`Date DOES NOT match: "${data.zotero.date}"" != "${data.zenodo.metadata.publication_date}"`);
+      // needSync.metadata = true;
+    }
+    //data.zotero.doi == data.zenodo.doi
+    //needSync.metadata = true;
+    let attachments = await getSelectedAttachments({
+      key: zz.data.zoteroKey,
+      group_id: zz.data.zoteroGroup,
+      filter: args.filter,
+      tags: args.tags
+    });
+    for (var i = 0; i < attachments.length; i++) {
+      //console.log("Zotero: " + attachments[i].data.filename);
+      //console.log("Zotero: " + attachments[i].data.md5);
+      attachments[i].located = false;
+      for (var j = 0; j < zz.originaldata.zenodo.files.length; j++) {
+        //console.log("- " + zz.originaldata.zenodo.files[j].filename);
+        //console.log("- " + zz.originaldata.zenodo.files[j].checksum);
+        zz.originaldata.zenodo.files[j].utilised = false;
+        if (attachments[i].data.md5 == zz.originaldata.zenodo.files[j].checksum) {
+          attachments[i].located = true;
+          zz.originaldata.zenodo.files[j].utilised = true;
+        }
+      }
+    }
+    // To do: See whether there are extra records in Zenodo.
+    for (var i = 0; i < attachments.length; i++) {
+      if (attachments[i].located == false) {
+        console.warn("Not in Zenodo record: " + attachments[i].data.filename);
+        needSync.attachments = true;
+      }
+    }
+    for (var j = 0; j < zz.originaldata.zenodo.files.length; j++) {
+      if (zz.originaldata.zenodo.files[j].utilised == false) {
+        console.warn("Extra in Zenodo record: " + zz.originaldata.zenodo.files[j].filename);
+        needSync.attachments = true;
+      };
+    }
+    // {...}
+    // console.log("TEMPORARY="+JSON.stringify(  attachments          ,null,2))
+    //console.log("TEMPORARY=" + JSON.stringify(zz.originaldata.zenodo.files , null, 2))
+    // console.log("TEMPORARY="+JSON.stringify(      needSync      ,null,2))     
+    // console.log("TEMPORARY="+JSON.stringify(  zz.data          ,null,2))
+    // "zenodoState": "done", "zenodoSubmitted": true
+    if (needSync.attachments || needSync.metadata) {
+      if (needSync.metadata) {
+        logger.warn("A metadata sync is needed.");
+      }
+      if (needSync.attachments) {
+        logger.warn("The attachments are not synchronised.");
+        if (zz.data.zenodoSubmitted) {
+          logger.warn(" - Create a new version.");
+        } else {
+          logger.warn(" - Sync and publish.");
+        }
+      }
+
+    }
+    process.exit(1)
+    return null
+  }
   if (args.metadata) {
     console.log('metadata');
     if (zz.originaldata && zz.originaldata.zotero) {
@@ -1405,60 +1490,12 @@ async function zotzenSyncOne(args) {
   */
   let attachments;
   if (args.attachments) {
-    logger.info('Attachments arg provided via cli...');
-    // get information about attachments
-    const myargs = { ...args, children: true };
-    // console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))
-    const children = await zotero.item(myargs);
-    logger.info('children %O', children);
-    // Select file attachments
-    attachments = children.filter(
-      (c) =>
-        c.data.itemType === 'attachment' &&
-        (c.data.linkMode === 'imported_file' ||
-          c.data.linkMode === 'imported_url')
-    );
-
-    logger.info('selected file attachment count: %s', attachments.length);
-
-    if ('type' in args && args.type) {
-      logger.info('filtering attachments by type');
-      const attachmentType = args.type.toLowerCase();
-      if (attachmentType !== 'all') {
-        attachments = attachments.filter((a) =>
-          a.data.filename.endsWith(attachmentType)
-        );
-      }
-      logger.info(
-        'attachment count after filter by arg: %s',
-        attachments.length
-      );
-    }
-
-    if ('tag' in args && args.tag) {
-      const tag = as_value(args.tag);
-
-      logger.info(
-        'count before filtering attachments by tag: %s',
-        attachments.length
-      );
-      attachments = attachments.filter((a) => {
-        // .log(">>>" + a.data.filename)
-        // console.log("TEMPORARY=" + JSON.stringify(a.data.tags.map(element => { return element.tag }), null, 2))
-        // console.log(args.tag)
-        // const arr = a.data.tags.map(element => { return element.tag })
-        // console.log(arr.includes(tag))
-        return a.data.tags
-          .map((element) => {
-            return element.tag;
-          })
-          .includes(tag);
-      });
-      logger.info(
-        'count after filtering attachments by tag: %s',
-        attachments.length
-      );
-    }
+    attachments = await getSelectedAttachments({
+      key: zz.data.zoteroKey,
+      group_id: zz.data.zoteroGroup,
+      filter: args.filter,
+      tags: args.tags
+    });
     // console.log("ATTACHMENTS_TEMPORARY="+JSON.stringify(   attachments         ,null,2))
     // TODO: We should remove existing draft attachments in the Zenodo record
     if (attachments.length === 0) {
@@ -1552,6 +1589,65 @@ async function zotzenSyncOne(args) {
   // TODO - this should report on what was done: List the metadata and the files.
   return updated; // message(0, "Sync complete")
   // TODO? Final actions?
+}
+
+async function getSelectedAttachments(args) {
+  let attachments;
+  logger.info('Attachments arg provided via cli...');
+  // get information about attachments
+  const myargs = { ...args, children: true };
+  // console.log("TEMPORARY="+JSON.stringify(myargs            ,null,2))
+  const children = await zotero.item(myargs);
+  // logger.info('children %O', children);
+  // Select file attachments
+  attachments = children.filter(
+    (c) =>
+      c.data.itemType === 'attachment' &&
+      (c.data.linkMode === 'imported_file' ||
+        c.data.linkMode === 'imported_url')
+  );
+
+  logger.info('selected file attachment count: %s', attachments.length);
+
+  if ('type' in args && args.type) {
+    logger.info('filtering attachments by type');
+    const attachmentType = args.type.toLowerCase();
+    if (attachmentType !== 'all') {
+      attachments = attachments.filter((a) =>
+        a.data.filename.endsWith(attachmentType)
+      );
+    }
+    logger.info(
+      'attachment count after filter by arg: %s',
+      attachments.length
+    );
+  }
+
+  if ('tag' in args && args.tag) {
+    const tag = as_value(args.tag);
+
+    logger.info(
+      'count before filtering attachments by tag: %s',
+      attachments.length
+    );
+    attachments = attachments.filter((a) => {
+      // .log(">>>" + a.data.filename)
+      // console.log("TEMPORARY=" + JSON.stringify(a.data.tags.map(element => { return element.tag }), null, 2))
+      // console.log(args.tag)
+      // const arr = a.data.tags.map(element => { return element.tag })
+      // console.log(arr.includes(tag))
+      return a.data.tags
+        .map((element) => {
+          return element.tag;
+        })
+        .includes(tag);
+    });
+    logger.info(
+      'count after filtering attachments by tag: %s',
+      attachments.length
+    );
+  }
+  return attachments
 }
 
 async function newversion(args, subparsers) {
