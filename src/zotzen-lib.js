@@ -936,7 +936,7 @@ async function zotzenLink(args, subparsers) {
     // TODO - this will not work for Zotero recordTypes other the 'record'
     zenodoIDFromZotero = zenodoParseIDFromZoteroRecord(zoteroItem);
     const doi = zotero.get_doi_from_item(zoteroItem);
-    if (!doi.match(/zenodo/) && !('doi' in args)) {
+    if (!doi.match(/10.5281\/zenodo/) && !('doi' in args)) {
       args.doi = doi
     }
   } else {
@@ -1024,7 +1024,7 @@ async function zotzenLink(args, subparsers) {
     zenodoIDFromZotero,
     zoteroKeyFromZenodo,
     zoteroGroupFromZenodo,
-    doi: '[...]/zenodo.' + zenodoID,
+    doi: '10.5281/zenodo.' + zenodoID,
     zenodoState,
     zenodoSubmitted,
   };
@@ -1306,7 +1306,7 @@ async function linkZotZen(args, k, data) {
     );
     args.id = k.zenodoID; // <-- this ensures linking.
     // TODO - needs fixing
-    args.doi = `............../zenodo.${k.zenodoID}`;
+    args.doi = `10.5281/zenodo.${k.zenodoID}`;
     // authors .... <-- TODO - need to copy authors
     // TODO - need to figure out why we have an array here: [0]
     args.title = data.zenodo[0].title;
@@ -1402,7 +1402,7 @@ async function zotzenSyncOne(args) {
     if (data.zotero.date == data.zenodo.metadata.publication_date) {
       console.log("Date matches.");
     } else {
-      console.log(`Date DOES NOT match: "${data.zotero.date}"" != "${data.zenodo.metadata.publication_date}"`);
+      console.log(`Date DOES NOT match: "${data.zotero.date}" != "${data.zenodo.metadata.publication_date}"`);
       // needSync.metadata = true;
     }
     //data.zotero.doi == data.zenodo.doi
@@ -1730,8 +1730,9 @@ async function newversion(args, subparsers) {
     id: [zenodorecord.id],
     deletefiles: true,
   };
-  if (!currentDOI.match(/zenodo/)) {
-    newversionCMD["doi"] = currentDOI;
+  if (!currentDOI.match(/10.5281\/zenodo/)) {
+    // HERE - this needs to be re-enabled following discussion with Zenodo support team.
+    // newversionCMD["doi"] = currentDOI;
   }
   // console.log('TEMPORARY=' + JSON.stringify(newversionCMD, null, 2));
   const res = await zenodo.newversion(newversionCMD);
@@ -1741,9 +1742,8 @@ async function newversion(args, subparsers) {
 
   const res2 = await zotero.update_doi({
     key: args.key,
-    group: args.group_id,
-    doi: res.response.doi,
-    zenodorecord: res.response.id
+    doi: currentDOI.match(/10.5281\/zenodo/) ? res.response.doi : currentDOI,
+    zenodoRecordID: res.response.id
   });
 
   // reorder extra field

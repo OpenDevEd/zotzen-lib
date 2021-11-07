@@ -19,7 +19,7 @@ function processExtraField(input = '') {
   if (ZenodoArchiveID > 0) {
     lines = lines.map((line) => {
       if (line.startsWith('ZenodoArchiveID: ') && !line.startsWith(ZAI)) {
-        return "old" + line;
+        return "previous" + line;
       } else {
         return line;
       };
@@ -95,7 +95,7 @@ function processExtraField(input = '') {
   }
 
   // combine doi + kerkoLine + anything else as result separate by newline
-  result = [...doiLines, ZAI, kerkoLine, "", ...nonDOILines].join('\n');
+  result = [...doiLines, ZAI, kerkoLine, ...nonDOILines].join('\n');
   // console.log("-------\n"+result);
   // process.exit(1)
   return result;
