@@ -22,7 +22,7 @@ function processExtraField(input = '') {
         return "previous" + line;
       } else {
         return line;
-      };
+      }
     });
     lines = lines.filter((line) => !line.startsWith('ZenodoArchiveID: '));
     // lines = [ZAI, ...lines];

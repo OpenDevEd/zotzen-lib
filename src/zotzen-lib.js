@@ -195,7 +195,7 @@ async function zoteroCreate(argsIn) {
   let decorations = [];
   // What if we are in the sandbox?
   console.log(args.base);
-  const base = args.base == 'sandbox' ? 'sandbox.' : '';
+  const base = args.base === 'sandbox' ? 'sandbox.' : '';
   if (args.id === null) {
     console.log('TEMPORARY=' + JSON.stringify(args, null, 2));
     process.exit(1);
@@ -284,7 +284,7 @@ async function zoteroCreate(argsIn) {
   // Attach kerko url to Zotero record (as url)
   let newZoteroRecord = zoteroRecord;
   const kerko_url = args.kerko_url ? args.kerko_url + zoteroRecord.key : '';
-  if (kerko_url != '') {
+  if (kerko_url !== '') {
     console.log('[zotzen] updating... with kerko url');
     const zoteroUpdate = {
       key: zoteroRecord.key,
@@ -555,7 +555,7 @@ async function zotzenCreate(args, subparsers) {
   // const zoteroGroup = args.group_id
   // TODO: Replace this with 'getZoteroLink' functionb elow - otherwise this will not work for user libs
   // Actually - as we are about the attach this to the Zenodo item - it will not work for user libs in any case...
-  if (zoteroRecordGType != 'group') {
+  if (zoteroRecordGType !== 'group') {
     console.log('The zotero record is in a user library.');
     return this.message(1, 'ERROR: group-type=user not implemented');
   }
@@ -816,10 +816,10 @@ function zenodoParseIDFromZoteroRecord(item) {
     if (res) {
       // doi = res[1];
       candidate = res[2];
-      //console.log("?? " + candidate)
+      // console.log("?? " + candidate)
       if (parseInt(id) < parseInt(candidate)) {
         id = candidate;
-        //console.log("-- " + candidate)
+        // console.log("-- " + candidate)
       }
     }
   });
@@ -949,7 +949,7 @@ async function zotzenLink(args, subparsers) {
   let zoteroKeyFromZenodo = null;
   let zoteroGroupFromZenodo = null;
   let zenodoID = args.id ? zenodoParseID(args.id) : null;
-  if (zenodoID == 0) {
+  if (zenodoID === 0) {
     zenodoID = null;
   }
   let zenodoRecord = null;
@@ -1072,7 +1072,7 @@ async function checkZotZenLink(args, k, data) {
           );
         } else if (
           k.zenodoIDFromZotero === k.zenodoID &&
-          k.zoteroKeyFromZenodo != k.zoteroKey
+          k.zoteroKeyFromZenodo !== k.zoteroKey
         ) {
           return message(
             1,
@@ -1080,7 +1080,7 @@ async function checkZotZenLink(args, k, data) {
             k
           );
         } else if (
-          k.zenodoIDFromZotero != k.zenodoID &&
+          k.zenodoIDFromZotero !== k.zenodoID &&
           k.zoteroKeyFromZenodo === k.zoteroKey
         ) {
           return message(
@@ -1149,7 +1149,7 @@ async function checkZotZenLink(args, k, data) {
       }
     } else {
       // We have Zotero, but no Zenodo
-      if (k.zenodoIDFromZotero && k.zenodoIDFromZotero != 0) {
+      if (k.zenodoIDFromZotero && k.zenodoIDFromZotero !== 0) {
         // However, we have a reference to a zenodo id.
         console.log(
           'Zotero key provided, and it links to Zenodo ID, but no Zenodo ID provided. Going to check this pair.'
@@ -1372,7 +1372,7 @@ async function zotzenSyncOne(args) {
   /* --- */
   // if (!syncErrors(doi, zenodoRawItem, zoteroSelectLink)) {
   if (!zz || zz.status !== 0) {
-    // console.log("TEMPORARY="+JSON.stringify(    zz        ,null,2))     
+    // console.log("TEMPORARY="+JSON.stringify(    zz        ,null,2))
     if ('zenodoID' in zz.data) {
       return message(
         1,
@@ -1390,9 +1390,8 @@ async function zotzenSyncOne(args) {
   verbose(args, 'zz=', zz);
   // console.log(`TEMPORARY syncone=${JSON.stringify(zz.data, null, 2)}`);
   /* TODO: Need to check whether the zenodo record is editable - otehrwise either abort or
-   (with option 'newversion' given)
-   produce a new version
-    */
+      (with option 'newversion' given) produce a new version
+   */
   const zenodoID = zz.data.zenodoID;
   if (args.check) {
     let needSync = { metadata: false, attachments: false };
@@ -1411,7 +1410,7 @@ async function zotzenSyncOne(args) {
     // console.log("TEMPORARY="+JSON.stringify(    data.zenodo        ,null,2))
     // TODO - fix the data comparison, e.g. using sugar.js
     if (
-      isodate(data.zotero.date) ==
+      isodate(data.zotero.date) ===
       isodate(data.zenodo.metadata.publication_date)
     ) {
       console.log("Date matches.");
@@ -1428,10 +1427,10 @@ async function zotzenSyncOne(args) {
       type: args.type,
       tag: args.tag
     };
-    //console.log("TEMPORARY attachmentsCMD="+JSON.stringify(   args         ,null,2))     
-    //console.log("TEMPORARY attachmentsCMD="+JSON.stringify(   attachmentsCMD         ,null,2))     
+    // console.log("TEMPORARY attachmentsCMD="+JSON.stringify(   args         ,null,2))
+    // console.log("TEMPORARY attachmentsCMD="+JSON.stringify(   attachmentsCMD         ,null,2))
     let attachments = await getSelectedAttachments(attachmentsCMD);
-    // console.log("TEMPORARY="+JSON.stringify(    attachments        ,null,2))     
+    // console.log("TEMPORARY="+JSON.stringify(    attachments        ,null,2))
     for (var i = 0; i < attachments.length; i++) {
       //console.log("Zotero: " + attachments[i].data.filename);
       //console.log("Zotero: " + attachments[i].data.md5);
@@ -1440,7 +1439,7 @@ async function zotzenSyncOne(args) {
         //console.log("- " + zz.originaldata.zenodo.files[j].filename);
         //console.log("- " + zz.originaldata.zenodo.files[j].checksum);
         zz.originaldata.zenodo.files[j].utilised = false;
-        if (attachments[i].data.md5 == zz.originaldata.zenodo.files[j].checksum) {
+        if (attachments[i].data.md5 === zz.originaldata.zenodo.files[j].checksum) {
           attachments[i].located = true;
           zz.originaldata.zenodo.files[j].utilised = true;
         }
@@ -1448,7 +1447,7 @@ async function zotzenSyncOne(args) {
     }
     // To do: See whether there are extra records in Zenodo.
     for (var i = 0; i < attachments.length; i++) {
-      if (attachments[i].located == false) {
+      if (attachments[i].located === false) {
         console.warn("Not in Zenodo record: " + attachments[i].data.filename);
         needSync.attachments = true;
       }
@@ -1461,8 +1460,8 @@ async function zotzenSyncOne(args) {
     }
     // {...}
     // console.log("TEMPORARY="+JSON.stringify(  attachments          ,null,2))
-    //console.log("TEMPORARY=" + JSON.stringify(zz.originaldata.zenodo.files , null, 2))
-    // console.log("TEMPORARY="+JSON.stringify(      needSync      ,null,2))     
+    // console.log("TEMPORARY=" + JSON.stringify(zz.originaldata.zenodo.files , null, 2))
+    // console.log("TEMPORARY="+JSON.stringify(      needSync      ,null,2))
     // console.log("TEMPORARY="+JSON.stringify(  zz.data          ,null,2))
     // "zenodoState": "done", "zenodoSubmitted": true
     if (needSync.metadata) {
@@ -1498,14 +1497,14 @@ async function zotzenSyncOne(args) {
       args.suppressDOI = true;
       const newmeta = await zotero.getZenodoJson(zz.originaldata.zotero, args);
       // formatAsZenodoJson - check that authordata is included... need commandline option...
-      // console.log("TEMPORARY orig="+JSON.stringify(    zz.originaldata.zotero        ,null,2))       
-      // console.log("TEMPORARY updateDoc="+JSON.stringify(    newmeta        ,null,2))       
+      // console.log("TEMPORARY orig="+JSON.stringify(    zz.originaldata.zotero        ,null,2))
+      // console.log("TEMPORARY updateDoc="+JSON.stringify(    newmeta        ,null,2))
       // process.exit(1)
       /*
       Really we should include the affiliations file here, supplement the author information with institution and orcid.
       370755a6-0cfd-11ec-851b-77cdfd2128b9
       */
-      updateDoc = {        
+      updateDoc = {
         ...updateDoc,
         ...newmeta,
         id: zenodoID
@@ -1514,7 +1513,7 @@ async function zotzenSyncOne(args) {
         // date: isodate(zoteroItem.date)
       };
       console.log("zotzenSyncOne TEMPORARY updateDoc=" + JSON.stringify(updateDoc, null, 2))
-      // console.log("TEMPORARY orig="+JSON.stringify(    zz.originaldata.zotero        ,null,2))       
+      // console.log("TEMPORARY orig="+JSON.stringify(    zz.originaldata.zotero        ,null,2))
       // process.exit(1)
       /*
       if (Array.isArray(zoteroItem.creators) && zoteroItem.creators.length) {
@@ -1540,9 +1539,9 @@ async function zotzenSyncOne(args) {
     console.log('metadata sync was not requested');
   }
   /*
-  The following code requests download of attachments from Zotero and upload to Zenodo.
-  It may or may not run. If it does not run, attachments is null.
-  */
+   * The following code requests download of attachments from Zotero and upload to Zenodo.
+   * It may or may not run. If it does not run, attachments is null.
+   */
   // console.log("TEMPORARY=" + JSON.stringify(updateDoc, null, 2))
 
   logger.info('checking Attachments.');
@@ -1607,13 +1606,13 @@ async function zotzenSyncOne(args) {
           `${element.data.key}->${element.data.filename}, %O`,
           element.data.tags
         );
-        //noattachmentsfound
+        // noattachmentsfound
         /*
           The intention here is that anything that has been transferred from Zotero to Zenodo is now tagged.
           This may be where the error occurs?
           TypeError: attachments is not iterable
-    at zotzenSyncOne (/usr/local/lib/node_modules/zotzen-lib/src/zotzen-lib.js:1136:35)
-    at process._tickCallback (internal/process/next_tick.js:68:7)
+          at zotzenSyncOne (/usr/local/lib/node_modules/zotzen-lib/src/zotzen-lib.js:1136:35)
+          at process._tickCallback (internal/process/next_tick.js:68:7)
           */
         const file = await zotero.item({
           key: element.data.key,
@@ -1637,7 +1636,6 @@ async function zotzenSyncOne(args) {
       console.log('Record unsubmitted');
     }
   }
-  // }
 
   console.log('reorder extra field in sync');
   await zotzenReorderExtraField({
@@ -1647,7 +1645,8 @@ async function zotzenSyncOne(args) {
   // TODOMD5
   // TODO: updated has the md5 sums for the files. They should be compared the md5 sums from Zotero.
   // TODO - this should report on what was done: List the metadata and the files.
-  return updated; // message(0, "Sync complete")
+  return updated;
+  // message(0, "Sync complete")
   // TODO? Final actions?
 }
 
@@ -1751,7 +1750,7 @@ async function newversion(args, subparsers) {
   };
   let result = await zotzenLink(linkrequest);
   // console.log("TEMPORARY=" + JSON.stringify(result, null, 2))
-  if (result.status != 0) {
+  if (result.status !== 0) {
     console.log('The items provided are not linked');
     process.exit(1);
   }
