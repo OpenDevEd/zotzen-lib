@@ -309,13 +309,13 @@ async function zoteroCreate(argsIn) {
         async () => {
             if (args.id) {
                 // Zotero item - attach links ... to Zenodo
-                return await zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] });
+                return zotero.attachLinkToItem(zoteroRecord.key, "https://zenodo.org/deposit/" + args.id, { title: "🔄View entry on Zenodo (draft)", tags: ["_r:zenodoDeposit", "_r:zotzen"] });
             }
         },
         async () => {
             if (args.doi) {
                 // Zotero item - attach links ... to DOI
-                return await zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] });
+                return zotero.attachLinkToItem(zoteroRecord.key, "https://doi.org/" + args.doi, { title: "🔄Look up this DOI (once activated)", tags: ["_r:doi", "_r:zotzen"] });
             }
         },
         async () => {
@@ -323,7 +323,7 @@ async function zoteroCreate(argsIn) {
                 // Ⓩ🅩🆉
                 //console.log(args.collections[i])
                 //process.exit(1)
-                return await zotero.attachLinkToItem(
+                return zotero.attachLinkToItem(
                     zoteroRecord.key,
                     getZoteroSelectLink(args.collections[i], zoteroRecordGroup, true, false),
                     {
@@ -336,7 +336,7 @@ async function zoteroCreate(argsIn) {
             // Zotero item - attach links ... to Google Doc
             if (args.googledoc) {
                 // Attach link to google doc, if there is one:
-                return await zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "📝View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] });
+                return zotero.attachLinkToItem(zoteroRecord.key, args.googledoc, { title: "📝View Google Doc and download alternative formats", tags: ["_r:googleDoc", "_r:zotzen"] });
             }
         },
         async () => {
@@ -344,7 +344,7 @@ async function zoteroCreate(argsIn) {
             const team = args.team ? `<p><b>Team (via form):</b> ${args.team}</p>` : "";
             const note = args.team ? `<p><b>Note (via form):</b> ${args.note}</p>` : "";
             const content = `${team} ${note}`;
-            return await zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm", "_r:zotzen"] });
+            return zotero.attachNoteToItem(zoteroRecord.key, { content: content, tags: ["_r:noteViaForm", "_r:zotzen"] });
         },
         async () => {
             // Attach kerko url to Zotero record (as url)
@@ -361,7 +361,7 @@ async function zoteroCreate(argsIn) {
                 // update_item doesn't return the item, but only a status - we should check the status at this point.
                 newZoteroRecord = await zotero.item({ key: zoteroRecord.key, fullresponse: false });
                 // Attach link to kerko
-                return await zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "👀View item in Evidence Library", tags: ["_r:kerko", "_r:zotzen"] });
+                return zotero.attachLinkToItem(zoteroRecord.key, kerko_url, { title: "👀View item in Evidence Library", tags: ["_r:kerko", "_r:zotzen"] });
             }
         }
     ]).then(
@@ -1057,7 +1057,7 @@ async function checkZotZenLink(args, k, data) {
         if (k.zenodoIDFromZotero === k.zenodoID) {
           if (args.link) {
             console.log('Proceeding to linking');
-            return await linkZotZen(args, k, data);
+            return linkZotZen(args, k, data);
           } else {
             return message(
               1,
@@ -1076,7 +1076,7 @@ async function checkZotZenLink(args, k, data) {
       } else if (!k.zenodoIDFromZotero && k.zoteroKeyFromZenodo) {
         if (k.zoteroKeyFromZenodo === k.zoteroKey) {
           if (args.link) {
-            return await linkZotZen(args, k, data);
+            return linkZotZen(args, k, data);
           } else {
             return message(
               1,
@@ -1095,7 +1095,7 @@ async function checkZotZenLink(args, k, data) {
       } else {
         // Neither are defined
         if (args.link) {
-          return await linkZotZen(args, k, data);
+          return linkZotZen(args, k, data);
         } else {
           return message(
             1,
@@ -1113,10 +1113,10 @@ async function checkZotZenLink(args, k, data) {
         );
         args.id = k.zenodoIDFromZotero;
 
-        return await zotzenLink(args);
+        return zotzenLink(args);
       } else {
         if (args.link) {
-          return await linkZotZen(args, k, data);
+          return linkZotZen(args, k, data);
         } else {
           return message(
             1,
@@ -1136,10 +1136,10 @@ async function checkZotZenLink(args, k, data) {
         );
         args.key = k.zoteroKeyFromZenodo;
         args.group_id = k.zoteroGroupFromZenodo;
-        return await zotzenLink(args);
+        return zotzenLink(args);
       } else {
         if (args.link) {
-          return await linkZotZen(args, k, data);
+          return linkZotZen(args, k, data);
         } else {
           return message(
             1,
