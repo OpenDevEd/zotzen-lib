@@ -44,7 +44,7 @@
     "sugar": "^2.0.6",
     "winston": "^3.3.3",
     "zenodo-lib": "^1.0.80",
-    "zotero-lib": "^1.0.81"
+    "zotero-lib": "^1.0.87"
   },
   "files": [
     "src/**/*.js",
